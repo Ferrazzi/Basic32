@@ -1,4 +1,19 @@
 ![Basic32](https://github.com/Ferrazzi/Basic32/blob/main/Logo.png)
+<p align="center">
+  <a href="https://t.me/Basic32ESP">
+    <img src="https://github.com/Ferrazzi/CarBox-Launcher/blob/main/telegra-banner.jpg" alt="Donate with PayPal" width="200"/>
+  </a>
+</p>
+<p align="center">Follow my Telegram channel, where you'll find updates and pre-release versions with new features</p>
+
+<p align="center">
+    <ins><strong>IF YOU LIKE, BUY ME A COFFEE TO SUPPORT THE APP DEVELOPMENT</strong></ins>
+</p>
+<p align="center">
+  <a href="https://www.paypal.com/donate/?business=3LPTNPJ2RV6U8&no_recurring=0&item_name=Buy+me+a+coffee+if+you+like+to+contribute+to+the+app+development&currency_code=EUR">
+    <img src="https://github.com/Ferrazzi/CarBox-Companion/blob/main/Assets/DonaPayPal.png" alt="Donate with PayPal" width="200"/>
+  </a>
+</p>
 
 # 🧠 Basic32 – A BASIC Interpreter for ESP32
 
