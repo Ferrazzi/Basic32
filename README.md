@@ -75,7 +75,7 @@ RUN
 
 ## 📚 Documentation
 
-A full user manual with examples is available in the [docs](./docs) folder (or see the Manuale for Basic32).
+A full user manual with examples is available in the [docs](./docs) folder (or see the Manual for Basic32).
 
 ---
 
