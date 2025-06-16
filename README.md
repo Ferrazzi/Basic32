@@ -75,19 +75,13 @@ RUN
 
 ## 📚 Documentation
 
-A full user manual with examples is available in the [docs](./docs) folder (or see the `Guida Basic32 v1.0` if you speak Italian).
+A full user manual with examples is available in the [docs](./docs) folder (or see the Manuale for Basic32).
 
 ---
 
 ## 🤝 Contributing
 
 Contributions, ideas, and pull requests are welcome! Whether you're optimizing the interpreter, expanding the command set, or just improving the documentation — you're invited to collaborate.
-
----
-
-## 📜 License
-
-This project is released under the [MIT License](LICENSE).
 
 ---
 
