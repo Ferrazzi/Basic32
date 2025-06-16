@@ -37,7 +37,7 @@ With Basic32, you can write, test, and save code directly through a serial termi
 
 ## 🚀 Getting Started
 
-Download the precompiled firmware and flash it to your ESP32 using Basic32Terminal or other flashing application.
+Download the precompiled firmware and flash it to your ESP32, using Basic32Terminal or other flashing application.
 Once flashed:
 
 1. Open Basic32Terminal or another serial terminal (115200 baud)
