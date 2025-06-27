@@ -109,5 +109,5 @@ The spirit of classic 8-bit computers, BASIC interpreters from the '80s, and a d
 
 <div align="center">
 <br><p align="centre"><b>Visitors Count</b></p>  
-<p align="center"><img align="center" src="https://profile-counter.glitch.me/{Ferrazzi}/count.svg" /></p> 
+<p align="center"><img src="https://profile-counter.glitch.me/Ferrazzi-homepage/count.svg" /></p> 
 <br></div>
