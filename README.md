@@ -106,3 +106,8 @@ Contributions, ideas, and pull requests are welcome! Whether you're optimizing t
 ## ❤️ Inspired by
 
 The spirit of classic 8-bit computers, BASIC interpreters from the '80s, and a desire to make microcontroller programming **accessible and fun again**.
+
+<div align="center">
+<br><p align="centre"><b>Visitors Count</b></p>  
+<p align="center"><img align="center" src="https://profile-counter.glitch.me/{Ferrazzi}/count.svg" /></p> 
+<br></div>
