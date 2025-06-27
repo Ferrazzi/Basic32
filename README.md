@@ -15,6 +15,8 @@
   </a>
 </p>
 
+<p align="center">TO ACTIVATE THE FIRMWARE CONTACT ME ON TELEGRAM</p>
+
 # 🧠 Basic32 – A BASIC Interpreter for ESP32
 
 **Basic32** is a lightweight, immediate and surprisingly powerful **BASIC interpreter** designed for **ESP32** boards. Its mission is to make hardware programming accessible, fast, and compiler-free.
