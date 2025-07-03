@@ -1,7 +1,7 @@
 ![Basic32](https://github.com/Ferrazzi/Basic32/blob/main/Logo.png)
 <p align="center">
   <a href="https://t.me/Basic32ESP">
-    <img src="https://github.com/Ferrazzi/CarBox-Launcher/blob/main/telegra-banner.jpg" alt="Donate with PayPal" width="200"/>
+    <img src="https://github.com/Ferrazzi/CarBox-Launcher/blob/main/telegra-banner.jpg" alt="Donate with PayPal" width="400"/>
   </a>
 </p>
 <p align="center">Follow my Telegram channel, where you'll find updates and pre-release versions with new features</p>
