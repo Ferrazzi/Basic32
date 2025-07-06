@@ -29,7 +29,7 @@ else:
 ESPT_CMD = [sys.executable, "-m", "esptool"]
 
 FLASH_FILES = {
-    "0x0": "Basic32.ino.bootloader.bin",
+    "0x1000": "Basic32.ino.bootloader.bin",
     "0x8000": "Basic32.ino.partitions.bin",
     "0x10000": "Basic32.ino.bin"
 }
@@ -102,11 +102,11 @@ def detect_chip(port):
 def flash_device(port, chip):
     flash_args = [
         "--chip", chip,
-        "--baud", "460800",
+        "--baud", "921600",
         "--before", "default_reset",
         "--after", "hard_reset",
         "write_flash", "-z",
-        "--flash_mode", "dio",
+        "--flash_mode", "qio",
         "--flash_freq", "80m",
         "--flash_size", "4MB"
     ]
