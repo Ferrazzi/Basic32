@@ -109,7 +109,7 @@ Contributions, ideas, and pull requests are welcome! Whether you're optimizing t
 
 The spirit of classic 8-bit computers, BASIC interpreters from the '80s, and a desire to make microcontroller programming **accessible and fun again**.
 
+
 <div align="center">
-<br><p align="centre"><b>Visitors Count</b></p>  
-<p align="center"><img src="https://profile-counter.glitch.me/Ferrazzi-homepage/count.svg" /></p> 
+<p align="center"><img src="https://visitor-badge.laobi.icu/badge?page_id=<Ferrazzi>.<Basic32>" /></p> 
 <br></div>
