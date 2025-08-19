@@ -16,6 +16,7 @@
 </p>
 
 ## <p align="center">TO ACTIVATE THE FIRMWARE CONTACT ME ON TELEGRAM</p>
+   <p align="center">IT'S FREE!!!</p>
 
 # 🧠 Basic32 – A BASIC Interpreter for ESP32
 
