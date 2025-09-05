@@ -11,7 +11,7 @@
       #screen {
         outline: none;
         white-space: pre-wrap;
-        word-wrap: break-word;
+        word-wrap: break-word; /* NON aggiungiamo newline, permette il wrap solo visivo */
         min-height: 1em;
       }
     </style>
@@ -175,12 +175,12 @@
         if (moveToEnd) setCaretIndex(screenEl.textContent.length);
       }
 
-      // --- NUOVO: garantisce riga vuota finale + caret in fondo
+      // --- Garantisce UNA riga vuota a fine testo e porta il caret lì
       function ensureTrailingBlankLineInEditor() {
         const t = screenEl.textContent;
         let s = t;
         if (s.endsWith('\n\n')) {
-          // già ok
+          // ok
         } else if (s.endsWith('\n')) {
           s += '\n';
         } else {
@@ -193,9 +193,11 @@
 
       // Output helpers
       function appendText(text) {
-        // Modificata: aggiunge testo e poi garantisce riga vuota + caret in fondo
+        // *** NON aggiungiamo newline qui, per non spezzare output in chunk ***
+        const atEnd = getCaretIndex() === screenEl.textContent.length;
         screenEl.textContent += text;
-        ensureTrailingBlankLineInEditor();
+        if (atEnd) setCaretIndex(screenEl.textContent.length);
+        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
       function localClear() {
@@ -204,10 +206,11 @@
       }
 
       function logLine(txt) {
-        // Modificata: garantisce riga vuota + caret in fondo
+        // Messaggi locali: una sola newline di chiusura
         const t = screenEl.textContent;
         screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n';
-        ensureTrailingBlankLineInEditor();
+        setCaretIndex(screenEl.textContent.length);
+        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
       // ANSI: ESC[2J clear + home, ESC[H home
@@ -220,7 +223,14 @@
           setCaretIndex(0);
           chunk = chunk.replace(/\x1b\[H/g, '');
         }
+
+        // Appendi il testo così com'è
         appendText(chunk);
+
+        // Se il chunk termina con newline, allora portiamo il caret su una nuova riga
+        if (chunk.endsWith('\n')) {
+          ensureTrailingBlankLineInEditor();
+        }
       }
 
       // Aggiunge line end e invia
@@ -249,7 +259,7 @@
 
         await writeWithLineEnd(line);
 
-        // forza una riga vuota in fondo e sposta il caret lì
+        // Forza una riga vuota in fondo e sposta il caret lì
         screenEl.textContent = ensureTrailingBlankLine(txt);
         ensureTrailingBlankLineInEditor();
       }
@@ -334,8 +344,6 @@
 
       // avvio
       focusEditor(true);
-      // NUOVO: allinea lo stato iniziale a "riga vuota + caret in fondo"
-      ensureTrailingBlankLineInEditor();
     </script>
   </body>
 </html>
