@@ -25,11 +25,11 @@
         <img src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png" alt="Logo" />
       </a>
       <nav class="topnav" role="navigation" aria-label="primary">
-        <a class="navitem" href="index.html">Flash</a>
+        <a class="navitem" href="index.html">Home</a>
         <a class="navitem" href="terminal.html">Serial Monitor</a>
       </nav>
 
-      <main class="content" style="padding-top: 10px;">
+      <main class="content" style="padding-top: 20px;">
         <h1>SERIAL MONITOR</h1>
         <p class="lead">
           Select the serial device: the connection starts automatically.<br />
@@ -175,12 +175,27 @@
         if (moveToEnd) setCaretIndex(screenEl.textContent.length);
       }
 
+      // --- NUOVO: garantisce riga vuota finale + caret in fondo
+      function ensureTrailingBlankLineInEditor() {
+        const t = screenEl.textContent;
+        let s = t;
+        if (s.endsWith('\n\n')) {
+          // già ok
+        } else if (s.endsWith('\n')) {
+          s += '\n';
+        } else {
+          s += '\n\n';
+        }
+        if (s !== t) screenEl.textContent = s;
+        setCaretIndex(screenEl.textContent.length);
+        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
+      }
+
       // Output helpers
       function appendText(text) {
-        const atEnd = getCaretIndex() === screenEl.textContent.length;
+        // Modificata: aggiunge testo e poi garantisce riga vuota + caret in fondo
         screenEl.textContent += text;
-        if (atEnd) setCaretIndex(screenEl.textContent.length);
-        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
+        ensureTrailingBlankLineInEditor();
       }
 
       function localClear() {
@@ -189,10 +204,10 @@
       }
 
       function logLine(txt) {
+        // Modificata: garantisce riga vuota + caret in fondo
         const t = screenEl.textContent;
         screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n';
-        setCaretIndex(screenEl.textContent.length);
-        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
+        ensureTrailingBlankLineInEditor();
       }
 
       // ANSI: ESC[2J clear + home, ESC[H home
@@ -221,7 +236,7 @@
         if (s.endsWith('\n\n')) return s;
         if (s.endsWith('\n')) return s + '\n';
         return s + '\n\n';
-        }
+      }
 
       // Invia la riga corrente, poi porta SEMPRE il cursore su una NUOVA riga in fondo
       async function sendCurrentLine() {
@@ -236,8 +251,7 @@
 
         // forza una riga vuota in fondo e sposta il caret lì
         screenEl.textContent = ensureTrailingBlankLine(txt);
-        setCaretIndex(screenEl.textContent.length);
-        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
+        ensureTrailingBlankLineInEditor();
       }
 
       // Key handling: Enter invia la riga corrente e porta il cursore su riga nuova in fondo
@@ -320,6 +334,8 @@
 
       // avvio
       focusEditor(true);
+      // NUOVO: allinea lo stato iniziale a "riga vuota + caret in fondo"
+      ensureTrailingBlankLineInEditor();
     </script>
   </body>
 </html>
