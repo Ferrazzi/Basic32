@@ -180,7 +180,6 @@
       function appendText(text) {
         const atEnd = getCaretIndex() === screenEl.textContent.length;
         screenEl.textContent += text;
-        // se il caret era alla fine, mantienilo in fondo
         if (atEnd) setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
@@ -204,8 +203,6 @@
           chunk = chunk.replace(/\x1b\[2J/g, '');
         }
         if (/\x1b\[H/.test(chunk)) {
-          // porta il cursore a inizio; l'utente potrà comunque scrivere altrove,
-          // ma dopo l'INVIO lo riporteremo sempre in fondo.
           setCaretIndex(0);
           chunk = chunk.replace(/\x1b\[H/g, '');
         }
@@ -220,7 +217,14 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      // Invia la riga corrente, poi sposta SEMPRE il cursore in fondo
+      // garantisce che il testo termini con UNA riga vuota (due newline finali)
+      function ensureTrailingBlankLine(s) {
+        if (s.endsWith('\n\n')) return s;
+        if (s.endsWith('\n')) return s + '\n';
+        return s + '\n\n';
+        }
+
+      // Invia la riga corrente, poi porta SEMPRE il cursore su una NUOVA riga in fondo
       async function sendCurrentLine() {
         const idx = getCaretIndex();
         const txt = screenEl.textContent;
@@ -231,13 +235,13 @@
 
         await writeWithLineEnd(line);
 
-        // NON modifichiamo la riga; aggiungiamo solo una nuova riga in coda
-        screenEl.textContent = txt + '\n';
-        setCaretIndex(screenEl.textContent.length); // cursore sempre in fondo
+        // forza una riga vuota in fondo e sposta il caret lì
+        screenEl.textContent = ensureTrailingBlankLine(txt);
+        setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
-      // Key handling: Enter invia la riga corrente e porta il cursore in fondo
+      // Key handling: Enter invia la riga corrente e porta il cursore su riga nuova in fondo
       screenEl.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
