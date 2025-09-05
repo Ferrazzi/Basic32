@@ -11,24 +11,20 @@
     <div class="crt"></div>
 
     <div class="frame">
-      <!-- Logo in alto a sinistra -->
+      <!-- Logo + menu -->
       <a class="brand" href="index.html" aria-label="Home">
         <img src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png" alt="Logo" />
       </a>
-
-      <!-- Menu orizzontale affianco al logo -->
       <nav class="topnav" role="navigation" aria-label="primary">
-      <a class="navitem" href="index.html">Home</a>
-      <a class="navitem" href="terminal.html">Serial Monitor</a>
-      <!-- Aggiungi altri link qui in futuro -->
+        <a class="navitem" href="index.html">Home</a>
+        <a class="navitem" href="terminal.html">Serial Monitor</a>
       </nav>
-      
-      <!-- Contenuto centrato -->
-      <main class="content" style="padding-top: 100px;">
+
+      <main class="content" style="padding-top: 60px;">
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
-          Seleziona il dispositivo seriale collegato, imposta il baud e connetti.
-          Puoi leggere e inviare comandi (CR/LF configurabili).
+          Seleziona il dispositivo seriale, imposta il baud e connetti.
+          Line end di default: <b>none</b>. Hai i pulsanti <b>Clear</b>, <b>CLS ANSI</b> e <b>Reboot</b>.
         </p>
 
         <!-- Controlli -->
@@ -36,6 +32,7 @@
           <button id="pick">Seleziona dispositivo</button>
           <button id="connect" disabled>Connetti</button>
           <button id="disconnect" disabled>Scollega</button>
+          <button id="reboot" disabled>Reboot</button>
 
           <label>
             Baud
@@ -53,10 +50,10 @@
           <label>
             Line end
             <select id="lineend">
-              <option value="">(none)</option>
+              <option value="" selected>(none)</option>
               <option value="\n">LF</option>
               <option value="\r">CR</option>
-              <option value="\r\n" selected>CRLF</option>
+              <option value="\r\n">CRLF</option>
             </select>
           </label>
 
@@ -65,11 +62,12 @@
             Auto-scroll
           </label>
 
-          <button id="clear">Clear</button>
+          <button id="cls">Clear</button>
+          <button id="clsAnsi">CLS ANSI</button>
           <button id="save">Save log</button>
         </div>
 
-        <!-- Output log -->
+        <!-- Output -->
         <div id="log" style="
           width:min(980px, 96%);
           height:420px; border:3px solid var(--c64-border); border-radius:10px;
@@ -79,7 +77,7 @@
           [ready]
         </div>
 
-        <!-- Input riga -->
+        <!-- Input -->
         <div style="display:flex; gap:8px; margin-top:8px; width:min(980px,96%);">
           <input id="line" type="text" placeholder="Scrivi un comando e premi Invio…" style="
             flex:1 1 auto; border:3px solid var(--c64-border); border-radius:8px;
@@ -87,10 +85,10 @@
           <button id="send">Invia</button>
         </div>
 
-        <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>. Su Windows potresti dover installare i driver USB-Serial.</p>
+        <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>.</p>
       </main>
 
-      <!-- Icone social in basso a destra -->
+      <!-- Icone social -->
       <aside class="social">
         <a class="icon" href="https://t.me/Basic32ESP" target="_blank" rel="noopener" aria-label="Telegram">
           <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -126,13 +124,15 @@
       const pickBtn = $('pick');
       const connectBtn = $('connect');
       const disconnectBtn = $('disconnect');
+      const rebootBtn = $('reboot');
       const baudSel = $('baud');
       const lineendSel = $('lineend');
       const autoscroll = $('autoscroll');
       const logEl = $('log');
       const lineIn = $('line');
       const sendBtn = $('send');
-      const clearBtn = $('clear');
+      const clearBtn = $('cls');
+      const clsAnsiBtn = $('clsAnsi');
       const saveBtn = $('save');
 
       let port = null;
@@ -144,21 +144,42 @@
         logEl.textContent += (logEl.textContent.endsWith('\n') ? '' : '\n') + txt;
         if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
       }
+      function localClear() { logEl.textContent = ''; }
 
-      // 1) Device picker (come ESP Web Tools: apre il selettore della porta)
+      async function ansiClear() {
+        if (!writer) return;
+        const encoder = new TextEncoder();
+        await writer.write(encoder.encode('\x1b[2J\x1b[H'));
+      }
+
+      // Reboot ESP32 in RUN MODE (no bootloader)
+      async function rebootRunMode() {
+        if (!port || !port.setSignals) { log('[reboot non supportato]'); return; }
+        try {
+          // IO0 HIGH -> RTS false
+          await port.setSignals({ requestToSend: false });
+          // pulse EN: DTR true (EN LOW) -> false (EN HIGH)
+          await port.setSignals({ dataTerminalReady: true });
+          await new Promise(r => setTimeout(r, 120));
+          await port.setSignals({ dataTerminalReady: false });
+          log('[reboot (run mode) inviato]');
+        } catch (e) {
+          console.warn(e); log('[reboot fallito]');
+        }
+      }
+
+      // Device picker
       pickBtn.addEventListener('click', async () => {
         try {
-          // Facoltativo: puoi passare filtri vendorId/productId se vuoi restringere l’elenco
-          port = await navigator.serial.requestPort(/* { filters: [...] } */);
+          port = await navigator.serial.requestPort();
           connectBtn.disabled = false;
           log('[porta selezionata]');
-        } catch (e) {
-          console.warn(e);
+        } catch {
           log('[selezione annullata]');
         }
       });
 
-      // 2) Connessione
+      // Connessione
       connectBtn.addEventListener('click', async () => {
         try {
           await port.open({ baudRate: Number(baudSel.value) || 115200 });
@@ -166,19 +187,26 @@
           reader = port.readable.getReader();
           writer = port.writable.getWriter();
           keepReading = true;
+
+          // Clear + reboot all'aggancio
+          localClear();
+          log('[connesso — reset device (run mode)]');
+          await rebootRunMode();
+
           connectBtn.disabled = true;
           disconnectBtn.disabled = false;
-          log('[connesso]');
+          rebootBtn.disabled = false;
+
           (async () => {
             try {
               while (keepReading) {
                 const { value, done } = await reader.read();
                 if (done) break;
-                if (value) logEl.textContent += decoder.decode(value);
-                if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+                if (value) {
+                  logEl.textContent += decoder.decode(value);
+                  if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+                }
               }
-            } catch (err) {
-              console.warn('read error:', err);
             } finally {
               try { reader.releaseLock(); } catch {}
             }
@@ -188,7 +216,7 @@
         }
       });
 
-      // 3) Disconnessione
+      // Disconnessione
       async function disconnect() {
         keepReading = false;
         try { if (reader) await reader.cancel(); } catch {}
@@ -196,12 +224,16 @@
         try { if (port) await port.close(); } catch {}
         connectBtn.disabled = !port;
         disconnectBtn.disabled = true;
+        rebootBtn.disabled = true;
         log('[disconnesso]');
       }
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
 
-      // 4) Invio riga
+      // Pulsante reboot (run mode)
+      rebootBtn.addEventListener('click', rebootRunMode);
+
+      // Invio riga
       async function sendLine() {
         if (!writer) return;
         const encoder = new TextEncoder();
@@ -214,7 +246,8 @@
       lineIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendLine(); });
 
       // Utility
-      clearBtn.addEventListener('click', () => { logEl.textContent = ''; });
+      clearBtn.addEventListener('click', localClear);
+      clsAnsiBtn.addEventListener('click', ansiClear);
       saveBtn.addEventListener('click', () => {
         const blob = new Blob([logEl.textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
