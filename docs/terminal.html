@@ -24,7 +24,7 @@
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
           Seleziona il dispositivo seriale, imposta il baud e connetti.
-          Line end di default: <b>none</b>. Hai i pulsanti <b>Clear</b>, <b>CLS ANSI</b> e <b>Reboot</b>.
+          Line end di default: <b>none</b>. Pulsanti: <b>Clear</b>, <b>CLS ANSI</b>, <b>Reboot</b> (invia il comando <code>REBOOT</code>).
         </p>
 
         <!-- Controlli -->
@@ -146,26 +146,26 @@
       }
       function localClear() { logEl.textContent = ''; }
 
+      // helper: scrive una stringa aggiungendo il line end scelto in UI
+      async function writeWithLineEnd(str) {
+        if (!writer) return;
+        const encoder = new TextEncoder();
+        const end = lineendSel.value || '';
+        await writer.write(encoder.encode(str + end));
+      }
+
+      // CLS ANSI: ESC[2J ESC[H]
       async function ansiClear() {
         if (!writer) return;
         const encoder = new TextEncoder();
         await writer.write(encoder.encode('\x1b[2J\x1b[H'));
       }
 
-      // Reboot ESP32 in RUN MODE (no bootloader)
-      async function rebootRunMode() {
-        if (!port || !port.setSignals) { log('[reboot non supportato]'); return; }
-        try {
-          // IO0 HIGH -> RTS false
-          await port.setSignals({ requestToSend: false });
-          // pulse EN: DTR true (EN LOW) -> false (EN HIGH)
-          await port.setSignals({ dataTerminalReady: true });
-          await new Promise(r => setTimeout(r, 120));
-          await port.setSignals({ dataTerminalReady: false });
-          log('[reboot (run mode) inviato]');
-        } catch (e) {
-          console.warn(e); log('[reboot fallito]');
-        }
+      // Reboot via comando seriale "REBOOT"
+      async function rebootCommand() {
+        if (!writer) { log('[nessuna connessione seriale]'); return; }
+        await writeWithLineEnd('REBOOT');
+        log('[reboot command sent: "REBOOT"]');
       }
 
       // Device picker
@@ -188,10 +188,10 @@
           writer = port.writable.getWriter();
           keepReading = true;
 
-          // Clear + reboot all'aggancio
+          // Clear + reboot (comando "REBOOT") all'aggancio
           localClear();
-          log('[connesso — reset device (run mode)]');
-          await rebootRunMode();
+          log('[connesso — invio comando REBOOT]');
+          await rebootCommand();
 
           connectBtn.disabled = true;
           disconnectBtn.disabled = false;
@@ -230,17 +230,13 @@
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
 
-      // Pulsante reboot (run mode)
-      rebootBtn.addEventListener('click', rebootRunMode);
+      // Pulsante reboot (comando "REBOOT")
+      rebootBtn.addEventListener('click', rebootCommand);
 
-      // Invio riga
+      // Invio riga dal campo input
       async function sendLine() {
-        if (!writer) return;
-        const encoder = new TextEncoder();
-        const end = lineendSel.value || '';
-        const data = lineIn.value + end;
+        await writeWithLineEnd(lineIn.value);
         lineIn.value = '';
-        await writer.write(encoder.encode(data));
       }
       sendBtn.addEventListener('click', sendLine);
       lineIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendLine(); });
