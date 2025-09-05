@@ -46,6 +46,17 @@ For the complete list of commands, check the **manual PDF** inside the `manual` 
 
 ---
 
+## Basic32 Web Tools
+
+With the official **Web Tools** you can manage your ESP32 directly from the browser, without installing any additional software:  
+➜ [**Open Basic32 Web Tools**](https://ferrazzi.github.io/Basic32/index.html)
+
+The Web Tools allow you to:
+- **Flash the Basic32 firmware** to your ESP32 directly from the web  
+- **Open an online serial monitor** to connect to your device and use Basic32 without extra programs
+
+---
+
 ## Install the firmware
 
 You have two options to install Basic32 on your ESP32:
