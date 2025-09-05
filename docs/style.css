@@ -63,9 +63,10 @@ body.c64 { margin: 0; min-height: 100vh; background: var(--c64-bg); color: var(-
 .navitem:hover{ transform: translateY(-1px); filter: brightness(1.15); }
 
 /* Un filo meno spazio sopra il contenuto, visto che ora c’è il menu */
-.content{ padding-top: 60px; }
+.content{ padding-top: 20px; }
 
 /* Responsive: su schermi stretti il menu scende sotto il logo e si centra */
 @media (max-width: 640px){
-  .topnav{ margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 60px; }
+  .topnav{ margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 20px; }
 }
+
