@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Basic32 — Serial Terminal (C64)</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  </head>
+  <body class="c64">
+    <div class="crt"></div>
+
+    <div class="frame">
+      <!-- Logo in alto a sinistra -->
+      <a class="brand" href="index.html" aria-label="Home">
+        <img src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png" alt="Logo" />
+      </a>
+
+      <!-- Contenuto centrato -->
+      <main class="content" style="padding-top: 100px;">
+        <h1>TERMINALE SERIALE</h1>
+        <p class="lead">
+          Seleziona il dispositivo seriale collegato, imposta il baud e connetti.
+          Puoi leggere e inviare comandi (CR/LF configurabili).
+        </p>
+
+        <!-- Controlli -->
+        <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
+          <button id="pick">Seleziona dispositivo</button>
+          <button id="connect" disabled>Connetti</button>
+          <button id="disconnect" disabled>Scollega</button>
+
+          <label>
+            Baud
+            <select id="baud">
+              <option>921600</option>
+              <option>460800</option>
+              <option selected>115200</option>
+              <option>57600</option>
+              <option>38400</option>
+              <option>19200</option>
+              <option>9600</option>
+            </select>
+          </label>
+
+          <label>
+            Line end
+            <select id="lineend">
+              <option value="">(none)</option>
+              <option value="\n">LF</option>
+              <option value="\r">CR</option>
+              <option value="\r\n" selected>CRLF</option>
+            </select>
+          </label>
+
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="autoscroll" checked />
+            Auto-scroll
+          </label>
+
+          <button id="clear">Clear</button>
+          <button id="save">Save log</button>
+        </div>
+
+        <!-- Output log -->
+        <div id="log" style="
+          width:min(980px, 96%);
+          height:420px; border:3px solid var(--c64-border); border-radius:10px;
+          padding:.75rem; overflow:auto; white-space:pre-wrap;
+          background: rgba(0,0,0,.12); color: var(--c64-text);
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">
+          [ready]
+        </div>
+
+        <!-- Input riga -->
+        <div style="display:flex; gap:8px; margin-top:8px; width:min(980px,96%);">
+          <input id="line" type="text" placeholder="Scrivi un comando e premi Invio…" style="
+            flex:1 1 auto; border:3px solid var(--c64-border); border-radius:8px;
+            padding:.5rem .7rem; background: rgba(0,0,0,.15); color: var(--c64-text);" />
+          <button id="send">Invia</button>
+        </div>
+
+        <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>. Su Windows potresti dover installare i driver USB-Serial.</p>
+      </main>
+
+      <!-- Icone social in basso a destra -->
+      <aside class="social">
+        <a class="icon" href="https://t.me/Basic32ESP" target="_blank" rel="noopener" aria-label="Telegram">
+          <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#37aee2"/><stop offset="100%" stop-color="#1e96c8"/>
+            </linearGradient></defs>
+            <circle cx="120" cy="120" r="120" fill="url(#tg)"/>
+            <path fill="#c8daea" d="M98 163c-3 0-2-1-3-4l-8-26 74-44"/>
+            <path fill="#a9c9dd" d="M98 163c2 0 4-1 6-3l16-15-20-12"/>
+            <path fill="#fff" d="M100 133l48 35c5 3 8 1 9-5l16-75c2-8-3-11-8-9L66 109c-8 3-8 7-1 9l24 7 55-35c3-2 6-1 4 1"/>
+          </svg>
+        </a>
+        <a class="icon" href="https://github.com/Ferrazzi" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="currentColor" fill-rule="evenodd"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53
+                 .63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27
+                 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95
+                 .29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+        </a>
+      </aside>
+    </div>
+
+    <script type="module">
+      if (!('serial' in navigator)) {
+        alert('Questo browser non supporta la Web Serial API. Usa Chrome/Edge su desktop.');
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const pickBtn = $('pick');
+      const connectBtn = $('connect');
+      const disconnectBtn = $('disconnect');
+      const baudSel = $('baud');
+      const lineendSel = $('lineend');
+      const autoscroll = $('autoscroll');
+      const logEl = $('log');
+      const lineIn = $('line');
+      const sendBtn = $('send');
+      const clearBtn = $('clear');
+      const saveBtn = $('save');
+
+      let port = null;
+      let reader = null;
+      let writer = null;
+      let keepReading = false;
+
+      function log(txt) {
+        logEl.textContent += (logEl.textContent.endsWith('\n') ? '' : '\n') + txt;
+        if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      // 1) Device picker (come ESP Web Tools: apre il selettore della porta)
+      pickBtn.addEventListener('click', async () => {
+        try {
+          // Facoltativo: puoi passare filtri vendorId/productId se vuoi restringere l’elenco
+          port = await navigator.serial.requestPort(/* { filters: [...] } */);
+          connectBtn.disabled = false;
+          log('[porta selezionata]');
+        } catch (e) {
+          console.warn(e);
+          log('[selezione annullata]');
+        }
+      });
+
+      // 2) Connessione
+      connectBtn.addEventListener('click', async () => {
+        try {
+          await port.open({ baudRate: Number(baudSel.value) || 115200 });
+          const decoder = new TextDecoder();
+          reader = port.readable.getReader();
+          writer = port.writable.getWriter();
+          keepReading = true;
+          connectBtn.disabled = true;
+          disconnectBtn.disabled = false;
+          log('[connesso]');
+          (async () => {
+            try {
+              while (keepReading) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                if (value) logEl.textContent += decoder.decode(value);
+                if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+              }
+            } catch (err) {
+              console.warn('read error:', err);
+            } finally {
+              try { reader.releaseLock(); } catch {}
+            }
+          })();
+        } catch (e) {
+          alert('Connessione fallita: ' + e);
+        }
+      });
+
+      // 3) Disconnessione
+      async function disconnect() {
+        keepReading = false;
+        try { if (reader) await reader.cancel(); } catch {}
+        try { if (writer) writer.releaseLock(); } catch {}
+        try { if (port) await port.close(); } catch {}
+        connectBtn.disabled = !port;
+        disconnectBtn.disabled = true;
+        log('[disconnesso]');
+      }
+      disconnectBtn.addEventListener('click', disconnect);
+      window.addEventListener('beforeunload', () => { if (port) disconnect(); });
+
+      // 4) Invio riga
+      async function sendLine() {
+        if (!writer) return;
+        const encoder = new TextEncoder();
+        const end = lineendSel.value || '';
+        const data = lineIn.value + end;
+        lineIn.value = '';
+        await writer.write(encoder.encode(data));
+      }
+      sendBtn.addEventListener('click', sendLine);
+      lineIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendLine(); });
+
+      // Utility
+      clearBtn.addEventListener('click', () => { logEl.textContent = ''; });
+      saveBtn.addEventListener('click', () => {
+        const blob = new Blob([logEl.textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'serial-log.txt'; a.click();
+        URL.revokeObjectURL(url);
+      });
+    </script>
+  </body>
+</html>
