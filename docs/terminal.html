@@ -7,25 +7,12 @@
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-      /* Cursore lampeggiante stile C64 (rettangolo vuoto) */
+      /* Nessun cursore custom */
       #entry {
-        position: relative;
         display: inline-block;
         min-height: 1em;
         outline: none;
         white-space: pre;
-      }
-      #entry::after {
-        content: " ";                 /* spazio */
-        display: inline-block;
-        width: 0.6em;                 /* larghezza simile a un carattere */
-        height: 1em;
-        background: currentColor;     /* usa il colore del testo */
-        opacity: 1;
-        animation: blink 1s step-start infinite;
-      }
-      @keyframes blink {
-        50% { opacity: 0; }
       }
     </style>
   </head>
