@@ -96,7 +96,7 @@ RUN
 
 ## 📚 Documentation
 
-A full user manual is available in the docs folder.
+A full user manual is available in the manual folder.
 
 ---
 
