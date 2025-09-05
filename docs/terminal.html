@@ -23,16 +23,14 @@
       <main class="content" style="padding-top: 60px;">
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
-          Seleziona il dispositivo seriale, imposta il baud e connetti.
-          Line end di default: <b>none</b>. Pulsanti: <b>Clear</b>, <b>CLS ANSI</b>, <b>Reboot</b> (invia il comando <code>REBOOT</code>).
+          Seleziona il dispositivo seriale: la connessione partirà automaticamente.<br />
+          All’aggancio invierò <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
         </p>
 
         <!-- Controlli -->
         <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
           <button id="pick">Seleziona dispositivo</button>
-          <button id="connect" disabled>Connetti</button>
           <button id="disconnect" disabled>Scollega</button>
-          <button id="reboot" disabled>Reboot</button>
 
           <label>
             Baud
@@ -63,7 +61,6 @@
           </label>
 
           <button id="cls">Clear</button>
-          <button id="clsAnsi">CLS ANSI</button>
           <button id="save">Save log</button>
         </div>
 
@@ -122,9 +119,7 @@
 
       const $ = (id) => document.getElementById(id);
       const pickBtn = $('pick');
-      const connectBtn = $('connect');
       const disconnectBtn = $('disconnect');
-      const rebootBtn = $('reboot');
       const baudSel = $('baud');
       const lineendSel = $('lineend');
       const autoscroll = $('autoscroll');
@@ -132,7 +127,6 @@
       const lineIn = $('line');
       const sendBtn = $('send');
       const clearBtn = $('cls');
-      const clsAnsiBtn = $('clsAnsi');
       const saveBtn = $('save');
 
       let port = null;
@@ -154,48 +148,31 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      // CLS ANSI: ESC[2J ESC[H]
-      async function ansiClear() {
-        if (!writer) return;
-        const encoder = new TextEncoder();
-        await writer.write(encoder.encode('\x1b[2J\x1b[H'));
-      }
-
-      // Reboot via comando seriale "REBOOT"
-      async function rebootCommand() {
-        if (!writer) { log('[nessuna connessione seriale]'); return; }
-        await writeWithLineEnd('REBOOT');
-        log('[reboot command sent: "REBOOT"]');
-      }
-
-      // Device picker
+      // Auto-connessione subito dopo la selezione del dispositivo
       pickBtn.addEventListener('click', async () => {
         try {
           port = await navigator.serial.requestPort();
-          connectBtn.disabled = false;
-          log('[porta selezionata]');
+          await connectSerial();              // connessione immediata
         } catch {
           log('[selezione annullata]');
         }
       });
 
-      // Connessione
-      connectBtn.addEventListener('click', async () => {
+      async function connectSerial() {
         try {
           await port.open({ baudRate: Number(baudSel.value) || 115200 });
+
           const decoder = new TextDecoder();
           reader = port.readable.getReader();
           writer = port.writable.getWriter();
           keepReading = true;
 
-          // Clear + reboot (comando "REBOOT") all'aggancio
+          // Clear + invia REBOOT all'aggancio
           localClear();
           log('[connesso — invio comando REBOOT]');
-          await rebootCommand();
+          await writeWithLineEnd('REBOOT');
 
-          connectBtn.disabled = true;
           disconnectBtn.disabled = false;
-          rebootBtn.disabled = false;
 
           (async () => {
             try {
@@ -203,7 +180,8 @@
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                  logEl.textContent += decoder.decode(value);
+                  const chunk = decoder.decode(value);
+                  logEl.textContent += chunk;
                   if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
                 }
               }
@@ -214,7 +192,7 @@
         } catch (e) {
           alert('Connessione fallita: ' + e);
         }
-      });
+      }
 
       // Disconnessione
       async function disconnect() {
@@ -222,16 +200,11 @@
         try { if (reader) await reader.cancel(); } catch {}
         try { if (writer) writer.releaseLock(); } catch {}
         try { if (port) await port.close(); } catch {}
-        connectBtn.disabled = !port;
         disconnectBtn.disabled = true;
-        rebootBtn.disabled = true;
         log('[disconnesso]');
       }
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
-
-      // Pulsante reboot (comando "REBOOT")
-      rebootBtn.addEventListener('click', rebootCommand);
 
       // Invio riga dal campo input
       async function sendLine() {
@@ -243,7 +216,6 @@
 
       // Utility
       clearBtn.addEventListener('click', localClear);
-      clsAnsiBtn.addEventListener('click', ansiClear);
       saveBtn.addEventListener('click', () => {
         const blob = new Blob([logEl.textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
