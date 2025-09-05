@@ -22,6 +22,7 @@
 
 You can flash the firmware to your ESP32 directly from your browser using this link:  [**Install Firmware**](https://ferrazzi.github.io/Basic32/)
 
+
 # 🧠 Basic32 – A BASIC Interpreter for ESP32
 
 **Basic32** is a lightweight, immediate and surprisingly powerful **BASIC interpreter** designed for **ESP32** boards. Its mission is to make hardware programming accessible, fast, and compiler-free.
