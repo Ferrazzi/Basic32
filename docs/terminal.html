@@ -16,6 +16,13 @@
       }
 
       /* Stile pulsanti e controlli come menù */
+      .controls {
+        display: flex;
+        gap: 10px 14px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 14px 0 6px;
+      }
       .controls button,
       .controls select {
         padding: .45rem .8rem;
@@ -39,9 +46,19 @@
         color: var(--c64-text);
         font-size: 22px;          /* uguale al menù */
         letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
       .controls input[type="checkbox"] {
         accent-color: var(--c64-border);
+        transform: scale(1.1);
+      }
+
+      @media (max-width: 640px) {
+        .controls button,
+        .controls select,
+        .controls label { font-size: 20px; }
       }
     </style>
   </head>
@@ -66,7 +83,7 @@
         </p>
 
         <!-- Tutti i controlli sopra -->
-        <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
+        <div class="controls">
           <button id="pick">Seleziona dispositivo</button>
           <button id="disconnect" disabled>Scollega</button>
 
@@ -93,7 +110,7 @@
             </select>
           </label>
 
-          <label style="display:flex;align-items:center;gap:6px;">
+          <label>
             <input type="checkbox" id="autoscroll" checked />
             Auto-scroll
           </label>
@@ -117,10 +134,10 @@
       <!-- Icone social -->
       <aside class="social">
         <a class="icon" href="https://t.me/Basic32ESP" target="_blank" rel="noopener" aria-label="Telegram">
-          <!-- SVG Telegram -->
+          <!-- SVG Telegram (già presente nella tua pagina principale) -->
         </a>
         <a class="icon" href="https://github.com/Ferrazzi" target="_blank" rel="noopener" aria-label="GitHub">
-          <!-- SVG GitHub -->
+          <!-- SVG GitHub (già presente nella tua pagina principale) -->
         </a>
       </aside>
     </div>
@@ -146,6 +163,17 @@
       let writer = null;
       let keepReading = false;
 
+      /* ---- Caret helpers robusti ---- */
+      function getCaretIndex() {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return screenEl.textContent.length;
+        const range = sel.getRangeAt(0);
+        const preRange = document.createRange();
+        preRange.selectNodeContents(screenEl);
+        preRange.setEnd(range.startContainer, range.startOffset);
+        return preRange.toString().length;
+      }
+
       function setCaretIndex(index) {
         index = Math.max(0, Math.min(index, screenEl.textContent.length));
         const walker = document.createTreeWalker(screenEl, NodeFilter.SHOW_TEXT, null);
@@ -164,6 +192,7 @@
           }
           pos = nextPos;
         }
+        // fallback: alla fine
         const range = document.createRange();
         range.selectNodeContents(screenEl);
         range.collapse(false);
@@ -177,36 +206,45 @@
         if (moveToEnd) setCaretIndex(screenEl.textContent.length);
       }
 
+      /* ---- Output helpers ---- */
       function appendText(text) {
+        // Append sempre in coda e mantieni il caret in fondo
         screenEl.textContent += text;
         setCaretIndex(screenEl.textContent.length);
+        ensureBlankLineAtEnd();
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
       function localClear() {
         screenEl.textContent = '';
-        setCaretIndex(0);
+        // dopo clear, lasciamo una riga vuota pronta
+        ensureBlankLineAtEnd();
+        setCaretIndex(screenEl.textContent.length);
       }
 
       function logLine(txt) {
-        const t = screenEl.textContent;
-        screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n\n';
+        const t = screenEl.textContent.replace(/\s*$/, ''); // rimuovo spazi finali
+        screenEl.textContent = (t.length ? t + '\n' : '') + txt + '\n';
+        ensureBlankLineAtEnd(); // aggiunge la riga vuota in fondo
         setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
+      /* ---- ANSI: ESC[2J clear + home, ESC[H home ---- */
       function handleAnsiAndAppend(chunk) {
         if (/\x1b\[2J/.test(chunk)) {
           localClear();
           chunk = chunk.replace(/\x1b\[2J/g, '');
         }
         if (/\x1b\[H/.test(chunk)) {
+          // posiziona il cursore logico a inizio; dopo invio torniamo comunque in fondo
           setCaretIndex(0);
           chunk = chunk.replace(/\x1b\[H/g, '');
         }
         appendText(chunk);
       }
 
+      /* ---- Invio su seriale ---- */
       async function writeWithLineEnd(str) {
         if (!writer) return;
         const encoder = new TextEncoder();
@@ -214,15 +252,20 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      function ensureTrailingBlankLine(s) {
-        if (s.endsWith('\n\n')) return s;
-        if (s.endsWith('\n')) return s + '\n';
-        return s + '\n\n';
+      // Garantisce che il testo termini con UNA riga vuota (due newline finali)
+      function ensureBlankLineAtEnd() {
+        if (screenEl.textContent.endsWith('\n\n')) return;
+        if (screenEl.textContent.endsWith('\n')) {
+          screenEl.textContent += '\n';
+        } else {
+          screenEl.textContent += '\n\n';
+        }
       }
 
+      // Invia la riga corrente; poi metti SEMPRE il cursore su una NUOVA riga vuota in fondo
       async function sendCurrentLine() {
         const txt = screenEl.textContent;
-        const idx = window.getSelection().anchorOffset;
+        const idx = getCaretIndex();
         const lineStart = txt.lastIndexOf('\n', Math.max(0, idx - 1)) + 1;
         const lineEnd = txt.indexOf('\n', idx);
         const endIdx = (lineEnd === -1) ? txt.length : lineEnd;
@@ -230,11 +273,13 @@
 
         await writeWithLineEnd(line);
 
-        screenEl.textContent = ensureTrailingBlankLine(txt);
+        // Non tocchiamo le righe sopra; assicuriamo una riga vuota in fondo e mettiamo il caret lì
+        ensureBlankLineAtEnd();
         setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
+      /* ---- Hotkeys ---- */
       screenEl.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -242,6 +287,7 @@
         }
       });
 
+      /* ---- UI wiring ---- */
       pickBtn.addEventListener('click', async () => {
         try {
           port = await navigator.serial.requestPort();
@@ -297,7 +343,12 @@
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
 
-      clearBtn.addEventListener('click', () => { localClear(); focusEditor(false); });
+      clearBtn.addEventListener('click', () => {
+        localClear();
+        logLine('[clear]');
+        focusEditor(true);
+      });
+
       saveBtn.addEventListener('click', () => {
         const blob = new Blob([screenEl.textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -306,6 +357,8 @@
         URL.revokeObjectURL(url);
       });
 
+      // avvio: riga vuota pronta e caret in fondo
+      ensureBlankLineAtEnd();
       focusEditor(true);
     </script>
   </body>
