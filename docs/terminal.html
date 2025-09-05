@@ -7,12 +7,41 @@
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-      /* Editor unico: caret standard, nessun cursore custom */
+      /* Editor unico: caret standard */
       #screen {
         outline: none;
         white-space: pre-wrap;
         word-wrap: break-word;
         min-height: 1em;
+      }
+
+      /* Stile pulsanti e controlli come menù */
+      .controls button,
+      .controls select {
+        padding: .45rem .8rem;
+        border: 3px solid var(--c64-border);
+        border-radius: 8px;
+        background: rgba(0,0,0,.12);
+        color: var(--c64-text);
+        font-family: 'VT323', monospace;
+        font-size: 22px;          /* uguale al menù */
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: transform .08s ease, filter .2s ease;
+      }
+      .controls button:hover,
+      .controls select:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.15);
+      }
+      .controls label {
+        color: var(--c64-text);
+        font-size: 22px;          /* uguale al menù */
+        letter-spacing: 2px;
+      }
+      .controls input[type="checkbox"] {
+        accent-color: var(--c64-border);
       }
     </style>
   </head>
@@ -29,15 +58,15 @@
         <a class="navitem" href="terminal.html">Serial Monitor</a>
       </nav>
 
-      <main class="content" style="padding-top: 60px;">
+      <main class="content" style="padding-top: 20px;">
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
           Seleziona il dispositivo seriale: la connessione parte automaticamente.<br />
           All’aggancio invio <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
         </p>
 
-        <!-- Controlli -->
-        <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
+        <!-- Controlli sopra -->
+        <div class="controls top-controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
           <button id="pick">Seleziona dispositivo</button>
           <button id="disconnect" disabled>Scollega</button>
 
@@ -54,6 +83,25 @@
             </select>
           </label>
 
+          <button id="cls">Clear</button>
+        </div>
+
+        <!-- Output -->
+        <div id="log" style="
+          width:min(980px, 96%);
+          height:420px; border:3px solid var(--c64-border); border-radius:10px;
+          padding:.75rem; overflow:auto; background: rgba(0,0,0,.12); color: var(--c64-text);
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align:left;">
+          <pre id="screen" contenteditable="true" spellcheck="false" style="margin:0;">[ready]</pre>
+        </div>
+
+        <!-- Controlli sotto -->
+        <div class="controls bottom-controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:10px 0;">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="autoscroll" checked />
+            Auto-scroll
+          </label>
+
           <label>
             Line end
             <select id="lineend">
@@ -64,22 +112,7 @@
             </select>
           </label>
 
-          <label style="display:flex;align-items:center;gap:6px;">
-            <input type="checkbox" id="autoscroll" checked />
-            Auto-scroll
-          </label>
-
-          <button id="cls">Clear</button>
           <button id="save">Save log</button>
-        </div>
-
-        <!-- Unica area: output + editing libero -->
-        <div id="log" style="
-          width:min(980px, 96%);
-          height:420px; border:3px solid var(--c64-border); border-radius:10px;
-          padding:.75rem; overflow:auto; background: rgba(0,0,0,.12); color: var(--c64-text);
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align:left;">
-          <pre id="screen" contenteditable="true" spellcheck="false" style="margin:0;">[ready]</pre>
         </div>
 
         <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>.</p>
@@ -88,26 +121,10 @@
       <!-- Icone social -->
       <aside class="social">
         <a class="icon" href="https://t.me/Basic32ESP" target="_blank" rel="noopener" aria-label="Telegram">
-          <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#37aee2"/><stop offset="100%" stop-color="#1e96c8"/>
-            </linearGradient></defs>
-            <circle cx="120" cy="120" r="120" fill="url(#tg)"/>
-            <path fill="#c8daea" d="M98 163c-3 0-2-1-3-4l-8-26 74-44"/>
-            <path fill="#a9c9dd" d="M98 163c2 0 4-1 6-3l16-15-20-12"/>
-            <path fill="#fff" d="M100 133l48 35c5 3 8 1 9-5l16-75c2-8-3-11-8-9L66 109c-8 3-8 7-1 9l24 7 55-35c3-2 6-1 4 1"/>
-          </svg>
+          <!-- SVG Telegram -->
         </a>
         <a class="icon" href="https://github.com/Ferrazzi" target="_blank" rel="noopener" aria-label="GitHub">
-          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path fill="currentColor" fill-rule="evenodd"
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
-                 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53
-                 .63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
-                 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27
-                 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95
-                 .29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
-          </svg>
+          <!-- SVG GitHub -->
         </a>
       </aside>
     </div>
@@ -133,17 +150,6 @@
       let writer = null;
       let keepReading = false;
 
-      // Utils caret ↔ indice carattere nell'editor
-      function getCaretIndex() {
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) return screenEl.textContent.length;
-        const range = sel.getRangeAt(0);
-        const preRange = document.createRange();
-        preRange.selectNodeContents(screenEl);
-        preRange.setEnd(range.startContainer, range.startOffset);
-        return preRange.toString().length;
-      }
-
       function setCaretIndex(index) {
         index = Math.max(0, Math.min(index, screenEl.textContent.length));
         const walker = document.createTreeWalker(screenEl, NodeFilter.SHOW_TEXT, null);
@@ -162,7 +168,6 @@
           }
           pos = nextPos;
         }
-        // fallback: alla fine
         const range = document.createRange();
         range.selectNodeContents(screenEl);
         range.collapse(false);
@@ -176,9 +181,8 @@
         if (moveToEnd) setCaretIndex(screenEl.textContent.length);
       }
 
-      // Output helpers
       function appendText(text) {
-        const atEnd = getCaretIndex() === screenEl.textContent.length;
+        const atEnd = window.getSelection().anchorOffset === screenEl.textContent.length;
         screenEl.textContent += text;
         if (atEnd) setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
@@ -191,12 +195,11 @@
 
       function logLine(txt) {
         const t = screenEl.textContent;
-        screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n';
+        screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n\n';
         setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
-      // ANSI: ESC[2J clear + home, ESC[H home
       function handleAnsiAndAppend(chunk) {
         if (/\x1b\[2J/.test(chunk)) {
           localClear();
@@ -209,7 +212,6 @@
         appendText(chunk);
       }
 
-      // Aggiunge line end e invia
       async function writeWithLineEnd(str) {
         if (!writer) return;
         const encoder = new TextEncoder();
@@ -217,17 +219,15 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      // garantisce che il testo termini con UNA riga vuota (due newline finali)
       function ensureTrailingBlankLine(s) {
         if (s.endsWith('\n\n')) return s;
         if (s.endsWith('\n')) return s + '\n';
         return s + '\n\n';
-        }
+      }
 
-      // Invia la riga corrente, poi porta SEMPRE il cursore su una NUOVA riga in fondo
       async function sendCurrentLine() {
-        const idx = getCaretIndex();
         const txt = screenEl.textContent;
+        const idx = window.getSelection().anchorOffset;
         const lineStart = txt.lastIndexOf('\n', Math.max(0, idx - 1)) + 1;
         const lineEnd = txt.indexOf('\n', idx);
         const endIdx = (lineEnd === -1) ? txt.length : lineEnd;
@@ -235,13 +235,11 @@
 
         await writeWithLineEnd(line);
 
-        // forza una riga vuota in fondo e sposta il caret lì
         screenEl.textContent = ensureTrailingBlankLine(txt);
         setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
-      // Key handling: Enter invia la riga corrente e porta il cursore su riga nuova in fondo
       screenEl.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -249,10 +247,6 @@
         }
       });
 
-      // Click nel box mantiene il focus nell'editor
-      logBox.addEventListener('mousedown', () => { setTimeout(() => focusEditor(false), 0); });
-
-      // Device picker → auto-connect
       pickBtn.addEventListener('click', async () => {
         try {
           port = await navigator.serial.requestPort();
@@ -296,7 +290,6 @@
         }
       }
 
-      // Disconnessione
       async function disconnect() {
         keepReading = false;
         try { if (reader) await reader.cancel(); } catch {}
@@ -309,7 +302,6 @@
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
 
-      // Utility
       clearBtn.addEventListener('click', () => { localClear(); focusEditor(false); });
       saveBtn.addEventListener('click', () => {
         const blob = new Blob([screenEl.textContent], { type: 'text/plain' });
@@ -319,7 +311,6 @@
         URL.revokeObjectURL(url);
       });
 
-      // avvio
       focusEditor(true);
     </script>
   </body>
