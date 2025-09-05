@@ -70,3 +70,31 @@ body.c64 { margin: 0; min-height: 100vh; background: var(--c64-bg); color: var(-
   .topnav{ margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 20px; }
 }
 
+.controls button,
+.controls select {
+  padding: .45rem .8rem;
+  border: 3px solid var(--c64-border);
+  border-radius: 8px;
+  background: rgba(0,0,0,.12);
+  color: var(--c64-text);
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform .08s ease, filter .2s ease;
+}
+
+.controls button:hover,
+.controls select:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+
+.controls label {
+  color: var(--c64-text);
+  font-size: 18px;
+}
+.controls input[type="checkbox"] {
+  accent-color: var(--c64-border);
+}
