@@ -153,7 +153,9 @@ If you like Basic32 and want to support its development, you can buy me a coffee
 <p align="center">
   <a href="https://www.paypal.com/donate/?business=3LPTNPJ2RV6U8&no_recurring=0&item_name=Buy+me+a+coffee+if+you+like+to+contribute+to+the+app+development&currency_code=EUR">
     <img src="https://github.com/Ferrazzi/CarBox-Companion/blob/main/Assets/DonaPayPal.png" alt="Donate with PayPal" width="200"/>
-    &nbsp;&nbsp;&nbsp;
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://t.me/Basic32ESP">
     <img src="https://github.com/Ferrazzi/CarBox-Launcher/blob/main/telegra-banner.jpg" alt="Telegram" width="200"/>
   </a>
 </p>
