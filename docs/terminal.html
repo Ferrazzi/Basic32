@@ -6,6 +6,25 @@
     <title>Basic32 — Serial Terminal (C64)</title>
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+      /* Cursore lampeggiante stile C64 */
+      #entry {
+        position: relative;
+        display: inline-block;
+        min-height: 1em;
+        outline: none;
+        white-space: pre;
+      }
+      #entry::after {
+        content: "▉"; /* blocco pieno */
+        display: inline-block;
+        margin-left: 2px;
+        animation: blink 1s step-start infinite;
+      }
+      @keyframes blink {
+        50% { opacity: 0; }
+      }
+    </style>
   </head>
   <body class="c64">
     <div class="crt"></div>
@@ -64,22 +83,14 @@
           <button id="save">Save log</button>
         </div>
 
-        <!-- Output -->
+        <!-- Output + Input nello stesso riquadro -->
         <div id="log" style="
           width:min(980px, 96%);
           height:420px; border:3px solid var(--c64-border); border-radius:10px;
-          padding:.75rem; overflow:auto; white-space:pre-wrap;
-          background: rgba(0,0,0,.12); color: var(--c64-text);
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">
-          [ready]
-        </div>
-
-        <!-- Input -->
-        <div style="display:flex; gap:8px; margin-top:8px; width:min(980px,96%);">
-          <input id="line" type="text" placeholder="Scrivi un comando e premi Invio…" style="
-            flex:1 1 auto; border:3px solid var(--c64-border); border-radius:8px;
-            padding:.5rem .7rem; background: rgba(0,0,0,.15); color: var(--c64-text);" />
-          <button id="send">Invia</button>
+          padding:.75rem; overflow:auto; background: rgba(0,0,0,.12); color: var(--c64-text);
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align:left;">
+          <pre id="out" style="margin:0; white-space:pre-wrap; word-wrap:break-word;">[ready]</pre>
+          <div id="entry" contenteditable="true" spellcheck="false"></div>
         </div>
 
         <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>.</p>
@@ -123,9 +134,9 @@
       const baudSel = $('baud');
       const lineendSel = $('lineend');
       const autoscroll = $('autoscroll');
-      const logEl = $('log');
-      const lineIn = $('line');
-      const sendBtn = $('send');
+      const logBox = $('log');
+      const outEl = $('out');
+      const entryEl = $('entry');
       const clearBtn = $('cls');
       const saveBtn = $('save');
 
@@ -134,34 +145,34 @@
       let writer = null;
       let keepReading = false;
 
-      // "schermo" testuale e cursore
-      let screen = '[ready]';
-      let cursor = screen.length; // per default scriviamo in coda
+      function focusEntry() {
+        entryEl.focus();
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(entryEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
 
-      function render() {
-        logEl.textContent = screen;
-        if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+      function renderAppend(text) {
+        outEl.textContent += text;
+        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
       function localClear() {
-        screen = '';
-        cursor = 0;
-        render();
+        outEl.textContent = '';
+        focusEntry();
       }
-      function log(txt) {
-        // append di servizio a fine schermo (non muove il cursore applicativo)
-        screen += (screen.endsWith('\n') ? '' : '\n') + txt;
-        cursor = screen.length;
-        render();
+      function logLine(txt) {
+        renderAppend((outEl.textContent.endsWith('\n') ? '' : '\n') + txt + '\n');
       }
 
-      // scrive una stringa alla posizione del cursore (inserimento)
-      function insertAtCursor(str) {
-        if (!str) return;
-        screen = screen.slice(0, cursor) + str + screen.slice(cursor);
-        cursor += str.length;
+      function handleAnsiAndAppend(chunk) {
+        chunk = chunk.replace(/\x1b\[2J/g, () => { localClear(); return ''; });
+        chunk = chunk.replace(/\x1b\[H/g, () => { /* cursore home non modificato nell'output */ return ''; });
+        renderAppend(chunk);
       }
 
-      // helper: invia una stringa aggiungendo il line end scelto in UI
       async function writeWithLineEnd(str) {
         if (!writer) return;
         const encoder = new TextEncoder();
@@ -169,60 +180,46 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      // parser ANSI minimale: gestisce ESC[2J e ESC[H]
-      // ritorna il testo "pulito" da inserire, aggiornando screen/cursor per le sequenze
-      function handleAnsi(text) {
-        // processiamo più sequenze, nell'ordine in cui compaiono
-        const ESC_SEQ = /\x1b\[[0-9;]*[A-Za-z]/g;
-        let lastIndex = 0;
-        let clean = '';
-
-        let m;
-        while ((m = ESC_SEQ.exec(text)) !== null) {
-          // testo normale prima della sequenza → accumula
-          clean += text.slice(lastIndex, m.index);
-          const seq = m[0];
-
-          if (seq === '\x1b[2J') {
-            // clear screen + home
-            localClear();
-          } else if (seq === '\x1b[H') {
-            // cursore a home
-            cursor = 0;
-          }
-          lastIndex = m.index + seq.length;
+      // gestione input
+      entryEl.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const cmd = entryEl.textContent;
+          entryEl.textContent = '';
+          renderAppend((outEl.textContent.endsWith('\n') ? '' : '\n') + cmd + '\n');
+          await writeWithLineEnd(cmd);
+          focusEntry();
         }
-        // resto del testo dopo l'ultima sequenza
-        clean += text.slice(lastIndex);
-        return clean;
-      }
+      });
 
-      // Auto-connessione subito dopo la selezione del dispositivo
+      logBox.addEventListener('mousedown', (e) => {
+        if (e.target !== entryEl) {
+          e.preventDefault();
+          focusEntry();
+        }
+      });
+
       pickBtn.addEventListener('click', async () => {
         try {
           port = await navigator.serial.requestPort();
-          await connectSerial();              // connessione immediata
+          await connectSerial();
         } catch {
-          log('[selezione annullata]');
+          logLine('[selezione annullata]');
         }
       });
 
       async function connectSerial() {
         try {
           await port.open({ baudRate: Number(baudSel.value) || 115200 });
-
           const decoder = new TextDecoder();
           reader = port.readable.getReader();
           writer = port.writable.getWriter();
           keepReading = true;
-
-          // Clear locale + invia REBOOT all'aggancio
           localClear();
-          log('[connesso — invio comando REBOOT]');
+          logLine('[connesso — invio comando REBOOT]');
           await writeWithLineEnd('REBOOT');
-
           disconnectBtn.disabled = false;
-
+          focusEntry();
           (async () => {
             try {
               while (keepReading) {
@@ -230,9 +227,8 @@
                 if (done) break;
                 if (value) {
                   const chunk = decoder.decode(value);
-                  const cleaned = handleAnsi(chunk);
-                  insertAtCursor(cleaned);
-                  render();
+                  handleAnsiAndAppend(chunk);
+                  focusEntry();
                 }
               }
             } finally {
@@ -244,38 +240,28 @@
         }
       }
 
-      // Disconnessione
       async function disconnect() {
         keepReading = false;
         try { if (reader) await reader.cancel(); } catch {}
         try { if (writer) writer.releaseLock(); } catch {}
         try { if (port) await port.close(); } catch {}
         disconnectBtn.disabled = true;
-        log('[disconnesso]');
+        logLine('[disconnesso]');
+        focusEntry();
       }
       disconnectBtn.addEventListener('click', disconnect);
       window.addEventListener('beforeunload', () => { if (port) disconnect(); });
 
-      // Invio riga dal campo input
-      async function sendLine() {
-        await writeWithLineEnd(lineIn.value);
-        lineIn.value = '';
-      }
-      sendBtn.addEventListener('click', sendLine);
-      lineIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendLine(); });
-
-      // Utility
-      clearBtn.addEventListener('click', localClear);
+      clearBtn.addEventListener('click', () => { localClear(); focusEntry(); });
       saveBtn.addEventListener('click', () => {
-        const blob = new Blob([logEl.textContent], { type: 'text/plain' });
+        const blob = new Blob([outEl.textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = 'serial-log.txt'; a.click();
         URL.revokeObjectURL(url);
       });
 
-      // iniziale render
-      render();
+      focusEntry();
     </script>
   </body>
 </html>
