@@ -159,6 +159,7 @@ If you like Basic32 and want to support its development, you can buy me a coffee
     <img src="https://github.com/Ferrazzi/CarBox-Launcher/blob/main/telegra-banner.jpg" alt="Telegram" width="200"/>
   </a>
 </p>
-<p align="center">
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=Ferrazzi.Basic32" alt="visitor badge"/>
-</p>
+
+<div align="center">
+<p align="center"><img src="https://visitor-badge.laobi.icu/badge?page_id=<Ferrazzi>.<Basic32>" /></p> 
+<br></div>
