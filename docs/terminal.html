@@ -178,8 +178,10 @@
 
       // Output helpers
       function appendText(text) {
-        // aggiunge in coda senza toccare il caret (tranne autoscroll)
+        const atEnd = getCaretIndex() === screenEl.textContent.length;
         screenEl.textContent += text;
+        // se il caret era alla fine, mantienilo in fondo
+        if (atEnd) setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
@@ -191,43 +193,23 @@
       function logLine(txt) {
         const t = screenEl.textContent;
         screenEl.textContent = (t.endsWith('\n') || t.length === 0 ? t : t + '\n') + txt + '\n';
+        setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
       // ANSI: ESC[2J clear + home, ESC[H home
       function handleAnsiAndAppend(chunk) {
-        // Applichiamo gli effetti, rimuovendo le sequenze dal testo mostrato
-        // 1) clear schermo
         if (/\x1b\[2J/.test(chunk)) {
           localClear();
           chunk = chunk.replace(/\x1b\[2J/g, '');
         }
-        // 2) cursore home: portiamo il caret all'inizio (non spostiamo il testo esistente)
         if (/\x1b\[H/.test(chunk)) {
+          // porta il cursore a inizio; l'utente potrà comunque scrivere altrove,
+          // ma dopo l'INVIO lo riporteremo sempre in fondo.
           setCaretIndex(0);
           chunk = chunk.replace(/\x1b\[H/g, '');
         }
         appendText(chunk);
-      }
-
-      // Indivia/Invia riga corrente con Enter
-      async function sendCurrentLine() {
-        const idx = getCaretIndex();
-        const txt = screenEl.textContent;
-        const lineStart = txt.lastIndexOf('\n', Math.max(0, idx - 1)) + 1;
-        const lineEnd = txt.indexOf('\n', idx);
-        const endIdx = (lineEnd === -1) ? txt.length : lineEnd;
-        const line = txt.slice(lineStart, endIdx);
-
-        await writeWithLineEnd(line);
-
-        // Inserisci newline dopo la riga corrente e vai a inizio nuova riga
-        const before = txt.slice(0, endIdx);
-        const after  = txt.slice(endIdx);
-        const updated = before + '\n' + after;
-        screenEl.textContent = updated;
-        setCaretIndex(before.length + 1);
-        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
       // Aggiunge line end e invia
@@ -238,7 +220,24 @@
         await writer.write(encoder.encode(str + end));
       }
 
-      // Key handling: Enter invia la riga corrente
+      // Invia la riga corrente, poi sposta SEMPRE il cursore in fondo
+      async function sendCurrentLine() {
+        const idx = getCaretIndex();
+        const txt = screenEl.textContent;
+        const lineStart = txt.lastIndexOf('\n', Math.max(0, idx - 1)) + 1;
+        const lineEnd = txt.indexOf('\n', idx);
+        const endIdx = (lineEnd === -1) ? txt.length : lineEnd;
+        const line = txt.slice(lineStart, endIdx);
+
+        await writeWithLineEnd(line);
+
+        // NON modifichiamo la riga; aggiungiamo solo una nuova riga in coda
+        screenEl.textContent = txt + '\n';
+        setCaretIndex(screenEl.textContent.length); // cursore sempre in fondo
+        if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
+      }
+
+      // Key handling: Enter invia la riga corrente e porta il cursore in fondo
       screenEl.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -246,17 +245,18 @@
         }
       });
 
-      // Click nel box tiene il focus nell'editor
+      // Click nel box mantiene il focus nell'editor
       logBox.addEventListener('mousedown', () => { setTimeout(() => focusEditor(false), 0); });
 
       // Device picker → auto-connect
       pickBtn.addEventListener('click', async () => {
         try {
           port = await navigator.serial.requestPort();
-          await connectSerial();
         } catch {
           logLine('[selezione annullata]');
+          return;
         }
+        await connectSerial();
       });
 
       async function connectSerial() {
