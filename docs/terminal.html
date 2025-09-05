@@ -23,8 +23,8 @@
       <main class="content" style="padding-top: 60px;">
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
-          Seleziona il dispositivo seriale: la connessione partirà automaticamente.<br />
-          All’aggancio invierò <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
+          Seleziona il dispositivo seriale: la connessione parte automaticamente.<br />
+          All’aggancio invio <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
         </p>
 
         <!-- Controlli -->
@@ -134,18 +134,67 @@
       let writer = null;
       let keepReading = false;
 
-      function log(txt) {
-        logEl.textContent += (logEl.textContent.endsWith('\n') ? '' : '\n') + txt;
+      // "schermo" testuale e cursore
+      let screen = '[ready]';
+      let cursor = screen.length; // per default scriviamo in coda
+
+      function render() {
+        logEl.textContent = screen;
         if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
       }
-      function localClear() { logEl.textContent = ''; }
+      function localClear() {
+        screen = '';
+        cursor = 0;
+        render();
+      }
+      function log(txt) {
+        // append di servizio a fine schermo (non muove il cursore applicativo)
+        screen += (screen.endsWith('\n') ? '' : '\n') + txt;
+        cursor = screen.length;
+        render();
+      }
 
-      // helper: scrive una stringa aggiungendo il line end scelto in UI
+      // scrive una stringa alla posizione del cursore (inserimento)
+      function insertAtCursor(str) {
+        if (!str) return;
+        screen = screen.slice(0, cursor) + str + screen.slice(cursor);
+        cursor += str.length;
+      }
+
+      // helper: invia una stringa aggiungendo il line end scelto in UI
       async function writeWithLineEnd(str) {
         if (!writer) return;
         const encoder = new TextEncoder();
         const end = lineendSel.value || '';
         await writer.write(encoder.encode(str + end));
+      }
+
+      // parser ANSI minimale: gestisce ESC[2J e ESC[H]
+      // ritorna il testo "pulito" da inserire, aggiornando screen/cursor per le sequenze
+      function handleAnsi(text) {
+        // processiamo più sequenze, nell'ordine in cui compaiono
+        const ESC_SEQ = /\x1b\[[0-9;]*[A-Za-z]/g;
+        let lastIndex = 0;
+        let clean = '';
+
+        let m;
+        while ((m = ESC_SEQ.exec(text)) !== null) {
+          // testo normale prima della sequenza → accumula
+          clean += text.slice(lastIndex, m.index);
+          const seq = m[0];
+
+          if (seq === '\x1b[2J') {
+            // clear screen + home
+            localClear();
+          } else if (seq === '\x1b[H') {
+            // cursore a home
+            cursor = 0;
+          }
+          lastIndex = m.index + seq.length;
+        }
+        // resto del testo dopo l'ultima sequenza
+        clean += text.slice(lastIndex);
+        return clean;
       }
 
       // Auto-connessione subito dopo la selezione del dispositivo
@@ -167,7 +216,7 @@
           writer = port.writable.getWriter();
           keepReading = true;
 
-          // Clear + invia REBOOT all'aggancio
+          // Clear locale + invia REBOOT all'aggancio
           localClear();
           log('[connesso — invio comando REBOOT]');
           await writeWithLineEnd('REBOOT');
@@ -181,8 +230,9 @@
                 if (done) break;
                 if (value) {
                   const chunk = decoder.decode(value);
-                  logEl.textContent += chunk;
-                  if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+                  const cleaned = handleAnsi(chunk);
+                  insertAtCursor(cleaned);
+                  render();
                 }
               }
             } finally {
@@ -223,6 +273,9 @@
         a.href = url; a.download = 'serial-log.txt'; a.click();
         URL.revokeObjectURL(url);
       });
+
+      // iniziale render
+      render();
     </script>
   </body>
 </html>
