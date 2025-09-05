@@ -65,8 +65,8 @@
           All’aggancio invio <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
         </p>
 
-        <!-- Controlli sopra -->
-        <div class="controls top-controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
+        <!-- Tutti i controlli sopra -->
+        <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
           <button id="pick">Seleziona dispositivo</button>
           <button id="disconnect" disabled>Scollega</button>
 
@@ -83,25 +83,6 @@
             </select>
           </label>
 
-          <button id="cls">Clear</button>
-        </div>
-
-        <!-- Output -->
-        <div id="log" style="
-          width:min(980px, 96%);
-          height:420px; border:3px solid var(--c64-border); border-radius:10px;
-          padding:.75rem; overflow:auto; background: rgba(0,0,0,.12); color: var(--c64-text);
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align:left;">
-          <pre id="screen" contenteditable="true" spellcheck="false" style="margin:0;">[ready]</pre>
-        </div>
-
-        <!-- Controlli sotto -->
-        <div class="controls bottom-controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:10px 0;">
-          <label style="display:flex;align-items:center;gap:6px;">
-            <input type="checkbox" id="autoscroll" checked />
-            Auto-scroll
-          </label>
-
           <label>
             Line end
             <select id="lineend">
@@ -112,7 +93,22 @@
             </select>
           </label>
 
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="autoscroll" checked />
+            Auto-scroll
+          </label>
+
+          <button id="cls">Clear</button>
           <button id="save">Save log</button>
+        </div>
+
+        <!-- Output -->
+        <div id="log" style="
+          width:min(980px, 96%);
+          height:420px; border:3px solid var(--c64-border); border-radius:10px;
+          padding:.75rem; overflow:auto; background: rgba(0,0,0,.12); color: var(--c64-text);
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align:left;">
+          <pre id="screen" contenteditable="true" spellcheck="false" style="margin:0;">[ready]</pre>
         </div>
 
         <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>.</p>
@@ -182,9 +178,8 @@
       }
 
       function appendText(text) {
-        const atEnd = window.getSelection().anchorOffset === screenEl.textContent.length;
         screenEl.textContent += text;
-        if (atEnd) setCaretIndex(screenEl.textContent.length);
+        setCaretIndex(screenEl.textContent.length);
         if (autoscroll.checked) logBox.scrollTop = logBox.scrollHeight;
       }
 
