@@ -32,14 +32,13 @@
       <main class="content" style="padding-top: 60px;">
         <h1>TERMINALE SERIALE</h1>
         <p class="lead">
-          Seleziona il dispositivo seriale: la connessione parte automaticamente.<br />
-          All’aggancio invio <b>REBOOT</b> al dispositivo. Line end di default: <b>none</b>.
+          Select the serial device: the connection starts automatically.<br />
         </p>
 
         <!-- Controlli -->
         <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0 6px;">
-          <button id="pick">Seleziona dispositivo</button>
-          <button id="disconnect" disabled>Scollega</button>
+          <button id="pick">Select device</button>
+          <button id="disconnect" disabled>Disconnect</button>
 
           <label>
             Baud
@@ -82,7 +81,7 @@
           <pre id="screen" contenteditable="true" spellcheck="false" style="margin:0;">[ready]</pre>
         </div>
 
-        <p class="hint">Serve Chrome/Edge su HTTPS (GitHub Pages) o <code>localhost</code>.</p>
+        <p class="hint">Chrome/Edge over HTTPS is required</p>
       </main>
 
       <!-- Icone social -->
@@ -114,7 +113,7 @@
 
     <script type="module">
       if (!('serial' in navigator)) {
-        alert('Questo browser non supporta la Web Serial API. Usa Chrome/Edge su desktop.');
+        alert('This browser does not support the Web Serial API. Use Chrome/Edge on desktop.');
       }
 
       const $ = (id) => document.getElementById(id);
@@ -257,7 +256,7 @@
         try {
           port = await navigator.serial.requestPort();
         } catch {
-          logLine('[selezione annullata]');
+          logLine('[Selection canceled]');
           return;
         }
         await connectSerial();
@@ -272,7 +271,7 @@
           keepReading = true;
 
           localClear();
-          logLine('[connesso — invio comando REBOOT]');
+          logLine('[Connected — sending REBOOT command]');
           await writeWithLineEnd('REBOOT');
           disconnectBtn.disabled = false;
           focusEditor(true);
@@ -292,7 +291,7 @@
             }
           })();
         } catch (e) {
-          alert('Connessione fallita: ' + e);
+          alert('Connection failed: ' + e);
         }
       }
 
@@ -303,7 +302,7 @@
         try { if (writer) writer.releaseLock(); } catch {}
         try { if (port) await port.close(); } catch {}
         disconnectBtn.disabled = true;
-        logLine('[disconnesso]');
+        logLine('[disconnected]');
         focusEditor(false);
       }
       disconnectBtn.addEventListener('click', disconnect);
