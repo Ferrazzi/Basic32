@@ -78,7 +78,7 @@ body.c64 { margin: 0; min-height: 100vh; background: var(--c64-bg); color: var(-
   background: rgba(0,0,0,.12);
   color: var(--c64-text);
   font-family: 'VT323', monospace;
-  font-size: 20px;
+  font-size: 18px;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
@@ -98,3 +98,4 @@ body.c64 { margin: 0; min-height: 100vh; background: var(--c64-bg); color: var(-
 .controls input[type="checkbox"] {
   accent-color: var(--c64-border);
 }
+
