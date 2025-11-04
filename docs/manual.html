@@ -55,42 +55,32 @@
           </label>
         </div>
 
-        <!-- Riga 2: SEARCH + CATEGORY (category a destra della search) -->
+        <!-- Riga 2: SEARCH + INDEX (tendina indice a destra della search) -->
         <div class="controls" role="search" aria-label="Find in manual"
              style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
           <label for="search" class="visually-hidden">Search command</label>
           <input id="search" type="search" placeholder="Search command (e.g., RUN)..." autocomplete="off" />
 
           <label>
-            Category
-            <select id="category" aria-label="Filter by category">
-              <!-- popolato dinamicamente dal core -->
-              <option value="__all__" selected>All</option>
+            Index
+            <select id="index" aria-label="Commands index">
+              <!-- Popolato dinamicamente dal core -->
+              <option value="" selected>— Select command —</option>
             </select>
           </label>
         </div>
       </section>
 
-      <!-- ======= LAYOUT: SIDEBAR + CONTENUTO ======= -->
-      <div class="manual-layout">
-        <!-- Indice comandi -->
-        <aside class="sidebar" aria-label="Commands index">
-          <nav id="command-list" class="command-list" aria-label="Commands list">
-            <!-- Popolato da manual-core.js -->
-          </nav>
-        </aside>
-
-        <!-- Contenuto del manuale -->
-        <main id="manual-content" class="manual-content" tabindex="-1">
-          <p class="hint">Select a command from the index or start typing in the search box.</p>
-        </main>
-      </div>
+      <!-- ======= CONTENUTO ======= -->
+      <main id="manual-content" class="manual-content" tabindex="-1" style="margin:0 8px 24px;">
+        <p class="hint">Choose a command from the <em>Index</em> or start typing in the search box.</p>
+      </main>
     </div>
 
     <!-- ======= NOSCRIPT ======= -->
     <noscript>
       <div class="frame" style="margin-top:12px">
-        <p class="noscript">⚠️ JavaScript is disabled: index and filters will not work.</p>
+        <p class="noscript">⚠️ JavaScript is disabled: the index and search will not work.</p>
       </div>
     </noscript>
 
