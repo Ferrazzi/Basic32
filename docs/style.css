@@ -157,7 +157,7 @@ body.c64 {
   padding: .45rem .8rem;
   border: 3px solid var(--c64-border);
   border-radius: 8px;
-  background: rgba(0,0,0,.50);
+  background: rgba(0,0,0,.25);
   color: var(--c64-text);
   font-family: 'VT323', monospace;
   font-size: 15px;
@@ -306,6 +306,7 @@ body.c64 {
   .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
   .command-list a:hover { transform: none; filter: none; }
 }
+
 
 
 
