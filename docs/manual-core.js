@@ -1,21 +1,19 @@
 /* =========================================================
    BASIC32 — Manual (CORE)
-   - Caricamento dinamico lingua: ./manual.<lang>.js
-   - Ricerca, filtro di categoria, indice semplice, deep link
-   - Per aggiungere lingua: crea manual.<code>.js che esporta default = array comandi
+   - Lingua dinamica: ./manual.<lang>.js
+   - Ricerca testo, tendina "Index" con tutti i comandi (filtrata dalla ricerca)
+   - Deep link #cmd-<id> e ?lang=<code>
    ========================================================= */
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
-const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
 const langSel    = $("#lang");
 const searchBox  = $("#search");
-const catSel     = $("#category");
-const listEl     = $("#command-list");
+const indexSel   = $("#index");
 const contentEl  = $("#manual-content");
 
 let currentLang = "it";
-let currentData = []; // array comandi lingua corrente
+let currentData = []; // array di comandi della lingua corrente
 
 /* ---------- Utilità ---------- */
 function escapeHTML(str){
@@ -34,48 +32,24 @@ function matchesQuery(cmd, q) {
   return hay.includes(q);
 }
 
-function matchesCategory(cmd, catValue) {
-  if (!catValue || catValue === "__all__") return true;
-  return (cmd.categoria || "").toLowerCase() === catValue.toLowerCase();
-}
-
-/* ---------- Popola la tendina delle categorie ---------- */
-function buildCategoryOptions() {
-  const cats = Array.from(new Set(currentData.map(c => c.categoria).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
-  const current = catSel.value || "__all__";
-  catSel.innerHTML = `<option value="__all__">All</option>` +
-    cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
-  // ripristina selezione precedente se possibile
-  const hasPrev = Array.from(catSel.options).some(o => o.value === current);
-  catSel.value = hasPrev ? current : "__all__";
-}
-
-/* ---------- Indice: elenco semplice (no intestazioni categoria) ---------- */
-function renderIndex() {
-  listEl.innerHTML = "";
-  const q = searchBox.value.trim().toLowerCase();
-  const cat = catSel.value;
+/* ---------- Popola la tendina "Index" ---------- */
+function buildIndexOptions() {
+  const q = (searchBox.value || "").trim().toLowerCase();
 
   const items = currentData
-    .filter(cmd => matchesQuery(cmd, q) && matchesCategory(cmd, cat))
+    .filter(cmd => matchesQuery(cmd, q))
     .slice()
     .sort((a,b)=>a.nome.localeCompare(b.nome));
 
-  if (!items.length) {
-    listEl.innerHTML = `<p class="hint" style="padding:6px">No results.</p>`;
-    return;
-  }
+  const prev = indexSel.value;
+  indexSel.innerHTML = `<option value="">— Select command —</option>` +
+    items.map(cmd => `<option value="${escapeHTML(cmd.id)}">${escapeHTML(cmd.nome)}</option>`).join("");
 
-  for (const cmd of items) {
-    const a = document.createElement("a");
-    a.href = `#cmd-${cmd.id}`;
-    a.textContent = cmd.nome;
-    a.setAttribute("data-cmd", cmd.id);
-    listEl.appendChild(a);
-  }
+  // prova a ripristinare la scelta precedente
+  if ([...indexSel.options].some(o => o.value === prev)) indexSel.value = prev;
 }
 
-/* ---------- Contenuto del manuale ---------- */
+/* ---------- Contenuto del manuale (tutte le sezioni) ---------- */
 function renderContent() {
   contentEl.innerHTML = "";
   const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -102,7 +76,7 @@ function renderContent() {
   }
 }
 
-/* ---------- Focus su hash ---------- */
+/* ---------- Focus su sezione da hash ---------- */
 function focusHash(smooth = true){
   if (!location.hash) return;
   const target = document.getElementById(location.hash.slice(1));
@@ -125,11 +99,8 @@ async function loadLanguage(code){
     currentData = data;
 
     langSel.value = code;
-    // ricostruisci categorie per la lingua
-    buildCategoryOptions();
-    // render UI
     renderContent();
-    renderIndex();
+    buildIndexOptions();
 
     // aggiorna URL (?lang=)
     const params = new URLSearchParams(location.search);
@@ -153,25 +124,24 @@ function init(){
 
   loadLanguage(lang);
 
-  // ricerca testuale
-  searchBox.addEventListener("input", () => renderIndex());
-  // filtro categoria
-  catSel.addEventListener("change", () => renderIndex());
-  // cambio lingua
+  // Ricerca: filtra le opzioni dell'indice
+  searchBox.addEventListener("input", () => buildIndexOptions());
+
+  // Cambio lingua
   langSel.addEventListener("change", () => loadLanguage(langSel.value));
 
-  // click sulla lista comandi: conserva ?lang= e aggiorna hash
-  listEl.addEventListener("click", (e) => {
-    if (e.target.matches("a[data-cmd]")){
-      const params = new URLSearchParams(location.search);
-      params.set("lang", currentLang);
-      const href = e.target.getAttribute("href"); // #cmd-xxx
-      history.pushState(null, "", `${location.pathname}?${params.toString()}${href}`);
-      focusHash();
-      e.preventDefault();
-    }
+  // Selezione dall'indice: vai alla sezione
+  indexSel.addEventListener("change", () => {
+    const id = indexSel.value;
+    if (!id) return;
+    const params = new URLSearchParams(location.search);
+    params.set("lang", currentLang);
+    const hash = `#cmd-${id}`;
+    history.pushState(null, "", `${location.pathname}?${params.toString()}${hash}`);
+    focusHash();
   });
 
+  // Deep link manuale
   window.addEventListener("hashchange", () => focusHash());
 }
 
