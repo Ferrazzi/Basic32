@@ -1,8 +1,8 @@
 /* =========================================================
-   BASIC32 — Manual (CORE)
-   - Lingua dinamica: ./manual.<lang>.js
-   - Ricerca testo, tendina "Index" con tutti i comandi (filtrata dalla ricerca)
-   - Deep link #cmd-<id> e ?lang=<code>
+   BASIC32 — Manual (CORE) robusto
+   - Carica lingua da diversi nomi file possibili
+   - Supporta export default [], export const commands = [], export const DATA = { it:[] }
+   - Ricerca + tendina Index
    ========================================================= */
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
@@ -13,7 +13,7 @@ const indexSel   = $("#index");
 const contentEl  = $("#manual-content");
 
 let currentLang = "it";
-let currentData = []; // array di comandi della lingua corrente
+let currentData = []; // array comandi lingua corrente
 
 /* ---------- Utilità ---------- */
 function escapeHTML(str){
@@ -32,7 +32,7 @@ function matchesQuery(cmd, q) {
   return hay.includes(q);
 }
 
-/* ---------- Popola la tendina "Index" ---------- */
+/* ---------- Build tendina Index ---------- */
 function buildIndexOptions() {
   const q = (searchBox.value || "").trim().toLowerCase();
 
@@ -45,11 +45,10 @@ function buildIndexOptions() {
   indexSel.innerHTML = `<option value="">— Select command —</option>` +
     items.map(cmd => `<option value="${escapeHTML(cmd.id)}">${escapeHTML(cmd.nome)}</option>`).join("");
 
-  // prova a ripristinare la scelta precedente
   if ([...indexSel.options].some(o => o.value === prev)) indexSel.value = prev;
 }
 
-/* ---------- Contenuto del manuale (tutte le sezioni) ---------- */
+/* ---------- Render contenuto (tutte le sezioni) ---------- */
 function renderContent() {
   contentEl.innerHTML = "";
   const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -59,11 +58,11 @@ function renderContent() {
     section.id = `cmd-${cmd.id}`;
     section.innerHTML = `
       <h2>${cmd.nome}</h2>
-      ${cmd.sintassi ? `<p><strong>Syntax:</strong> <code>${cmd.sintassi}</code></p>` : ""}
-      ${cmd.sommario ? `<p><strong>Summary:</strong> ${cmd.sommario}</p>` : ""}
-      ${cmd.descrizione ? `<h3>Description</h3><p>${cmd.descrizione}</p>` : ""}
+      ${cmd.sintassi ? `<p><strong>${i18n('Syntax')}:</strong> <code>${cmd.sintassi}</code></p>` : ""}
+      ${cmd.sommario ? `<p><strong>${i18n('Summary')}:</strong> ${cmd.sommario}</p>` : ""}
+      ${cmd.descrizione ? `<h3>${i18n('Description')}</h3><p>${cmd.descrizione}</p>` : ""}
       ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
-        <h3>Examples</h3>
+        <h3>${i18n('Examples')}</h3>
         <div>${cmd.esempi.map(ex => `
           <pre><code>${escapeHTML(ex.code)}</code></pre>
           ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
@@ -74,6 +73,17 @@ function renderContent() {
     `;
     contentEl.appendChild(section);
   }
+}
+
+/* ---------- i18n etichette base ---------- */
+function i18n(key){
+  const map = {
+    Syntax:     { it: "Sintassi",    en: "Syntax" },
+    Summary:    { it: "Sommario",    en: "Summary" },
+    Description:{ it: "Descrizione", en: "Description" },
+    Examples:   { it: "Esempi",      en: "Examples" }
+  };
+  return (map[key] && map[key][currentLang]) || key;
 }
 
 /* ---------- Focus su sezione da hash ---------- */
@@ -87,13 +97,53 @@ function focusHash(smooth = true){
   }
 }
 
-/* ---------- Caricamento lingua ---------- */
+/* ---------- Estrarre dati dal modulo importato ---------- */
+function extractCommandsFromModule(mod, langCode){
+  // 1) export default [] (preferito)
+  if (Array.isArray(mod.default)) return mod.default;
+
+  // 2) export const commands = []
+  if (Array.isArray(mod.commands)) return mod.commands;
+
+  // 3) export const DATA = { it:[], en:[] }
+  if (mod.DATA && Array.isArray(mod.DATA[langCode])) return mod.DATA[langCode];
+
+  return null;
+}
+
+/* ---------- Prova più nomi file per la lingua ---------- */
+async function tryImportLanguage(code){
+  // Ordine: stessa cartella, poi cartella "manual/"
+  const candidates = [
+    `./manual.${code}.js`,
+    `./manual-${code}.js`,
+    `./manual${code.toUpperCase()}.js`,
+    `./manual${code[0].toUpperCase()+code.slice(1)}.js`,
+    `manual/manual.${code}.js`,
+    `manual/manual-${code}.js`,
+    `manual/manual${code.toUpperCase()}.js`,
+    `manual/manual${code[0].toUpperCase()+code.slice(1)}.js`,
+  ];
+
+  const tried = [];
+  for (const url of candidates) {
+    try {
+      const mod = await import(url);
+      const data = extractCommandsFromModule(mod, code);
+      if (!data) throw new Error("Module found but no commands array exported.");
+      return { data, url };
+    } catch (e) {
+      tried.push({ url, error: String(e.message || e) });
+      // continua con il prossimo
+    }
+  }
+  throw { tried };
+}
+
+/* ---------- Caricamento lingua (robusto) ---------- */
 async function loadLanguage(code){
-  const url = `./manual.${code}.js`;
   try {
-    const mod = await import(url);
-    const data = mod.default;
-    if (!Array.isArray(data)) throw new Error("Language module must export default array.");
+    const { data, url } = await tryImportLanguage(code);
 
     currentLang = code;
     currentData = data;
@@ -102,18 +152,24 @@ async function loadLanguage(code){
     renderContent();
     buildIndexOptions();
 
-    // aggiorna URL (?lang=)
     const params = new URLSearchParams(location.search);
     params.set("lang", code);
     history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 
     if (location.hash) focusHash(false);
-  } catch (e) {
-    console.error(e);
+    // Log utile in console per capire quale file è stato effettivamente caricato
+    console.info(`[manual-core] Loaded language "${code}" from: ${url}`);
+  } catch (info) {
+    // Messaggio chiaro a schermo
+    const list = (info?.tried || []).map(t => `• ${escapeHTML(t.url)}`).join("<br>");
     contentEl.innerHTML = `
       <p class="noscript">Unable to load language "<strong>${escapeHTML(code)}</strong>".</p>
-      <p class="hint">Ensure <code>manual.${escapeHTML(code)}.js</code> exists and exports <code>default</code>.</p>
+      <p class="hint">I tried these files (same origin required):<br>${list || "(no candidates)"}<br><br>
+      Make sure one of them exists and exports either <code>export default [...]</code>, or
+      <code>export const commands=[...]</code>, or <code>export const DATA={ ${escapeHTML(code)}:[...] }</code>.
+      </p>
     `;
+    console.error("[manual-core] Failed to load language", code, info);
   }
 }
 
@@ -124,24 +180,23 @@ function init(){
 
   loadLanguage(lang);
 
-  // Ricerca: filtra le opzioni dell'indice
+  // Ricerca → filtra le opzioni dell'indice
   searchBox.addEventListener("input", () => buildIndexOptions());
 
   // Cambio lingua
   langSel.addEventListener("change", () => loadLanguage(langSel.value));
 
-  // Selezione dall'indice: vai alla sezione
+  // Selezione dall'indice → vai alla sezione
   indexSel.addEventListener("change", () => {
     const id = indexSel.value;
     if (!id) return;
-    const params = new URLSearchParams(location.search);
-    params.set("lang", currentLang);
+    const qs = new URLSearchParams(location.search);
+    qs.set("lang", currentLang);
     const hash = `#cmd-${id}`;
-    history.pushState(null, "", `${location.pathname}?${params.toString()}${hash}`);
+    history.pushState(null, "", `${location.pathname}?${qs.toString()}${hash}`);
     focusHash();
   });
 
-  // Deep link manuale
   window.addEventListener("hashchange", () => focusHash());
 }
 
