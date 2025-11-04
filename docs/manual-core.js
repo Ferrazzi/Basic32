@@ -37,9 +37,9 @@ function buildIndexOptions() {
   const q = (searchBox.value || "").trim().toLowerCase();
 
   const items = currentData
-    .filter(cmd => matchesQuery(cmd, q))
+    .filter(cmd => cmd.tipo !== "introduzione" && matchesQuery(cmd, q))
     .slice()
-    .sort((a,b)=>a.nome.localeCompare(b.nome));
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const prev = indexSel.value;
   indexSel.innerHTML = `<option value="">— Select command —</option>` +
@@ -52,7 +52,7 @@ function buildIndexOptions() {
 function renderContent() {
   contentEl.innerHTML = "";
 
-  // Mostra eventuale introduzione
+  // Mostra l'introduzione, se presente
   const intro = currentData.find(c => c.tipo === "introduzione");
   if (intro) {
     const sectionIntro = document.createElement("section");
@@ -65,19 +65,13 @@ function renderContent() {
     contentEl.appendChild(sectionIntro);
   }
 
+  // Mostra SOLO i comandi normali (esclude tipo="introduzione")
   const items = currentData
     .filter(c => c.tipo !== "introduzione")
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   for (const cmd of items) {
-    // Normalizza le note globali: accetta note / notes come stringa o array
-    const notesArray = Array.isArray(cmd.note)
-      ? cmd.note
-      : Array.isArray(cmd.notes)
-        ? cmd.notes
-        : (cmd.note ? [cmd.note] : []);
-
     const section = document.createElement("section");
     section.id = `cmd-${cmd.id}`;
     section.innerHTML = `
@@ -85,7 +79,6 @@ function renderContent() {
       ${cmd.sintassi ? `<p><strong>${i18n('Syntax')}:</strong> <code>${cmd.sintassi}</code></p>` : ""}
       ${cmd.sommario ? `<p><strong>${i18n('Summary')}:</strong> ${cmd.sommario}</p>` : ""}
       ${cmd.descrizione ? `<h3>${i18n('Description')}</h3><p>${cmd.descrizione}</p>` : ""}
-
       ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
         <h3>${i18n('Examples')}</h3>
         <div>
@@ -95,14 +88,7 @@ function renderContent() {
           `).join("")}
         </div>
       ` : ""}
-
-      ${notesArray.length ? `
-        <h3>${i18n('Notes')}</h3>
-        <ul class="notes">
-          ${notesArray.map(n => `<li>${escapeHTML(n)}</li>`).join("")}
-        </ul>
-      ` : ""}
-
+      ${cmd.note ? `<h3>${i18n('Notes')}</h3><p class="hint">${cmd.note}</p>` : ""}
       <hr style="border:0;border-top:2px dashed var(--c64-border);opacity:.6;margin:14px 0;">
     `;
     contentEl.appendChild(section);
