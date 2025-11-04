@@ -11,7 +11,7 @@ body.c64 {
   margin: 0;
   min-height: 100vh;
   background: var(--c64-bg);
-  color: var4b90a7(--c64-cyan);
+  color: var(--c64-cyan); /* <-- fixed: var(...) */
   font-family: 'VT323', ui-monospace, Menlo, Consolas, monospace;
   letter-spacing: 1px;
   -webkit-font-smoothing: antialiased;
@@ -157,8 +157,7 @@ body.c64 {
   padding: .45rem .8rem;
   border: 3px solid var(--c64-border);
   border-radius: 8px;
-  background: rgba(0,0,0,.25);
-  background-color: #2e2e3f;
+  background: #2e2e3f;         /* grigio scuro */
   color: var(--c64-text);
   font-family: 'VT323', monospace;
   font-size: 15px;
@@ -166,6 +165,10 @@ body.c64 {
   letter-spacing: 1px;
   cursor: pointer;
   transition: transform .08s ease, filter .2s ease;
+}
+.controls select option {
+  background: #2e2e3f;         /* non sempre supportato, ma proviamo */
+  color: var(--c64-text);
 }
 .controls button:hover,
 .controls select:hover {
@@ -308,44 +311,45 @@ body.c64 {
   .command-list a:hover { transform: none; filter: none; }
 }
 
-/* Toolbar del manuale: input a sinistra (flex) + select a destra */
+/* ===== Toolbar manuale: lingua sopra, search+index centrati ===== */
 .controls--manual {
   display: flex;
   align-items: center;
   gap: 12px;
   max-width: 980px;
+  width: min(96vw, 980px);
   margin: 8px auto 0;
+  justify-content: center;
 }
-
 .controls--manual .search {
   flex: 1;                /* prende lo spazio disponibile */
   min-width: 240px;
+  max-width: 640px;       /* non esce mai dal riquadro */
 }
-
 .controls--manual #index {
-  margin-left: auto;      /* spinge il select all'estrema destra */
+  margin-left: 0;
+  flex: 0 1 300px;
+  min-width: 180px;
+  max-width: 360px;
 }
 
-/* su schermi piccoli: stack verticale ordinato */
+/* Lingua sopra, centrata */
+.controls--lang {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 6px;
+}
+
+/* Mobile: impila ordinato */
 @media (max-width: 640px){
   .controls--manual {
     flex-direction: column;
     align-items: stretch;
   }
-  .controls--manual #index,
-  .controls--manual #lang {
-    margin-left: 0;
+  .controls--manual .search,
+  .controls--manual #index {
     width: 100%;
+    max-width: none;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
