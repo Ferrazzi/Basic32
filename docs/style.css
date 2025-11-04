@@ -331,7 +331,7 @@ body.c64 {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 .controls--lang select {
   width: min(100%, 360px);
@@ -403,3 +403,4 @@ body.c64 {
   .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
   .command-list a:hover { transform: none; filter: none; }
 }
+
