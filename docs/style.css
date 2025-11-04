@@ -2,7 +2,7 @@
   --c64-bg: #40318d;
   --c64-border: #6c5eb5;
   --c64-cyan: #70a4b2;
-  --c64-text: #4b90a7;
+  --c64-text: #a0d0e0;
 }
 
 * { box-sizing: border-box; }
@@ -306,5 +306,6 @@ body.c64 {
   .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
   .command-list a:hover { transform: none; filter: none; }
 }
+
 
 
