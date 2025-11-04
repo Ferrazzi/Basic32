@@ -19,7 +19,7 @@ Just plug it in, open a terminal, and start coding like in the 80s — but with 
 - Keep track of time with RTC and time zones  
 - Debug memory, use EEPROM, manage files… and much more
 
-For the complete list of commands, check the **manual PDF** inside the `manual` folder or open [**Open Basic32 Web Tools**](https://ferrazzi.github.io/Basic32/index.html) to consult the full programming guide.
+For the complete list of commands, check the **manual PDF** inside the `manual` folder or open [**Basic32 Web Tools**](https://ferrazzi.github.io/Basic32/index.html) to consult the full programming guide.
 
 ---
 
