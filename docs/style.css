@@ -11,7 +11,7 @@ body.c64 {
   margin: 0;
   min-height: 100vh;
   background: var(--c64-bg);
-  color: var(--c64-cyan); /* <-- fixed: var(...) */
+  color: var(--c64-cyan);
   font-family: 'VT323', ui-monospace, Menlo, Consolas, monospace;
   letter-spacing: 1px;
   -webkit-font-smoothing: antialiased;
@@ -152,6 +152,14 @@ body.c64 {
 }
 
 /* ===== Controlli stile C64 (usati in terminale e manuale) ===== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
 .controls button,
 .controls select {
   padding: .45rem .8rem;
@@ -191,7 +199,7 @@ body.c64 {
   accent-color: var(--c64-border);
 }
 
-/* Input di ricerca con lo stesso look dei menu a tendina */
+/* Input di ricerca con look coerente */
 .controls input[type="search"]{
   padding: .45rem .8rem;
   border: 3px solid var(--c64-border);
@@ -204,7 +212,6 @@ body.c64 {
   letter-spacing: 1px;
   outline: none;
   transition: transform .08s ease, filter .2s ease;
-  min-width: min(520px, 90vw);
   cursor: text;
 }
 .controls input[type="search"]:hover {
@@ -216,14 +223,22 @@ body.c64 {
   outline-offset: 2px;
 }
 
-/* ===== Manuale: layout con sidebar ===== */
-.manual-layout{
+/* ===== Manuale: griglia con aree (sidebar | toolbar | contenuto) ===== */
+.manual-grid{
   display: grid;
   grid-template-columns: 260px 1fr;
+  grid-template-areas:
+    "sidebar toolbar"
+    "sidebar content";
   gap: 16px;
   padding: 8px 8px 24px;
 }
 
+.sidebar{ grid-area: sidebar; }
+.manual-toolbar{ grid-area: toolbar; }
+.manual-content{ grid-area: content; }
+
+/* Box sidebar e contenuto */
 .sidebar{
   border: 3px solid var(--c64-border);
   border-radius: 8px;
@@ -295,50 +310,48 @@ body.c64 {
   white-space: nowrap; border: 0; padding: 0; margin: -1px;
 }
 
-/* Responsive manuale */
-@media (max-width: 900px){
-  .manual-layout{ grid-template-columns: 1fr; }
-  .sidebar{ max-height: none; }
-}
-
-/* Riduci movimento per chi lo preferisce */
-@media (prefers-reduced-motion: reduce){
-  .navitem, .icon,
-  .controls button, .controls select, .controls input[type="search"],
-  .command-list a { transition: none; }
-  .navitem:hover, .icon:hover,
-  .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
-  .command-list a:hover { transform: none; filter: none; }
-}
-
-/* ===== Toolbar manuale: lingua sopra, search+index centrati ===== */
-.controls--manual {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: 980px;
-  width: min(96vw, 980px);
-  margin: 8px auto 0;
-  justify-content: center;
-}
-.controls--manual .search {
-  flex: 1;                /* prende lo spazio disponibile */
-  min-width: 240px;
-  max-width: 640px;       /* non esce mai dal riquadro */
-}
-.controls--manual #index {
-  margin-left: 0;
-  flex: 0 1 300px;
-  min-width: 180px;
-  max-width: 360px;
-}
-
-/* Lingua sopra, centrata */
+/* ===== Toolbar Manuale: lingua sopra, search+index centrati e fluidi ===== */
+/* Lingua in alto, centrata */
 .controls--lang {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 6px;
+  margin-bottom: 6px;
+}
+.controls--lang select {
+  max-width: 360px;
+  width: min(100%, 360px);
+}
+
+/* Riga centrata con Search + Select, dimensioni fluide legate alla colonna contenuti */
+.controls--manual {
+  justify-content: center;          /* centra la riga nella colonna */
+  width: 100%;                      /* prende tutta la colonna contenuti */
+  gap: 12px;
+  flex-wrap: wrap;                  /* va a capo senza overflow */
+  padding: 0 4px;
+}
+.controls--manual .search{
+  flex: 1 1 420px;                  /* cresce e si riduce */
+  min-width: 220px;                 /* non troppo piccola */
+  max-width: 100%;                  /* non oltre la colonna */
+}
+.controls--manual #index{
+  flex: 0 1 320px;                  /* preferenza 320px ma si riduce se serve */
+  min-width: 180px;
+  max-width: 460px;
+}
+
+/* Responsive manuale */
+@media (max-width: 900px){
+  .manual-grid{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "toolbar"
+      "sidebar"
+      "content";
+  }
+  .sidebar{ max-height: none; }
 }
 
 /* Mobile: impila ordinato */
@@ -352,4 +365,14 @@ body.c64 {
     width: 100%;
     max-width: none;
   }
+}
+
+/* Riduci movimento per chi lo preferisce */
+@media (prefers-reduced-motion: reduce){
+  .navitem, .icon,
+  .controls button, .controls select, .controls input[type="search"],
+  .command-list a { transition: none; }
+  .navitem:hover, .icon:hover,
+  .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
+  .command-list a:hover { transform: none; filter: none; }
 }
