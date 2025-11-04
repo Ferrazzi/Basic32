@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Basic32 — Manuale</title>
+    <meta name="description" content="Manuale d’uso del BASIC32 con indice comandi, ricerca e lingue." />
+    <meta name="theme-color" content="#40318d" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body class="c64">
+    <div class="crt" aria-hidden="true"></div>
+
+    <div class="frame">
+      <header class="header" role="banner">
+        <a class="brand" href="index.html" aria-label="Home">
+          <img
+            src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png"
+            alt="Basic32"
+            width="180" height="100"
+            decoding="async" fetchpriority="high"
+          />
+        </a>
+
+        <nav class="topnav" aria-label="Primaria">
+          <a class="navitem" href="index.html">Flash</a>
+          <a class="navitem" href="terminal.html">Serial Monitor</a>
+          <a class="navitem" href="manual.html" aria-current="page">Manuale</a>
+        </nav>
+      </header>
+
+      <section class="content" style="padding-bottom:16px;">
+        <h1>Manuale d’uso BASIC32</h1>
+        <p class="lead">Cerca un comando oppure sfoglia l’indice a sinistra.</p>
+
+        <div class="manual-controls" role="search" aria-label="Cerca nel manuale">
+          <label for="search" class="visually-hidden">Cerca comando</label>
+          <input id="search" type="search" placeholder="Cerca comando (es: RUN, SAVE)…" autocomplete="off" />
+
+          <label for="lang" class="visually-hidden">Lingua manuale</label>
+          <select id="lang" aria-label="Seleziona lingua">
+            <option value="it" selected>Italiano</option>
+            <option value="en">English</option>
+            <!-- Aggiungi altre lingue creando manual.<codice>.js -->
+          </select>
+        </div>
+      </section>
+
+      <div class="manual-layout">
+        <aside class="sidebar" aria-label="Indice comandi">
+          <nav id="command-list" class="command-list" aria-label="Elenco comandi">
+            <!-- Popolato dal core -->
+          </nav>
+        </aside>
+
+        <main id="manual-content" class="manual-content" tabindex="-1">
+          <p class="hint">Seleziona un comando dall’indice o inizia a digitare nella ricerca.</p>
+        </main>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="frame" style="margin-top:12px">
+        <p class="noscript">⚠️ JavaScript è disabilitato: l’indice e il filtro non funzioneranno.</p>
+      </div>
+    </noscript>
+
+    <!-- Core (carica dinamicamente i file lingua) -->
+    <script type="module" src="manual-core.js"></script>
+  </body>
+</html>
