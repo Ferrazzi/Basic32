@@ -27,10 +27,8 @@
           <img
             src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png"
             alt="Basic32"
-            width="180"
-            height="100"
-            decoding="async"
-            fetchpriority="high"
+            width="180" height="100"
+            decoding="async" fetchpriority="high"
           />
         </a>
 
@@ -44,8 +42,18 @@
       <!-- ======= TOOLBAR ======= -->
       <section class="content" style="padding-bottom:16px;">
         <h1>BASIC32 Programming Manual</h1>
-        <p class="lead">Cerca un comando o sfoglia l’indice a sinistra.</p>
 
+        <!-- Lingua (sopra, centrata) -->
+        <div class="controls controls--lang" aria-label="Select language">
+          <label for="lang" class="visually-hidden">Language</label>
+          <select id="lang" aria-label="Select language">
+            <option value="it" selected>Italiano</option>
+            <option value="en">English</option>
+            <!-- aggiungi altre lingue: manual.<codice>.js -->
+          </select>
+        </div>
+
+        <!-- Riga centrata: Search + Select command (si ridimensionano) -->
         <div class="controls controls--manual" role="search" aria-label="Find in manual">
           <label for="search" class="visually-hidden">Search command</label>
           <input
@@ -60,13 +68,6 @@
           <select id="index" aria-label="Select command">
             <option value="">— Select command —</option>
             <!-- options generate via manual-core.js -->
-          </select>
-
-          <label for="lang" class="visually-hidden">Language</label>
-          <select id="lang" aria-label="Select language">
-            <option value="it" selected>Italiano</option>
-            <option value="en">English</option>
-            <!-- altre lingue -->
           </select>
         </div>
       </section>
