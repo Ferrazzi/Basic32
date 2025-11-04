@@ -54,7 +54,8 @@ With the official **Web Tools** you can manage your ESP32 directly from the brow
 The Web Tools allow you to:
 - **Flash the Basic32 firmware** to your ESP32 directly from the web  
 - **Open an online serial monitor** to connect to your device and use Basic32 without extra programs
-
+- **Open an online programming manual** to explore all Basic32 commands, examples, and syntax in one place
+- 
 ---
 
 ## Install the firmware
