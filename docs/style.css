@@ -119,7 +119,7 @@ body.c64 {
 .icon svg { width: 28px; height: 28px; display: block; }
 
 /* ===== Top navigation accanto al logo ===== */
-.topnav{
+.topnav {
   position: relative;
   margin-left: 150px;
   min-height: 80px;
@@ -128,7 +128,7 @@ body.c64 {
   gap: 12px;
   margin-bottom: 8px;
 }
-.navitem{
+.navitem {
   display: inline-block;
   padding: .45rem .8rem;
   border: 3px solid var(--c64-border);
@@ -141,28 +141,20 @@ body.c64 {
   font-weight: 700;
   transition: transform .08s ease, filter .2s ease;
 }
-.navitem:hover{ transform: translateY(-1px); filter: brightness(1.15); }
-.navitem:focus-visible{ outline: 3px solid var(--c64-text); outline-offset: 2px; }
+.navitem:hover { transform: translateY(-1px); filter: brightness(1.15); }
+.navitem:focus-visible { outline: 3px solid var(--c64-text); outline-offset: 2px; }
 
 /* Responsive header */
-@media (max-width: 640px){
+@media (max-width: 640px) {
   .brand { position: static; transform: none; display: inline-block; margin-bottom: 8px; }
-  .topnav{ margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 20px; min-height: 0; }
+  .topnav { margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 20px; min-height: 0; }
   .social { position: static; justify-content: center; margin-top: 16px; }
 }
 
 /* ===== Controlli ===== */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Base per select e button */
 .controls button,
-.controls select {
+.controls select,
+.controls input[type="search"] {
   padding: 0 .8rem;
   height: var(--ctl-h);
   line-height: calc(var(--ctl-h) - 6px);
@@ -174,21 +166,12 @@ body.c64 {
   font-size: 16px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  cursor: pointer;
   transition: transform .08s ease, filter .2s ease;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   text-align: center;
-  text-align-last: center; /* centratura testo */
-}
-
-/* Centratura anche su Safari */
-@supports (-webkit-touch-callout: none) {
-  .controls select {
-    -webkit-appearance: none !important;
-    text-align: center;
-  }
+  text-align-last: center; /* centratura su Chrome/Firefox */
 }
 
 .controls select option {
@@ -197,54 +180,30 @@ body.c64 {
 }
 
 .controls button:hover,
-.controls select:hover {
+.controls select:hover,
+.controls input[type="search"]:hover {
   transform: translateY(-2px);
   filter: brightness(1.15);
 }
+
 .controls button:focus-visible,
-.controls select:focus-visible {
+.controls select:focus-visible,
+.controls input[type="search"]:focus-visible {
   outline: 3px solid var(--c64-text);
   outline-offset: 2px;
 }
 
-.controls label {
-  color: var(--c64-text);
-  font-size: 18px;
+/* Centratura su Safari/iOS */
+@supports (-webkit-touch-callout: none) {
+  .controls select,
+  .controls input[type="search"] {
+    -webkit-appearance: none !important;
+    text-align: center;
+  }
 }
 
-/* Checkbox */
-.controls input[type="checkbox"] {
-  accent-color: var(--c64-border);
-}
-
-/* Input di ricerca */
-.controls input[type="search"]{
-  padding: 0 .8rem;
-  height: var(--ctl-h);
-  line-height: calc(var(--ctl-h) - 6px);
-  border: 3px solid var(--c64-border);
-  border-radius: 8px;
-  background: rgba(0,0,0,.12);
-  color: var(--c64-text);
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  outline: none;
-  transition: transform .08s ease, filter .2s ease;
-  cursor: text;
-  text-align: center;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-.controls input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
-.controls input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
-.controls input[type="search"]:hover { transform: translateY(-2px); filter: brightness(1.15); }
-.controls input[type="search"]:focus-visible { outline: 3px solid var(--c64-text); outline-offset: 2px; }
-
-/* ===== Manuale layout ===== */
-.manual-grid{
+/* ===== Manuale: layout ===== */
+.manual-grid {
   display: grid;
   grid-template-columns: 260px 1fr;
   grid-template-areas:
@@ -254,11 +213,8 @@ body.c64 {
   padding: 8px 8px 24px;
 }
 
-.sidebar{ grid-area: sidebar; }
-.manual-toolbar{ grid-area: toolbar; }
-.manual-content{ grid-area: content; }
-
-.sidebar{
+.sidebar {
+  grid-area: sidebar;
   border: 3px solid var(--c64-border);
   border-radius: 8px;
   background: rgba(0,0,0,.08);
@@ -267,7 +223,10 @@ body.c64 {
   padding: 8px;
 }
 
-.command-list a{
+.manual-toolbar { grid-area: toolbar; }
+.manual-content { grid-area: content; }
+
+.command-list a {
   display: block;
   padding: .4rem .6rem;
   margin: 4px 0;
@@ -278,8 +237,8 @@ body.c64 {
   background: rgba(0,0,0,.12);
   transition: transform .08s ease, filter .2s ease;
 }
-.command-list a:hover{ transform: translateY(-2px); filter: brightness(1.1); }
-.command-list a:focus-visible{ outline: 3px solid var(--c64-text); outline-offset: 2px; }
+.command-list a:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.command-list a:focus-visible { outline: 3px solid var(--c64-text); outline-offset: 2px; }
 
 /* Toolbar Manuale */
 .controls--lang {
@@ -297,12 +256,12 @@ body.c64 {
   padding: 0 4px;
   margin-bottom: 12px;
 }
-.controls--manual .search{
+.controls--manual .search {
   flex: 1 1 420px;
   min-width: 180px;
   max-width: 100%;
 }
-.controls--manual #index{
+.controls--manual #index {
   flex: 0 1 320px;
   min-width: 140px;
   max-width: 420px;
@@ -310,8 +269,8 @@ body.c64 {
   text-align-last: center;
 }
 
-/* ===== Mobile fix ===== */
-@media (max-width: 640px){
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
   .controls--lang select,
   .controls--manual .search,
   .controls--manual #index {
@@ -325,18 +284,18 @@ body.c64 {
   .controls--manual .search { flex: 1 1 220px; min-width: 150px; }
   .controls--manual #index  { flex: 0 1 200px; min-width: 140px; }
 
-  .manual-grid{
+  .manual-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
       "toolbar"
       "sidebar"
       "content";
   }
-  .sidebar{ max-height: none; }
+  .sidebar { max-height: none; }
 }
 
 /* Riduci movimento */
-@media (prefers-reduced-motion: reduce){
+@media (prefers-reduced-motion: reduce) {
   .navitem, .icon,
   .controls button, .controls select, .controls input[type="search"],
   .command-list a { transition: none; }
