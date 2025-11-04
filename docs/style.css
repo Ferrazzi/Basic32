@@ -308,6 +308,39 @@ body.c64 {
   .command-list a:hover { transform: none; filter: none; }
 }
 
+/* Toolbar del manuale: input a sinistra (flex) + select a destra */
+.controls--manual {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 980px;
+  margin: 8px auto 0;
+}
+
+.controls--manual .search {
+  flex: 1;                /* prende lo spazio disponibile */
+  min-width: 240px;
+}
+
+.controls--manual #index {
+  margin-left: auto;      /* spinge il select all'estrema destra */
+}
+
+/* su schermi piccoli: stack verticale ordinato */
+@media (max-width: 640px){
+  .controls--manual {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .controls--manual #index,
+  .controls--manual #lang {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+
+
 
 
 
