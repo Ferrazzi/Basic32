@@ -51,8 +51,24 @@ function buildIndexOptions() {
 /* ---------- Render contenuto (tutte le sezioni) ---------- */
 function renderContent() {
   contentEl.innerHTML = "";
-   
-  const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+
+  // Mostra eventuale introduzione
+  const intro = currentData.find(c => c.tipo === "introduzione");
+  if (intro) {
+    const sectionIntro = document.createElement("section");
+    sectionIntro.id = "manual-intro";
+    sectionIntro.innerHTML = `
+      <h2>${intro.titolo || "Introduzione"}</h2>
+      <div class="intro-text">${intro.contenuto}</div>
+      <hr style="border:0;border-top:2px dashed var(--c64-border);opacity:.6;margin:16px 0;">
+    `;
+    contentEl.appendChild(sectionIntro);
+  }
+
+  const items = currentData
+    .filter(c => c.tipo !== "introduzione")
+    .slice()
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   for (const cmd of items) {
     // Normalizza le note globali: accetta note / notes come stringa o array
