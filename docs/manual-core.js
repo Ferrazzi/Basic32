@@ -54,6 +54,13 @@ function renderContent() {
   const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
 
   for (const cmd of items) {
+    // Normalizza le note globali: accetta note / notes come stringa o array
+    const notesArray = Array.isArray(cmd.note)
+      ? cmd.note
+      : Array.isArray(cmd.notes)
+        ? cmd.notes
+        : (cmd.note ? [cmd.note] : []);
+
     const section = document.createElement("section");
     section.id = `cmd-${cmd.id}`;
     section.innerHTML = `
@@ -61,14 +68,24 @@ function renderContent() {
       ${cmd.sintassi ? `<p><strong>${i18n('Syntax')}:</strong> <code>${cmd.sintassi}</code></p>` : ""}
       ${cmd.sommario ? `<p><strong>${i18n('Summary')}:</strong> ${cmd.sommario}</p>` : ""}
       ${cmd.descrizione ? `<h3>${i18n('Description')}</h3><p>${cmd.descrizione}</p>` : ""}
+
       ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
         <h3>${i18n('Examples')}</h3>
-        <div>${cmd.esempi.map(ex => `
-          <pre><code>${escapeHTML(ex.code)}</code></pre>
-          ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
-        `).join("")}</div>
-      ` : "" }
-      ${cmd.note ? `<p class="hint">${cmd.note}</p>` : "" }
+        <div>
+          ${cmd.esempi.map(ex => `
+            <pre><code>${escapeHTML(ex.code)}</code></pre>
+            ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
+          `).join("")}
+        </div>
+      ` : ""}
+
+      ${notesArray.length ? `
+        <h3>${i18n('Notes')}</h3>
+        <ul class="notes">
+          ${notesArray.map(n => `<li>${escapeHTML(n)}</li>`).join("")}
+        </ul>
+      ` : ""}
+
       <hr style="border:0;border-top:2px dashed var(--c64-border);opacity:.6;margin:14px 0;">
     `;
     contentEl.appendChild(section);
@@ -78,10 +95,11 @@ function renderContent() {
 /* ---------- i18n etichette base ---------- */
 function i18n(key){
   const map = {
-    Syntax:     { it: "Sintassi",    en: "Syntax" },
-    Summary:    { it: "Sommario",    en: "Summary" },
-    Description:{ it: "Descrizione", en: "Description" },
-    Examples:   { it: "Esempi",      en: "Examples" }
+    Syntax:      { it: "Sintassi",    en: "Syntax" },
+    Summary:     { it: "Sommario",    en: "Summary" },
+    Description: { it: "Descrizione", en: "Description" },
+    Examples:    { it: "Esempi",      en: "Examples" },
+    Notes:       { it: "Note",        en: "Notes" }
   };
   return (map[key] && map[key][currentLang]) || key;
 }
