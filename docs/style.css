@@ -344,7 +344,7 @@ body.c64 {
   gap: 12px;
   flex-wrap: wrap;           /* può andare a capo senza sformarsi */
   padding: 0 4px;
-  margin-top: 12px; 
+  margin-bottom: 12px; 
 }
 .controls--manual .search{
   flex: 1 1 420px;
@@ -404,5 +404,6 @@ body.c64 {
   .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
   .command-list a:hover { transform: none; filter: none; }
 }
+
 
 
