@@ -124,7 +124,6 @@ body.c64 {
   gap: 12px;
   margin-bottom: 8px;
 }
-
 .navitem{
   display: inline-block;
   padding: .45rem .8rem;
@@ -144,7 +143,7 @@ body.c64 {
 /* Un filo meno spazio sopra il contenuto, visto che ora c’è il menu */
 .content{ padding-top: 20px; }
 
-/* Responsive: su schermi stretti il menu scende sotto il logo e si centra */
+/* Responsive header */
 @media (max-width: 640px){
   .brand { position: static; transform: none; display: inline-block; margin-bottom: 8px; }
   .topnav{ margin-left: 0; justify-content: center; flex-wrap: wrap; padding-top: 20px; min-height: 0; }
@@ -160,22 +159,24 @@ body.c64 {
   align-items: center;
 }
 
+/* Base per select e button */
 .controls button,
 .controls select {
   padding: .45rem .8rem;
   border: 3px solid var(--c64-border);
   border-radius: 8px;
-  background: #2e2e3f;         /* grigio scuro */
+  background: #2e2e3f;         /* grigio scuro richiesto */
   color: var(--c64-text);
   font-family: 'VT323', monospace;
   font-size: 15px;
+  line-height: 1.1;            /* evita che “si alzino” */
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
   transition: transform .08s ease, filter .2s ease;
 }
 .controls select option {
-  background: #2e2e3f;         /* non sempre supportato, ma proviamo */
+  background: #2e2e3f;         /* supporto variabile tra browser */
   color: var(--c64-text);
 }
 .controls button:hover,
@@ -208,6 +209,7 @@ body.c64 {
   color: var(--c64-text);
   font-family: 'VT323', monospace;
   font-size: 18px;
+  line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 1px;
   outline: none;
@@ -342,7 +344,66 @@ body.c64 {
   max-width: 460px;
 }
 
-/* Responsive manuale */
+/* ===== Compattazione controlli su schermi più stretti ===== */
+/* Evita “altezza eccessiva” generale */
+.controls select,
+.controls button { line-height: 1.1; }
+
+/* breakpoint 900px: prima stretta */
+@media (max-width: 900px){
+  .controls select,
+  .controls button {
+    font-size: 12px;               /* da ~15px -> 12px */
+    padding: .28rem .6rem;         /* più basso: ~40–45% in meno di altezza */
+  }
+  .controls input[type="search"]{
+    font-size: 16px;
+    padding: .35rem .7rem;
+    line-height: 1.2;
+  }
+  .controls--manual { gap: 8px; }
+}
+
+/* breakpoint 720px: prova a restare su una riga senza “alzarsi” */
+@media (max-width: 720px){
+  .controls--manual { 
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+  .controls--manual .search {
+    flex: 1 1 180px;               /* si stringe in larghezza */
+    min-width: 140px;
+    max-width: 100%;
+  }
+  .controls--manual #index {
+    flex: 0 1 160px;               /* select più stretto */
+    min-width: 120px;
+    max-width: 220px;
+  }
+}
+
+/* breakpoint 520px: massima compattazione (~metà altezza) */
+@media (max-width: 520px){
+  .controls select,
+  .controls button {
+    font-size: 11px;               /* ancora più contenuto */
+    padding: .24rem .5rem;         /* ~50% rispetto al desktop */
+  }
+  .controls input[type="search"]{
+    font-size: 14px;
+    padding: .30rem .50rem;
+  }
+
+  /* se proprio non c’è spazio, consenti il wrap ma con altezze basse */
+  .controls--manual { flex-wrap: wrap; }
+  .controls--manual .search,
+  .controls--manual #index {
+    width: auto;
+    max-width: 100%;
+  }
+}
+
+/* Responsive manuale (riorganizza griglia) */
 @media (max-width: 900px){
   .manual-grid{
     grid-template-columns: 1fr;
@@ -352,19 +413,6 @@ body.c64 {
       "content";
   }
   .sidebar{ max-height: none; }
-}
-
-/* Mobile: impila ordinato */
-@media (max-width: 640px){
-  .controls--manual {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .controls--manual .search,
-  .controls--manual #index {
-    width: 100%;
-    max-width: none;
-  }
 }
 
 /* Riduci movimento per chi lo preferisce */
