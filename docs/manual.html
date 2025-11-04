@@ -27,12 +27,14 @@
           <img
             src="https://raw.githubusercontent.com/Ferrazzi/Basic32/main/Logo.png"
             alt="Basic32"
-            width="180" height="100"
-            decoding="async" fetchpriority="high"
+            width="180"
+            height="100"
+            decoding="async"
+            fetchpriority="high"
           />
         </a>
 
-        <nav class="topnav" aria-label="Primaria">
+        <nav class="topnav" aria-label="Navigazione principale">
           <a class="navitem" href="index.html">Flash</a>
           <a class="navitem" href="terminal.html">Serial Monitor</a>
           <a class="navitem" href="manual.html" aria-current="page">Manual</a>
@@ -41,46 +43,54 @@
 
       <!-- ======= TOOLBAR ======= -->
       <section class="content" style="padding-bottom:16px;">
-        <h1>BASIC32 programming manual</h1>
+        <h1>BASIC32 Programming Manual</h1>
+        <p class="lead">Cerca un comando o sfoglia l’indice a sinistra.</p>
 
-        <!-- Riga 1: LANGUAGE (centrato, da solo) -->
-        <div class="controls" style="justify-content:center; margin-top:4px;">
-          <label>
-            Language
-            <select id="lang" aria-label="Select language">
-              <option value="it" selected>Italiano</option>
-              <option value="en">English</option>
-              <!-- Aggiungi altre lingue creando manual.<codice>.js -->
-            </select>
-          </label>
-        </div>
-
-        <!-- Riga 2: SEARCH + INDEX (tendina indice a destra della search) -->
-        <div class="controls" role="search" aria-label="Find in manual"
-             style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+        <div class="controls controls--manual" role="search" aria-label="Find in manual">
           <label for="search" class="visually-hidden">Search command</label>
-          <input id="search" type="search" placeholder="Search command (e.g., RUN)..." autocomplete="off" />
+          <input
+            id="search"
+            class="search"
+            type="search"
+            placeholder="Search command (es: RUN)…"
+            autocomplete="off"
+          />
 
-          <label>
-            Index
-            <select id="index" aria-label="Commands index">
-              <!-- Popolato dinamicamente dal core -->
-              <option value="" selected>— Select command —</option>
-            </select>
-          </label>
+          <label for="index" class="visually-hidden">Select command</label>
+          <select id="index" aria-label="Select command">
+            <option value="">— Select command —</option>
+            <!-- options generate via manual-core.js -->
+          </select>
+
+          <label for="lang" class="visually-hidden">Language</label>
+          <select id="lang" aria-label="Select language">
+            <option value="it" selected>Italiano</option>
+            <option value="en">English</option>
+            <!-- altre lingue -->
+          </select>
         </div>
       </section>
 
-      <!-- ======= CONTENUTO ======= -->
-      <main id="manual-content" class="manual-content" tabindex="-1" style="margin:0 8px 24px;">
-        <p class="hint">Choose a command from the <em>Index</em> or start typing in the search box.</p>
-      </main>
+      <!-- ======= LAYOUT: SIDEBAR + CONTENUTO ======= -->
+      <div class="manual-layout">
+        <!-- Indice comandi (sinistra) -->
+        <aside class="sidebar" aria-label="Indice comandi">
+          <nav id="command-list" class="command-list" aria-label="Elenco comandi">
+            <!-- Popolato da manual-core.js -->
+          </nav>
+        </aside>
+
+        <!-- Contenuto del manuale -->
+        <main id="manual-content" class="manual-content" tabindex="-1">
+          <p class="hint">Seleziona un comando dall’indice o inizia a digitare nella ricerca.</p>
+        </main>
+      </div>
     </div>
 
     <!-- ======= NOSCRIPT ======= -->
     <noscript>
       <div class="frame" style="margin-top:12px">
-        <p class="noscript">⚠️ JavaScript is disabled: the index and search will not work.</p>
+        <p class="noscript">⚠️ JavaScript è disabilitato: l’indice e il filtro non funzioneranno.</p>
       </div>
     </noscript>
 
