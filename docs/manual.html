@@ -15,44 +15,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="style.css" />
-
-    <!-- Mini-stili SOLO per il rail alfabetico, il resto usa style.css -->
-    <style>
-      .sidebar-grid{
-        display:grid;
-        grid-template-columns: 36px 1fr; /* rail a sinistra, lista a destra */
-        gap: 8px;
-        height: 100%;
-      }
-      .alpha-rail{
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:4px;
-        user-select:none;
-        position:sticky;
-        top:8px; /* resta visibile mentre scorri l'indice */
-      }
-      .alpha-rail button{
-        width:32px;height:28px;
-        border:2px solid var(--c64-border);
-        border-radius:8px;
-        background:rgba(0,0,0,.12);
-        color:var(--c64-text);
-        font-family:'VT323', ui-monospace, monospace;
-        font-size:16px; line-height:1;
-        cursor:pointer;
-        transition: transform .08s ease, filter .2s ease;
-      }
-      .alpha-rail button:hover{ transform:translateY(-2px); filter:brightness(1.15); }
-      .alpha-rail button:focus-visible{ outline:3px solid var(--c64-text); outline-offset:2px; }
-      @media (max-width:900px){
-        /* su mobile, il rail va sopra la lista per non sprecare orizzontale */
-        .sidebar-grid{ grid-template-columns: 1fr; }
-        .alpha-rail{ flex-direction:row; flex-wrap:wrap; justify-content:center; position:static; }
-        .alpha-rail button{ width:34px; height:30px; }
-      }
-    </style>
   </head>
 
   <body class="c64">
@@ -81,16 +43,29 @@
       <section class="content" style="padding-bottom:16px;">
         <h1>BASIC32 programming manual</h1>
 
-        <div class="controls" role="search" aria-label="Find in manual" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
-          <label for="search" class="visually-hidden">Search command</label>
-          <input id="search" type="search" placeholder="Search command (e.g., RUN)..." autocomplete="off" />
-
+        <!-- Riga 1: LANGUAGE (centrato, da solo) -->
+        <div class="controls" style="justify-content:center; margin-top:4px;">
           <label>
             Language
             <select id="lang" aria-label="Select language">
               <option value="it" selected>Italiano</option>
               <option value="en">English</option>
-              <!-- Add more languages by creating manual.<code>.js -->
+              <!-- Aggiungi altre lingue creando manual.<codice>.js -->
+            </select>
+          </label>
+        </div>
+
+        <!-- Riga 2: SEARCH + CATEGORY (category a destra della search) -->
+        <div class="controls" role="search" aria-label="Find in manual"
+             style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+          <label for="search" class="visually-hidden">Search command</label>
+          <input id="search" type="search" placeholder="Search command (e.g., RUN)..." autocomplete="off" />
+
+          <label>
+            Category
+            <select id="category" aria-label="Filter by category">
+              <!-- popolato dinamicamente dal core -->
+              <option value="__all__" selected>All</option>
             </select>
           </label>
         </div>
@@ -100,47 +75,9 @@
       <div class="manual-layout">
         <!-- Indice comandi -->
         <aside class="sidebar" aria-label="Commands index">
-          <div class="sidebar-grid">
-            <!-- Rail alfabetico verticale -->
-            <div class="alpha-rail" aria-label="Alphabetical filter">
-              <!-- # per simboli/numeri -->
-              <button type="button" data-filter="0">#</button>
-              <!-- A–Z -->
-              <button type="button" data-filter="A">A</button>
-              <button type="button" data-filter="B">B</button>
-              <button type="button" data-filter="C">C</button>
-              <button type="button" data-filter="D">D</button>
-              <button type="button" data-filter="E">E</button>
-              <button type="button" data-filter="F">F</button>
-              <button type="button" data-filter="G">G</button>
-              <button type="button" data-filter="H">H</button>
-              <button type="button" data-filter="I">I</button>
-              <button type="button" data-filter="J">J</button>
-              <button type="button" data-filter="K">K</button>
-              <button type="button" data-filter="L">L</button>
-              <button type="button" data-filter="M">M</button>
-              <button type="button" data-filter="N">N</button>
-              <button type="button" data-filter="O">O</button>
-              <button type="button" data-filter="P">P</button>
-              <button type="button" data-filter="Q">Q</button>
-              <button type="button" data-filter="R">R</button>
-              <button type="button" data-filter="S">S</button>
-              <button type="button" data-filter="T">T</button>
-              <button type="button" data-filter="U">U</button>
-              <button type="button" data-filter="V">V</button>
-              <button type="button" data-filter="W">W</button>
-              <button type="button" data-filter="X">X</button>
-              <button type="button" data-filter="Y">Y</button>
-              <button type="button" data-filter="Z">Z</button>
-              <!-- reset -->
-              <button type="button" data-filter="">⟲</button>
-            </div>
-
-            <!-- Lista comandi (popolata via manual-core.js) -->
-            <nav id="command-list" class="command-list" aria-label="Elenco comandi">
-              <!-- Popolato da manual-core.js -->
-            </nav>
-          </div>
+          <nav id="command-list" class="command-list" aria-label="Commands list">
+            <!-- Popolato da manual-core.js -->
+          </nav>
         </aside>
 
         <!-- Contenuto del manuale -->
@@ -153,42 +90,11 @@
     <!-- ======= NOSCRIPT ======= -->
     <noscript>
       <div class="frame" style="margin-top:12px">
-        <p class="noscript">⚠️ JavaScript is disabled: index and filter will not work.</p>
+        <p class="noscript">⚠️ JavaScript is disabled: index and filters will not work.</p>
       </div>
     </noscript>
 
     <!-- ======= SCRIPT ======= -->
     <script type="module" src="manual-core.js"></script>
-
-    <!-- Piccolo script per far funzionare il rail senza toccare manual-core.js -->
-    <script>
-      (function(){
-        const rail = document.querySelector('.alpha-rail');
-        const search = document.getElementById('search');
-        if (!rail || !search) return;
-        rail.addEventListener('click', (e) => {
-          const btn = e.target.closest('button[data-filter]');
-          if (!btn) return;
-          const f = btn.getAttribute('data-filter') || '';
-          if (f === '') {
-            // reset filtro
-            search.value = '';
-          } else if (f === '0') {
-            // filtra numeri/simboli: inserisco carattere # come promemoria
-            search.value = '#';
-          } else {
-            // imposta lettera selezionata
-            search.value = f;
-          }
-          // scatena l'evento input così manual-core ricalcola l'indice
-          const ev = new Event('input', { bubbles: true });
-          search.dispatchEvent(ev);
-          // scroll al top dell'indice
-          const list = document.getElementById('command-list');
-          if (list) list.scrollTop = 0;
-        });
-      })();
-    </script>
   </body>
 </html>
-
