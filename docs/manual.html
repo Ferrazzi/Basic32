@@ -39,47 +39,51 @@
         </nav>
       </header>
 
-      <!-- ======= TOOLBAR ======= -->
-      <section class="content" style="padding-bottom:16px;">
+      <!-- Titolo -->
+      <section class="content" style="padding-bottom:12px;">
         <h1>BASIC32 Programming Manual</h1>
-
-        <!-- Lingua (sopra, centrata) -->
-        <div class="controls controls--lang" aria-label="Select language">
-          <label for="lang" class="visually-hidden">Language</label>
-          <select id="lang" aria-label="Select language">
-            <option value="it" selected>Italiano</option>
-            <option value="en">English</option>
-            <!-- aggiungi altre lingue: manual.<codice>.js -->
-          </select>
-        </div>
-
-        <!-- Riga centrata: Search + Select command (si ridimensionano) -->
-        <div class="controls controls--manual" role="search" aria-label="Find in manual">
-          <label for="search" class="visually-hidden">Search command</label>
-          <input
-            id="search"
-            class="search"
-            type="search"
-            placeholder="Search command (es: RUN)…"
-            autocomplete="off"
-          />
-
-          <label for="index" class="visually-hidden">Select command</label>
-          <select id="index" aria-label="Select command">
-            <option value="">— Select command —</option>
-            <!-- options generate via manual-core.js -->
-          </select>
-        </div>
+        <p class="lead">Cerca un comando o sfoglia l’indice a sinistra.</p>
       </section>
 
-      <!-- ======= LAYOUT: SIDEBAR + CONTENUTO ======= -->
-      <div class="manual-layout">
+      <!-- ======= GRIGLIA MANUALE (sidebar + toolbar + contenuto) ======= -->
+      <div class="manual-grid">
         <!-- Indice comandi (sinistra) -->
         <aside class="sidebar" aria-label="Indice comandi">
           <nav id="command-list" class="command-list" aria-label="Elenco comandi">
             <!-- Popolato da manual-core.js -->
           </nav>
         </aside>
+
+        <!-- Toolbar nella colonna dei contenuti: lingua sopra, sotto search + select command -->
+        <div class="manual-toolbar">
+          <!-- Lingua (sopra, centrata) -->
+          <div class="controls controls--lang" aria-label="Select language">
+            <label for="lang" class="visually-hidden">Language</label>
+            <select id="lang" aria-label="Select language">
+              <option value="it" selected>Italiano</option>
+              <option value="en">English</option>
+              <!-- altre lingue -->
+            </select>
+          </div>
+
+          <!-- Riga centrata: Search + Select command (auto-resize) -->
+          <div class="controls controls--manual" role="search" aria-label="Find in manual">
+            <label for="search" class="visually-hidden">Search command</label>
+            <input
+              id="search"
+              class="search"
+              type="search"
+              placeholder="Search command (es: RUN)…"
+              autocomplete="off"
+            />
+
+            <label for="index" class="visually-hidden">Select command</label>
+            <select id="index" aria-label="Select command">
+              <option value="">— Select command —</option>
+              <!-- options generate via manual-core.js -->
+            </select>
+          </div>
+        </div>
 
         <!-- Contenuto del manuale -->
         <main id="manual-content" class="manual-content" tabindex="-1">
