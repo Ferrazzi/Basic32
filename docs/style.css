@@ -184,6 +184,8 @@ body.c64 {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  text-align: center;
+  text-align-last: center;
 }
 .controls select option {
   background: #2e2e3f;           /* supporto variabile tra browser */
@@ -395,6 +397,13 @@ body.c64 {
   }
 }
 
+@supports (-webkit-touch-callout: none) {
+  .controls select {
+    -webkit-appearance: none !important;
+    text-align: center;
+  }
+}
+
 /* Riduci movimento per chi lo preferisce */
 @media (prefers-reduced-motion: reduce){
   .navitem, .icon,
@@ -404,6 +413,7 @@ body.c64 {
   .controls button:hover, .controls select:hover, .controls input[type="search"]:hover,
   .command-list a:hover { transform: none; filter: none; }
 }
+
 
 
 
