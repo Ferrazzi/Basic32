@@ -1,22 +1,23 @@
 /* =========================================================
-   BASIC32 — Manuale (CORE)
-   - Caricamento dinamico lingua: ./manual.<lang>.js (ES module)
-   - Ricerca, indice, contenuto, deep link, querystring ?lang=
-   - Per aggiungere una lingua: crea manual.<codice>.js che esporta default = array comandi
+   BASIC32 — Manual (CORE)
+   - Caricamento dinamico lingua: ./manual.<lang>.js
+   - Ricerca, filtro di categoria, indice semplice, deep link
+   - Per aggiungere lingua: crea manual.<code>.js che esporta default = array comandi
    ========================================================= */
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
-const langSel   = $("#lang");
-const searchBox = $("#search");
-const listEl    = $("#command-list");
-const contentEl = $("#manual-content");
+const langSel    = $("#lang");
+const searchBox  = $("#search");
+const catSel     = $("#category");
+const listEl     = $("#command-list");
+const contentEl  = $("#manual-content");
 
 let currentLang = "it";
-let currentData = []; // array di comandi dell’attuale lingua
+let currentData = []; // array comandi lingua corrente
 
-/* ---------- Utilità UI ---------- */
+/* ---------- Utilità ---------- */
 function escapeHTML(str){
   return String(str)
     .replaceAll("&","&amp;")
@@ -24,60 +25,71 @@ function escapeHTML(str){
     .replaceAll(">","&gt;");
 }
 
-function matches(cmd, q) {
-  return [cmd.nome, cmd.sintassi, cmd.sommario, cmd.categoria]
+function matchesQuery(cmd, q) {
+  if (!q) return true;
+  const hay = [cmd.nome, cmd.sintassi, cmd.sommario, cmd.categoria]
     .filter(Boolean)
-    .some(s => s.toLowerCase().includes(q));
+    .join(" ")
+    .toLowerCase();
+  return hay.includes(q);
 }
 
-function renderIndex(query = "") {
+function matchesCategory(cmd, catValue) {
+  if (!catValue || catValue === "__all__") return true;
+  return (cmd.categoria || "").toLowerCase() === catValue.toLowerCase();
+}
+
+/* ---------- Popola la tendina delle categorie ---------- */
+function buildCategoryOptions() {
+  const cats = Array.from(new Set(currentData.map(c => c.categoria).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+  const current = catSel.value || "__all__";
+  catSel.innerHTML = `<option value="__all__">All</option>` +
+    cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
+  // ripristina selezione precedente se possibile
+  const hasPrev = Array.from(catSel.options).some(o => o.value === current);
+  catSel.value = hasPrev ? current : "__all__";
+}
+
+/* ---------- Indice: elenco semplice (no intestazioni categoria) ---------- */
+function renderIndex() {
   listEl.innerHTML = "";
+  const q = searchBox.value.trim().toLowerCase();
+  const cat = catSel.value;
 
-  const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
-  const q = query.trim().toLowerCase();
+  const items = currentData
+    .filter(cmd => matchesQuery(cmd, q) && matchesCategory(cmd, cat))
+    .slice()
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
 
-  const byCat = {};
-  for (const cmd of items) {
-    if (q && !matches(cmd, q)) continue;
-    (byCat[cmd.categoria] ||= []).push(cmd);
-  }
-
-  const cats = Object.keys(byCat).sort((a,b)=>a.localeCompare(b));
-  if (!cats.length) {
-    listEl.innerHTML = `<p class="hint" style="padding:6px">Nessun risultato.</p>`;
+  if (!items.length) {
+    listEl.innerHTML = `<p class="hint" style="padding:6px">No results.</p>`;
     return;
   }
 
-  for (const cat of cats) {
-    const h = document.createElement("div");
-    h.className = "section-title";
-    h.textContent = cat;
-    listEl.appendChild(h);
-
-    for (const cmd of byCat[cat]) {
-      const a = document.createElement("a");
-      a.href = `#cmd-${cmd.id}`;
-      a.textContent = cmd.nome;
-      a.setAttribute("data-cmd", cmd.id);
-      listEl.appendChild(a);
-    }
+  for (const cmd of items) {
+    const a = document.createElement("a");
+    a.href = `#cmd-${cmd.id}`;
+    a.textContent = cmd.nome;
+    a.setAttribute("data-cmd", cmd.id);
+    listEl.appendChild(a);
   }
 }
 
+/* ---------- Contenuto del manuale ---------- */
 function renderContent() {
   contentEl.innerHTML = "";
-
   const items = currentData.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+
   for (const cmd of items) {
     const section = document.createElement("section");
     section.id = `cmd-${cmd.id}`;
     section.innerHTML = `
       <h2>${cmd.nome}</h2>
-      ${cmd.sintassi ? `<p><strong>Sintassi:</strong> <code>${cmd.sintassi}</code></p>` : ""}
-      ${cmd.sommario ? `<p><strong>Sommario:</strong> ${cmd.sommario}</p>` : ""}
-      ${cmd.descrizione ? `<h3>Descrizione</h3><p>${cmd.descrizione}</p>` : ""}
+      ${cmd.sintassi ? `<p><strong>Syntax:</strong> <code>${cmd.sintassi}</code></p>` : ""}
+      ${cmd.sommario ? `<p><strong>Summary:</strong> ${cmd.sommario}</p>` : ""}
+      ${cmd.descrizione ? `<h3>Description</h3><p>${cmd.descrizione}</p>` : ""}
       ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
-        <h3>Esempi</h3>
+        <h3>Examples</h3>
         <div>${cmd.esempi.map(ex => `
           <pre><code>${escapeHTML(ex.code)}</code></pre>
           ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
@@ -90,6 +102,7 @@ function renderContent() {
   }
 }
 
+/* ---------- Focus su hash ---------- */
 function focusHash(smooth = true){
   if (!location.hash) return;
   const target = document.getElementById(location.hash.slice(1));
@@ -100,34 +113,35 @@ function focusHash(smooth = true){
   }
 }
 
-/* ---------- Caricamento dinamico lingua ---------- */
+/* ---------- Caricamento lingua ---------- */
 async function loadLanguage(code){
-  // Prova a importare ./manual.<code>.js
   const url = `./manual.${code}.js`;
   try {
     const mod = await import(url);
     const data = mod.default;
-    if (!Array.isArray(data)) throw new Error("Il modulo non esporta un array di comandi.");
+    if (!Array.isArray(data)) throw new Error("Language module must export default array.");
+
     currentLang = code;
     currentData = data;
 
-    // Aggiorna UI
     langSel.value = code;
+    // ricostruisci categorie per la lingua
+    buildCategoryOptions();
+    // render UI
     renderContent();
-    renderIndex(searchBox.value);
+    renderIndex();
 
-    // Aggiorna querystring mantenendo hash
+    // aggiorna URL (?lang=)
     const params = new URLSearchParams(location.search);
     params.set("lang", code);
     history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 
-    // Se c’è un hash, prova a focussare dopo il render
     if (location.hash) focusHash(false);
   } catch (e) {
     console.error(e);
     contentEl.innerHTML = `
-      <p class="noscript">Impossibile caricare la lingua "<strong>${escapeHTML(code)}</strong>".</p>
-      <p class="hint">Verifica che esista il file <code>manual.${escapeHTML(code)}.js</code> e che esporti <code>default</code>.</p>
+      <p class="noscript">Unable to load language "<strong>${escapeHTML(code)}</strong>".</p>
+      <p class="hint">Ensure <code>manual.${escapeHTML(code)}.js</code> exists and exports <code>default</code>.</p>
     `;
   }
 }
@@ -139,17 +153,14 @@ function init(){
 
   loadLanguage(lang);
 
-  // Ricerca
-  searchBox.addEventListener("input", () => {
-    renderIndex(searchBox.value);
-  });
+  // ricerca testuale
+  searchBox.addEventListener("input", () => renderIndex());
+  // filtro categoria
+  catSel.addEventListener("change", () => renderIndex());
+  // cambio lingua
+  langSel.addEventListener("change", () => loadLanguage(langSel.value));
 
-  // Cambio lingua
-  langSel.addEventListener("change", () => {
-    loadLanguage(langSel.value);
-  });
-
-  // Click indice: conserva ?lang= nell’URL
+  // click sulla lista comandi: conserva ?lang= e aggiorna hash
   listEl.addEventListener("click", (e) => {
     if (e.target.matches("a[data-cmd]")){
       const params = new URLSearchParams(location.search);
