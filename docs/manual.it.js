@@ -21,7 +21,6 @@ export default [
       </li>
       <li>Controllo I/O GPIO: lettura/scrittura digitale e analogica, configurazione pin</li>
       <li>Funzioni di tempo e generazione casuale</li>
-      <li>Comandi integrati: <code>LIST</code>, <code>RUN</code>, <code>NEW</code>, <code>HELP</code>, <code>SAVE</code>, <code>LOAD</code></li>
       <li>Interprete interattivo: ogni riga può essere digitata e valutata in tempo reale</li>
     </ul>
 
@@ -56,7 +55,7 @@ export default [
       <li>Assegna un pin CS dedicato a ogni dispositivo (es. TFT_CS=17, SD_CS=13, TOUCH_CS=4, RFID_CS=25).</li>
       <li>Mantieni i CS alti (HIGH) quando il dispositivo non è in uso, così non interferisce con gli altri.</li>
       <li>Imposta i CS come OUTPUT e portali HIGH prima di inizializzare i moduli.</li>
-      <li>Inizializza i dispositivi con i relativi comandi (<code>INITSD</code>, <code>ILI INIT</code>, <code>RFID INIT</code>, ecc.).</li>
+      <li>Inizializza i dispositivi con i relativi comandi (INITSD, ILI INIT, RFID INIT, ecc.).</li>
     </ol>
 
     <h3>Esempio: Display ILI9341 con SD e Touch integrati</h3>
@@ -73,7 +72,7 @@ export default [
 100 ILI TEXT 10 50 2 SDFREE 0 255 255  ' stampa spazio libero su SD in giallo
     </code></pre>
 
-    <p><strong>Nota:</strong> Se aggiungi altre periferiche SPI (es. RFID RC522), assegna loro un CS dedicato, imposta <code>PINMODE &lt;CS&gt; OUTPUT</code> e <code>DWRITE &lt;CS&gt; 1</code> prima di eseguire il rispettivo <code>INIT</code>. Con questa sequenza, ogni dispositivo è pronto a lavorare senza disturbare gli altri sul bus SPI.</p>
+    <p><strong>Nota:</strong> Se aggiungi altre periferiche SPI (es. RFID RC522), assegna loro un CS dedicato, imposta PINMODE &lt;CS&gt; OUTPUT e DWRITE &lt;CS&gt; 1 prima di eseguire il rispettivo INIT. Con questa sequenza, ogni dispositivo è pronto a lavorare senza disturbare gli altri sul bus SPI.</p>
 
     <h3>Cosa puoi fare con Basic32?</h3>
     <ul>
@@ -84,7 +83,7 @@ export default [
     </ul>
 
     <h3>Installazione e Primo Avvio</h3>
-    <p>Questa sezione ti guida passo passo nell’installazione di Basic32 su una scheda ESP32, utilizzando un firmware già compilato. Non è necessario usare l’Arduino IDE: basta scaricare il file <code>.bin</code> e flasharlo direttamente nella memoria del dispositivo.</p>
+    <p>Questa sezione ti guida passo passo nell’installazione di Basic32 su una scheda ESP32, utilizzando un firmware già compilato. Non è necessario usare l’Arduino IDE: basta scaricare il file .bin e flasharlo direttamente nella memoria del dispositivo.</p>
 
     <h4>1. Requisiti</h4>
     <ul>
@@ -101,8 +100,8 @@ export default [
 
     <h4>2. File da scaricare</h4>
     <ul>
-      <li><code>Basic32.bin</code> → firmware precompilato (fornito su GitHub del progetto)</li>
-      <li>Eventuali file <code>.bas</code> di esempio (opzionali)</li>
+      <li>Basic32.bin → firmware precompilato (fornito su GitHub del progetto)</li>
+      <li>Eventuali file .bas di esempio (opzionali)</li>
     </ul>
 
     <h4>3. Flash del Firmware su ESP32</h4>
@@ -117,10 +116,10 @@ export default [
     <p><strong>Metodo 2:</strong> con esptool.py (multipiattaforma)</p>
     <ol>
       <li>Installa esptool.py (se non l’hai già fatto):<br>
-      <code>pip install esptool</code></li>
+      pip install esptool</li>
       <li>Collega l’ESP32 e identifica la porta seriale (es: COM3 su Windows o /dev/ttyUSB0 su Linux)</li>
       <li>Flasha il firmware con questo comando:<br>
-      <code>esptool.py --chip esp32 --port COM3 --baud 460800 write_flash -z 0x10000 Basic32.bin</code></li>
+      esptool.py --chip esp32 --port COM3 --baud 460800 write_flash -z 0x10000 Basic32.bin</li>
     </ol>
 
     <h4>4. Primo Avvio</h4>
@@ -153,7 +152,7 @@ LOAD "programma.bas"
     <h4>1. Memoria SPIFFS (interna)</h4>
     <ul>
       <li>I nomi dei file sono case-insensitive.</li>
-      <li>L’estensione <code>.bas</code> è convenzionale, ma non obbligatoria.</li>
+      <li>L’estensione .bas è convenzionale, ma non obbligatoria.</li>
       <li>La dimensione disponibile dipende dalla partizione SPIFFS (tipicamente 1MB–2MB).</li>
     </ul>
 
