@@ -737,5 +737,453 @@ AUTORUN OFF
     • Il file di configurazione /autorun.cfg viene sovrascritto a ogni nuova impostazione.
     • L'esecuzione del programma avviene subito dopo la configurazione.
   `
+},
+{
+  id: "awrite",
+  nome: "AWRITE(pin, valore)",
+  categoria: "PWM / Uscite analogiche",
+  sintassi: "AWRITE pin valore",
+  sommario: "Genera un segnale PWM sul pin per simulare un’uscita analogica (0–255).",
+  descrizione: `
+    Imposta un PWM (modulazione di larghezza d’impulso) su un pin dell’ESP32, simulando un valore analogico.
+    Valori ammessi 0..255:
+    • 0 = 0% duty (spento)
+    • 255 = 100% duty (massimo)
+    • intermedio proporzionale (es. 128 ≈ 50%)
+    ⚠ Il pin deve essere prima configurato come OUTPUT con <code>PINMODE</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 PINMODE 13 OUTPUT NOPULL
+20 AWRITE 13 128
+RUN
+      `,
+      note: "LED al 50% su GPIO13."
+    },
+    {
+      code: `
+10 PINMODE 2 OUTPUT NOPULL
+20 FOR A = 0 TO 255 STEP 5
+30 AWRITE 2 A
+40 DELAY 50
+50 NEXT A
+60 FOR I = 255 TO 0 STEP -5
+70 AWRITE 2 I
+80 DELAY 50
+90 NEXT I
+RUN
+      `,
+      note: "Fading continuo."
+    },
+    {
+      code: `
+10 PINMODE 14 OUTPUT NOPULL
+20 INPUT L
+30 AWRITE 14 L
+RUN
+      `,
+      note: "Controllo PWM guidato da variabile."
+    }
+  ],
+  note: "Richiede ESP32 Arduino core 3.x+ (supporto analogWrite). Pin non-PWM possono non mostrare effetto. Valori >255 vengono limitati a 255."
+},
+{
+  id: "breakpin",
+  nome: "BREAKPIN",
+  categoria: "Sistema / Sicurezza",
+  sintassi: `
+BREAKPIN pin
+BREAKPIN pin PULLUP|PULLDOWN|NOPULL
+BREAKPIN OFF
+BREAKPIN ?
+  `,
+  sommario: "Configura un pin “di sicurezza” che interrompe subito il programma alla pressione.",
+  descrizione: `
+    Imposta un GPIO come pulsante di stop immediato del programma BASIC in esecuzione.
+    • Modalità di ingresso:
+      – PULLUP (default): pulsante verso GND; premuto = LOW
+      – PULLDOWN: pulsante verso VCC; premuto = HIGH
+      – NOPULL: nessuna resistenza interna; premuto = HIGH
+    • OFF disabilita la funzione. La configurazione è salvata in EEPROM e ricaricata all’avvio.
+  `,
+  esempi: [
+    { code: "BREAKPIN 0", note: "Stop con pull-up (pulsante a GND)." },
+    { code: "BREAKPIN 12 PULLDOWN", note: "Stop con pull-down (pulsante a VCC)." },
+    { code: "BREAKPIN 25 NOPULL", note: "Senza pull interne (hardware esterno)." },
+    { code: "BREAKPIN OFF", note: "Disabilita il BREAKPIN." }
+  ],
+  note: "L’arresto è istantaneo (controllo a inizio riga). Evita pin critici di boot (0,2,15) se l’hardware non li gestisce. Indipendente dal SAFE MODE di AUTORUN."
+},
+{
+  id: "bt-at",
+  nome: "BT AT",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT AT \"cmd\" RESP var$ [timeout]",
+  sommario: "Invia un comando AT e legge una riga di risposta entro il timeout.",
+  descrizione: `
+    Invia il comando AT (terminato da CRLF) verso il modulo BT e legge una riga di risposta
+    entro <em>timeout</em> ms (se omesso usa <code>BT TIMEOUT</code>). La risposta viene salvata in <code>var$</code>.
+    Richiede AT mode attivo.
+  `,
+  esempi: [
+    { code: "10 BT AT \"AT\" RESP R$ 1000\n20 PRINT R$\nRUN", note: "Test base (atteso: OK)." },
+    { code: "10 BT AT \"AT+NAME?\" RESP N$ 1000\n20 PRINT N$\nRUN", note: "Legge il nome del modulo." }
+  ],
+  note: "Abilita l’AT mode con <code>BT ATMODE ON</code> (o KEY alto all’avvio). Timeout in ms."
+},
+{
+  id: "bt-atmode-off",
+  nome: "BT ATMODE OFF",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT ATMODE OFF",
+  sommario: "Esce dall’AT mode e riapre la UART alla baud dati salvata.",
+  descrizione: `
+    Porta <em>KEY</em> basso (se configurato) e riapre la UART in data mode alla velocità impostata.
+  `,
+  esempi: [
+    { code: "10 BT ATMODE OFF\n20 PRINT \"DATA MODE\"\nRUN", note: "Ritorna al data mode." }
+  ],
+  note: "Dopo modifiche di baud in AT, riallinea la porta dati con <code>BT INIT</code>."
+},
+{
+  id: "bt-atmode-on",
+  nome: "BT ATMODE ON",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT ATMODE ON [keyPin]",
+  sommario: "Entra in AT mode (KEY alto) e apre la UART alla baud AT.",
+  descrizione: `
+    Porta <em>KEY</em> alto (pin di <code>BT INIT</code> o <code>keyPin</code> passato) e apre la UART all’AT baud (tipicamente 38400 per HC-05).
+  `,
+  esempi: [
+    {
+      code: `
+10 BT INIT 16 17 9600 4
+20 BT ATMODE ON
+30 BT AT "AT" RESP R$ 1000
+40 PRINT R$
+RUN
+      `,
+      note: "Entra in AT e testa con AT."
+    }
+  ],
+  note: "Su molti HC-05 il vero AT richiede KEY alto all’accensione. Alcuni HC-06 restano in AT a 9600."
+},
+{
+  id: "bt-available",
+  nome: "BT AVAILABLE",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT AVAILABLE var",
+  sommario: "Ritorna in var il numero di byte disponibili nel buffer RX BT.",
+  descrizione: `
+    Scrive in <code>var</code> la dimensione del buffer di ricezione disponibile (intero ≥ 0).
+  `,
+  esempi: [
+    { code: "10 BT AVAILABLE N\n20 PRINT N\nRUN", note: "Stampa i byte attualmente disponibili (es. 0)." }
+  ],
+  note: "Usabile in PRINT/LET/IF."
+},
+{
+  id: "bt-end",
+  nome: "BT END",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT END",
+  sommario: "Chiude la UART2 e disattiva la comunicazione BT.",
+  descrizione: `
+    Termina la comunicazione seriale con il modulo BT e libera le risorse.
+  `,
+  esempi: [
+    { code: "10 BT END\n20 PRINT \"CHIUSO\"\nRUN", note: "Chiude la connessione BT." }
+  ],
+  note: "Usalo prima di cambiare pin/baud con un nuovo <code>BT INIT</code>."
+},
+{
+  id: "bt-flush",
+  nome: "BT FLUSH",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT FLUSH",
+  sommario: "Svuota il buffer RX della UART BT.",
+  descrizione: `
+    Svuota i dati pendenti nella ricezione BT per ripartire da uno stato pulito.
+  `,
+  esempi: [
+    { code: "10 BT FLUSH\n20 BT READLN S$\n30 PRINT LEN(S$)\nRUN", note: "Dopo flush, nessun dato (0)." }
+  ],
+  note: "Utile prima di un nuovo parsing."
+},
+{
+  id: "bt-init",
+  nome: "BT INIT",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT INIT rx tx baud [keyPin]",
+  sommario: "Inizializza la UART2 verso HC-05/HC-06 in data mode.",
+  descrizione: `
+    Configura la UART2 con pin RX/TX, velocità baud e opzionale <em>keyPin</em> per AT mode.
+  `,
+  esempi: [
+    { code: "10 BT INIT 16 17 9600\n20 PRINT \"OK\"\nRUN", note: "Inizializzazione base." },
+    { code: "10 BT INIT 16 17 9600 4\n20 PRINT \"READY\"\nRUN", note: "Con KEY su GPIO4." }
+  ],
+  note: "Scegli pin compatibili con la tua board ESP32."
+},
+{
+  id: "bt-print",
+  nome: "BT PRINT",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT PRINT valore",
+  sommario: "Converte un valore in testo e lo invia su BT (senza newline).",
+  descrizione: `
+    Invia la rappresentazione testuale di <em>valore</em> sulla porta BT.
+  `,
+  esempi: [
+    { code: "10 LET A=42\n20 BT PRINT A\nRUN", note: "Invia “42” via BT." }
+  ],
+  note: "Per newline usa <code>BT SEND \"\\r\\n\"</code>."
+},
+{
+  id: "bt-read",
+  nome: "BT READ",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT READ var$ [n]",
+  sommario: "Legge fino a n byte dal buffer RX in var$ (o tutto se n omesso).",
+  descrizione: `
+    Copia fino a <em>n</em> byte ricevuti in <code>var$</code>; se non ci sono dati, la stringa è vuota.
+  `,
+  esempi: [
+    { code: "10 BT READ S$\n20 PRINT S$\nRUN", note: "Legge tutti i dati disponibili." },
+    { code: "10 BT READ P$ 5\n20 PRINT P$\nRUN", note: "Legge esattamente 5 byte." }
+  ],
+  note: "Non attende newline."
+},
+{
+  id: "bt-readln",
+  nome: "BT READLN",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT READLN var$",
+  sommario: "Legge fino a LF (\\n) ignorando CR (\\r); se assente, restituisce quanto presente.",
+  descrizione: `
+    Ideale per protocolli a riga singola con terminatore LF.
+  `,
+  esempi: [
+    { code: "10 BT READLN CMD$\n20 IF LEN(CMD$)=0 THEN PRINT \"NESSUNA RIGA\"\nRUN", note: "Gestione riga assente." }
+  ],
+  note: "Ritorna anche stringa vuota se non arriva LF."
+},
+{
+  id: "bt-send",
+  nome: "BT SEND",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: `
+BT SEND "testo"
+BT SEND var$
+  `,
+  sommario: "Invia una stringa (letterale o variabile) così com’è sulla UART BT.",
+  descrizione: `
+    Spedisce il buffer esattamente come fornito. Nessuna terminazione automatica.
+  `,
+  esempi: [
+    { code: "10 BT SEND \"READY\\r\\n\"\nRUN", note: "Invia CRLF esplicito." }
+  ],
+  note: "Aggiungi \\r\\n se richiesto dal peer."
+},
+{
+  id: "bt-setbaud",
+  nome: "BT SETBAUD",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT SETBAUD rate",
+  sommario: "Imposta la baud dati del modulo e aggiorna la baud del data mode.",
+  descrizione: `
+    Tenta la sintassi HC-05 (<code>AT+UART=rate,0,0</code>). Dopo il cambio, riporta il modulo al data mode e re-inizializza.
+  `,
+  esempi: [
+    {
+      code: `
+10 BT ATMODE ON
+20 BT SETBAUD 9600
+30 BT ATMODE OFF
+40 BT END
+50 BT INIT 16 17 9600
+60 PRINT "BAUD OK"
+RUN
+      `,
+      note: "Cambio baud completo."
+    }
+  ],
+  note: "Su alcuni HC-05 serve <code>AT+RESET</code> per applicare la nuova UART."
+},
+{
+  id: "bt-setname",
+  nome: "BT SETNAME",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT SETNAME \"Nome\"",
+  sommario: "Imposta il nome del modulo (helper per HC-05/HC-06).",
+  descrizione: `
+    Prova HC-05 (<code>AT+NAME=Nome</code>) e HC-06 (<code>AT+NOMENome</code>). Non legge l’OK.
+  `,
+  esempi: [
+    {
+      code: `
+10 BT SETNAME "BASIC32"
+20 BT AT "AT+NAME?" RESP N$ 1000
+30 PRINT N$
+RUN
+      `,
+      note: "Verifica del nome via AT."
+    }
+  ],
+  note: "Usa <code>BT AT … RESP …</code> per controllare la risposta."
+},
+{
+  id: "bt-setpin",
+  nome: "BT SETPIN",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT SETPIN \"1234\"",
+  sommario: "Imposta il PIN di pairing del modulo (helper).",
+  descrizione: `
+    Tenta HC-05 (<code>AT+PSWD=1234</code>) e HC-06 (<code>AT+PIN1234</code>). Non legge l’OK.
+  `,
+  esempi: [
+    {
+      code: `
+10 BT SETPIN "1234"
+20 BT AT "AT+PSWD?" RESP P$ 1000
+30 PRINT P$
+RUN
+      `,
+      note: "Verifica PIN su HC-05."
+    }
+  ],
+  note: "La sintassi di lettura del PIN può variare per firmware."
+},
+{
+  id: "bt-timeout",
+  nome: "BT TIMEOUT",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT TIMEOUT ms",
+  sommario: "Imposta il timeout predefinito (ms) per le letture in AT mode.",
+  descrizione: `
+    Definisce il timeout usato da <code>BT AT … RESP …</code> e <code>BT VERSION</code> quando non specificato.
+  `,
+  esempi: [
+    { code: "10 BT TIMEOUT 1500\n20 PRINT \"TIMEOUT OK\"\nRUN", note: "Imposta timeout a 1500 ms." }
+  ],
+  note: "Influisce solo sulle letture AT con risposta a riga."
+},
+{
+  id: "bt-version",
+  nome: "BT VERSION",
+  categoria: "Bluetooth (HC-05/HC-06)",
+  sintassi: "BT VERSION var$",
+  sommario: "Tenta AT+VERSION? (HC-05) o AT+VERSION (HC-06) e salva la risposta.",
+  descrizione: `
+    Richiede AT mode attivo. La risposta (se presente) viene salvata in <code>var$</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 BT ATMODE ON
+20 BT VERSION V$
+21 IF LEN(V$)=0 THEN PRINT "NESSUNA RISPOSTA"
+30 PRINT V$
+RUN
+      `,
+      note: "Lettura versione firmware modulo."
+    }
+  ],
+  note: "Se non in AT mode, la risposta può essere vuota."
+},
+{
+  id: "callfunc",
+  nome: "CALLFUNC",
+  categoria: "Funzioni utente",
+  sintassi: "CALLFUNC <nome>",
+  sommario: "Esegue una funzione definita con FUNC una sola volta (bloccante).",
+  descrizione: `
+    Invoca l’implementazione definita con <code>FUNC ... ENDFUNC</code> e attende la sua conclusione prima di proseguire.
+  `,
+  esempi: [
+    {
+      code: `
+5  PINMODE 2 OUTPUT NOPULL
+10 FUNC LAMP
+20 DWRITE 2 1
+30 DELAY 500
+40 DWRITE 2 0
+50 DELAY 500
+60 ENDFUNC
+70 CALLFUNC LAMP
+      `,
+      note: "Esegue la funzione LAMP una volta."
+    },
+    {
+      code: `
+80 CALLFUNC LAMP
+90 DELAY 1000
+100 GOTO 80
+      `,
+      note: "Uso ripetuto della funzione."
+    }
+  ],
+  note: "La funzione deve essere già definita e il nome deve corrispondere. Non usare per funzioni LOOP (usare STARTFUNC)."
+},
+{
+  id: "chr",
+  nome: "CHR$(x)",
+  categoria: "Stringhe",
+  sintassi: "CHR$(codice)",
+  sommario: "Restituisce il carattere ASCII corrispondente a un valore numerico (0–255).",
+  descrizione: `
+    Converte un codice numerico nel carattere ASCII corrispondente. Utile per costruire stringhe o stampare caratteri speciali.
+  `,
+  esempi: [
+    { code: "10 PRINT CHR$(65)\nRUN", note: "Stampa 'A'." },
+    { code: "10 FOR I=65 TO 90\n20 PRINT CHR$(I);\n30 NEXT I\nRUN", note: "Stampa A..Z." },
+    { code: "10 PRINT \"RIGA1\" + CHR$(10) + \"RIGA2\"\nRUN", note: "Usa LF per andare a capo." },
+    { code: "10 PRINT \"NOME\" + CHR$(9) + \"VALORE\"\nRUN", note: "Inserisce un TAB." },
+    { code: "10 T$ = CHR$(72) + CHR$(73)\n20 PRINT T$\nRUN", note: "Costruisce \"HI\"." }
+  ],
+  note: "CHR$(10)=LF, CHR$(13)=CR, CHR$(32)=spazio, CHR$(9)=TAB. Vedi anche <code>ASC</code>, <code>MID$</code>, <code>LEFT$</code>, <code>RIGHT$</code>."
+},
+{
+  id: "cls",
+  nome: "CLS",
+  categoria: "Terminale",
+  sintassi: "CLS",
+  sommario: "Pulisce lo schermo inviando righe vuote sul terminale seriale.",
+  descrizione: `
+    Simula la pulizia dello schermo come nei vecchi ambienti BASIC, senza toccare codice o variabili.
+  `,
+  esempi: [
+    { code: "10 CLS\n20 PRINT \"BENVENUTO NEL SISTEMA\"\nRUN", note: "Schermo “pulito” prima del messaggio." },
+    { code: "10 PRINT \"PRIMA DEL CLS\"\n20 WAIT 2000\n30 CLS\n40 PRINT \"DOPO IL CLS\"\nRUN", note: "Intermezzo di pulizia tra due stampe." }
+  ],
+  note: "Effetto visivo; compatibilità massima ma meno “elegante” di <code>CLSANSI</code>."
+},
+{
+  id: "clsansi",
+  nome: "CLSANSI",
+  categoria: "Terminale",
+  sintassi: "CLSANSI",
+  sommario: "Pulisce lo schermo usando ESC[2J (ANSI).",
+  descrizione: `
+    Invia la sequenza ANSI <code>ESC[2J</code> per cancellare lo schermo sui terminali compatibili (PuTTY, TeraTerm, minicom, ecc.).
+  `,
+  esempi: [
+    { code: "10 CLSANSI\n20 PRINT \"PRONTO PER L'INPUT\"\nRUN", note: "Pulizia istantanea con ANSI." },
+    {
+      code: `
+10 PRINT "USO CLS:"
+20 CLS
+30 PRINT "FATTO"
+40 WAIT 2000
+50 PRINT "USO CLSANSI:"
+60 CLSANSI
+70 PRINT "FINITO"
+RUN
+      `,
+      note: "Confronto tra metodi di pulizia."
+    }
+  ],
+  note: "Funziona solo su terminali che supportano escape ANSI."
 }
 ];
