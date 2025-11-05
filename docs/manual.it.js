@@ -164,19 +164,42 @@ LOAD "programma.bas"
   `
 },
 {
-    id: "run",
-    nome: "RUN",
-    categoria: "Esecuzione",
-    sintassi: "RUN [linea]",
-    sommario: "Esegue il programma o parte di esso a partire dalla linea indicata.",
-    descrizione: `
-      Avvia l'esecuzione del programma in memoria. Se specifichi un numero di <em>linea</em>,
-      l'esecuzione parte da quella linea.
-    `,
-    esempi: [
-      { code: "RUN", note: "Esegue dall'inizio." },
-      { code: "RUN 200", note: "Esegue a partire dalla linea 200." }
-    ],
-    note: "Durante l’esecuzione, premi <kbd>CTRL+C</kbd> per interrompere."
-  }
+  id: "abs",
+  nome: "ABS(x)",
+  categoria: "Funzioni matematiche",
+  sintassi: "ABS(x)",
+  sommario: "Restituisce il valore assoluto di un numero.",
+  descrizione: `
+    La funzione <code>ABS(x)</code> restituisce il valore assoluto di <em>x</em>, cioè il numero senza segno.
+    È utilizzabile in espressioni aritmetiche, assegnazioni e condizioni logiche.
+    Accetta sia numeri interi che decimali. Se il numero è già positivo o zero, non viene modificato.
+  `,
+  esempi: [
+    {
+      code: `
+10 A = -42
+20 B = ABS(A)
+30 PRINT "VALORE ASSOLUTO: "; B
+RUN
+      `,
+      note: "Calcola il valore assoluto di un intero negativo.\nOutput: VALORE ASSOLUTO: 42"
+    },
+    {
+      code: `
+10 PRINT "ABS(-3.14) = "; ABS(-3.14)
+RUN
+      `,
+      note: "Funziona anche con numeri decimali (float).\nOutput: ABS(-3.14) = 3.14"
+    },
+    {
+      code: `
+10 A = -7
+20 IF ABS(A) = 7 THEN PRINT "È UGUALE A 7"
+RUN
+      `,
+      note: "Esempio d’uso diretto in una condizione IF.\nOutput: È UGUALE A 7"
+    }
+  ],
+  note: "ABS è una funzione pura: non modifica variabili, restituisce solo un valore numerico positivo."
+}
 ];
