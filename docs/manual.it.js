@@ -1185,5 +1185,596 @@ RUN
     }
   ],
   note: "Funziona solo su terminali che supportano escape ANSI."
+},
+{
+  id: "copy",
+  nome: "COPY",
+  categoria: "File system",
+  sintassi: `
+COPY "file"
+COPY FILE$
+COPY "*"
+  `,
+  sommario: "Copia file da SPIFFS a SD (sovrascrive se esiste).",
+  descrizione: `
+    Copia i file dalla SPIFFS alla scheda SD. Accetta:
+    • nomi tra virgolette
+    • variabili/esp. stringa (es. FILE$)
+    • "*" per copiare tutti i file presenti in SPIFFS
+    Se il file è già presente sulla SD, viene sovrascritto.
+  `,
+  esempi: [
+    {
+      code: `
+10 NAME$ = "init.bas"
+20 COPY NAME$
+30 PRINT "File copiato su SD"
+      `,
+      note: "Copia un file indicato in variabile."
+    },
+    {
+      code: `
+10 COPY "*"
+20 PRINT "Tutti i file copiati dalla SPIFFS alla SD"
+      `,
+      note: "Copia massiva."
+    }
+  ],
+  note: "Richiede SD montata. Nomi e path dipendono dal filesystem."
+},
+{
+  id: "cos",
+  nome: "COS(x)",
+  categoria: "Funzioni matematiche",
+  sintassi: "COS(x)",
+  sommario: "Restituisce il coseno di x espresso in gradi.",
+  descrizione: `
+    <code>COS(x)</code> calcola il coseno dell’angolo <em>x</em> in gradi. Restituisce un valore tra -1 e 1.
+    Per usare radianti, converti prima: <code>COS(x * 180 / PI)</code>.
+  `,
+  esempi: [
+    { code: "10 PRINT \"COS(60) = \"; COS(60)\nRUN", note: "COS(60°)=0.5" },
+    { code: "10 FOR A=0 TO 360 STEP 30\n20 PRINT \"COS(\";A;\") = \"; COS(A)\n30 NEXT A\nRUN", note: "Tabella rapida dei coseni." },
+    { code: "10 A=135\n20 IF COS(A)<0 THEN PRINT \"COSENO NEGATIVO\"\nRUN", note: "Uso in condizione." }
+  ],
+  note: "Input in gradi; per precisione dei decimali dipende dal formato di stampa."
+},
+{
+  id: "data",
+  nome: "DATA",
+  categoria: "Dati",
+  sintassi: "DATA valore1, valore2, valore3, ...",
+  sommario: "Dichiara costanti lette in seguito con READ.",
+  descrizione: `
+    <code>DATA</code> definisce una sequenza costante (numeri o stringhe) per <code>READ</code>.
+    Le voci sono lette in ordine. Puoi riavviare con <code>RESTORE</code>.
+  `,
+  esempi: [
+    {
+      code: "10 DATA 100,200,300\n20 READ A,B,C\n30 PRINT A,B,C\nRUN",
+      note: "Lettura di numeri."
+    },
+    {
+      code: "10 DATA \"UNO\",\"DUE\",\"TRE\"\n20 READ A$,B$,C$\n30 PRINT A$,B$,C$\nRUN",
+      note: "Lettura di stringhe."
+    },
+    {
+      code: "10 DATA 1,2,3,4,5\n20 FOR I=1 TO 5\n30 READ X\n40 PRINT \"VALORE \";I;\": \";X\n50 NEXT I\nRUN",
+      note: "Lettura in loop."
+    },
+    {
+      code: "10 DATA 10,20\n20 READ A,B\n30 PRINT A,B\n40 RESTORE\n50 READ C\n60 PRINT C\nRUN",
+      note: "Uso di RESTORE per ricominciare."
+    }
+  ],
+  note: "Gli elementi DATA non vengono eseguiti; sono un archivio interno."
+},
+{
+  id: "dated",
+  nome: "DATED",
+  categoria: "Data/Ora",
+  sintassi: "DATED",
+  sommario: "Ritorna il giorno corrente (1–31).",
+  descrizione: `
+    Restituisce il giorno del mese secondo l’orologio di sistema.
+  `,
+  esempi: [
+    { code: "10 PRINT DATED\nRUN", note: "Stampa il giorno corrente." }
+  ],
+  note: "Ritorna intero; dipende dalla data impostata/sincronizzata."
+},
+{
+  id: "datem",
+  nome: "DATEM",
+  categoria: "Data/Ora",
+  sintassi: "DATEM",
+  sommario: "Ritorna il mese corrente (1–12).",
+  descrizione: `
+    Restituisce il numero del mese secondo l’orologio interno.
+  `,
+  esempi: [
+    { code: "10 PRINT DATEM\nRUN", note: "Stampa il mese corrente." }
+  ],
+  note: "Ritorna intero; dipende dalla data impostata/sincronizzata."
+},
+{
+  id: "datey",
+  nome: "DATEY",
+  categoria: "Data/Ora",
+  sintassi: "DATEY",
+  sommario: "Ritorna l’anno corrente (es. 2025).",
+  descrizione: `
+    Restituisce l’anno secondo l’orologio interno.
+  `,
+  esempi: [
+    { code: "10 PRINT DATEY\nRUN", note: "Stampa l’anno corrente." }
+  ],
+  note: "Intero a quattro cifre; dipende dall’RTC/sync."
+},
+{
+  id: "debugmem",
+  nome: "DEBUGMEM",
+  categoria: "Diagnostica",
+  sintassi: "DEBUGMEM",
+  sommario: "Mostra stato memoria/risorse su monitor seriale.",
+  descrizione: `
+    Stampa heap disponibile, stack residuo (ESP32), conteggio/valore variabili numeriche e stringa,
+    numero di array, sprite attivi (ID, X/Y, nome dati).
+    Utile per analizzare consumi e possibili leak.
+  `,
+  esempi: [
+    { code: "10 DEBUGMEM\nRUN", note: "Dump iniziale dello stato." },
+    { code: "10 GOSUB 1000\n20 DEBUGMEM\nRUN", note: "Verifica risorse dopo animazioni/grafica." }
+  ],
+  note: "Non modifica lo stato; solo diagnostica. In loop aiuta a individuare perdite nel tempo."
+},
+{
+  id: "def-fn",
+  nome: "DEF FN",
+  categoria: "Funzioni utente",
+  sintassi: "DEF FNnome(arg1, arg2, ...) = espressione",
+  sommario: "Definisce funzioni inline che restituiscono il valore di un’espressione.",
+  descrizione: `
+    Consente di definire funzioni personalizzate che accettano argomenti e ritornano il risultato di una espressione.
+    Il nome deve iniziare con <code>FN</code> (es. <code>FNADD</code>). Non sono ammessi comandi (PRINT, GOTO, IF ecc.) all’interno: solo espressioni.
+  `,
+  esempi: [
+    { code: "10 DEF FNADD(X,Y)=X+Y\n20 PRINT \"5 + 3 = \"; FNADD(5,3)\nRUN", note: "Somma a due argomenti." },
+    { code: "10 DEF FNSQ(X)=X*X\n20 PRINT \"7^2 = \"; FNSQ(7)\nRUN", note: "Quadrato di un numero." },
+    { code: "10 DEF FNAREA(R)=3.14*R*R\n20 INPUT R\n30 PRINT \"AREA = \"; FNAREA(R)\nRUN", note: "Area cerchio da input." },
+    { code: "10 DEF FNTRIPLA(X)=X*3\n20 FOR I=1 TO 5\n30 PRINT \"TRIPLO DI \";I;\" = \"; FNTRIPLA(I)\n40 NEXT I\nRUN", note: "Richiamo multiplo in ciclo." }
+  ],
+  note: "Funzioni pure, senza effetti collaterali; richiamabili in espressioni."
+},
+{
+  id: "del",
+  nome: "DEL",
+  categoria: "File system",
+  sintassi: `
+DEL "nomefile"
+DEL variabile$
+  `,
+  sommario: "Elimina un file dalla SD (silenzioso se inesistente).",
+  descrizione: `
+    Cancella un file dalla memoria SD. Accetta nome tra virgolette o variabile stringa.
+    Non genera errore se il file non esiste.
+  `,
+  esempi: [
+    { code: "DEL \"prog1.bas\"", note: "Elimina file con nome diretto." },
+    { code: "10 LET F$=\"prog1.bas\"\n20 DEL F$\nRUN", note: "Elimina file specificato in variabile." }
+  ],
+  note: "Opera su SD. Per SPIFFS usare i comandi dedicati (se previsti)."
+},
+{
+  id: "deln",
+  nome: "DELN",
+  categoria: "Editor",
+  sintassi: `
+DELN n
+DELN n1,n2,n3
+DELN a-b
+  `,
+  sommario: "Elimina una o più righe dal programma in memoria.",
+  descrizione: `
+    Rimuove singole righe, liste di righe separate da virgole o intervalli continui.
+    Se una riga non esiste, viene ignorata. Digitare solo il numero di riga (senza DELN) elimina comunque la riga.
+  `,
+  esempi: [
+    {
+      code: `
+10 PRINT "Ciao"
+20 PRINT "Riga da cancellare"
+30 PRINT "Fine"
+RUN
+DELN 20
+LIST
+      `,
+      note: "Elimina riga 20."
+    },
+    {
+      code: `
+10 PRINT "Riga1"
+20 PRINT "Riga2"
+30 PRINT "Riga3"
+40 PRINT "Riga4"
+DELN 10,30
+LIST
+      `,
+      note: "Elimina più righe non contigue."
+    },
+    {
+      code: `
+100 PRINT "A"
+110 PRINT "B"
+120 PRINT "C"
+130 PRINT "D"
+DELN 100-120
+LIST
+      `,
+      note: "Elimina intervallo."
+    },
+    { code: "DELN 500", note: "Riga inesistente: nessun errore." }
+  ],
+  note: "Agisce solo sul listato in RAM. Per salvare, usa SAVE."
+},
+{
+  id: "delvar",
+  nome: "DELVAR",
+  categoria: "KV/JSON su SD",
+  sintassi: `
+DELVAR "file"
+DELVAR "file" "chiave"
+  `,
+  sommario: "Elimina un file JSON intero o una singola chiave al suo interno (su SD).",
+  descrizione: `
+    Senza chiave: cancella l’intero file JSON. Con chiave: rimuove solo la voce specificata.
+    ⚠ Agisce solo su SD; per SPIFFS usare <code>EDELVAR</code>.
+  `,
+  esempi: [
+    { code: "10 DELVAR \"config.json\" \"NOME\"", note: "Elimina una chiave dal file." },
+    { code: "10 DELVAR \"config.json\"", note: "Elimina completamente il file." }
+  ],
+  note: "Nessun effetto se il file/chiave non esiste."
+},
+{
+  id: "delay",
+  nome: "DELAY",
+  categoria: "Temporizzazione",
+  sintassi: "DELAY n",
+  sommario: "Pausa bloccante di n millisecondi.",
+  descrizione: `
+    Sospende l’esecuzione per <em>n</em> ms. Durante il delay non viene eseguito altro codice.
+  `,
+  esempi: [
+    { code: "10 PRINT \"CIAO\"\n20 DELAY 1000\n30 PRINT \"MONDO\"\nRUN", note: "Pausa di 1 s tra messaggi." },
+    { code: "10 CLS\n20 PRINT \"☼\"\n30 DELAY 500\n40 CLS\n50 DELAY 500\n60 GOTO 10\nRUN", note: "Lampeggio a 0.5 s." },
+    { code: "10 INPUT \"NOME: \"; N$\n20 PRINT \"ATTENDI...\"\n30 DELAY 2000\n40 PRINT \"BENVENUTO \"; N$\nRUN", note: "Ritardo dopo input." },
+    { code: "10 FOR I=5 TO 1 STEP -1\n20 PRINT I\n30 DELAY 1000\n40 NEXT I\n50 PRINT \"VIA!\"\nRUN", note: "Countdown." }
+  ],
+  note: "Bloccante. Unità: millisecondi (1000 = 1 s)."
+},
+{
+  id: "dev-auto",
+  nome: "DEV AUTO",
+  categoria: "Developer Console",
+  sintassi: `
+DEV AUTO ON
+DEV AUTO OFF
+  `,
+  sommario: "Abilita/disabilita l’avvio automatico della modalità developer al boot.",
+  descrizione: `
+    Se ON, al riavvio inizializza display e tastiera PS/2 configurati senza reinserire i comandi.
+  `,
+  esempi: [
+    {
+      code: `
+10 DEV AUTO ON
+20 DEV OLED SET 21 22 0x3C 128 64 0
+30 DEV DISPLAY OLED
+40 DEV ON
+RUN
+      `,
+      note: "Alla successiva accensione parte in dev mode con OLED pronto."
+    }
+  ],
+  note: "La configurazione viene salvata."
+},
+{
+  id: "dev-clear",
+  nome: "DEV CLEAR",
+  categoria: "Developer Console",
+  sintassi: "DEV CLEAR",
+  sommario: "Pulisce lo schermo del display corrente in dev mode.",
+  descrizione: `
+    Cancella la console del display selezionato (non disattiva dev mode).
+  `,
+  esempi: [
+    { code: "DEV CLEAR", note: "Schermata pulita." }
+  ],
+  note: "Utile per ripartire da una console vuota."
+},
+{
+  id: "dev-cursor",
+  nome: "DEV CURSOR",
+  categoria: "Developer Console",
+  sintassi: `
+DEV CURSOR ON
+DEV CURSOR OFF
+  `,
+  sommario: "Mostra/nasconde il cursore lampeggiante della console DEV.",
+  descrizione: `
+    Abilita o disabilita il cursore per distinguere stati di input.
+  `,
+  esempi: [
+    { code: "DEV CURSOR ON", note: "Abilita cursore." },
+    { code: "DEV CURSOR OFF", note: "Disabilita cursore." }
+  ],
+  note: "Persistenza dipende dall’implementazione."
+},
+{
+  id: "dev-display",
+  nome: "DEV DISPLAY",
+  categoria: "Developer Console",
+  sintassi: `
+DEV DISPLAY OLED
+DEV DISPLAY ILI
+DEV DISPLAY LCD
+  `,
+  sommario: "Seleziona il display per l’output della console DEV.",
+  descrizione: `
+    Sceglie il device di output (OLED/ILI/LCD) per PRINT/LIST/EDIR ecc.
+    La selezione viene salvata e resta attiva ai riavvii. Il display deve essere stato configurato in precedenza.
+  `,
+  esempi: [
+    { code: "10 DEV DISPLAY OLED\n20 DEV CLEAR\n30 PRINT \"Benvenuto su OLED\"\nRUN", note: "Console su OLED." },
+    { code: "10 DEV DISPLAY ILI\n20 DEV CLEAR\n30 PRINT \"Schermo ILI attivo\"\nRUN", note: "Console su ILI9341." },
+    { code: "10 DEV DISPLAY LCD\n20 DEV CLEAR\n30 PRINT \"LCD operativo\"\nRUN", note: "Console su LCD caratteri." }
+  ],
+  note: "Errore se il dispositivo non è configurato o non inizializza; resta il precedente."
+},
+{
+  id: "dev-font",
+  nome: "DEV FONT",
+  categoria: "Developer Console",
+  sintassi: "DEV FONT <size>",
+  sommario: "Imposta il fattore di scala del font della console DEV.",
+  descrizione: `
+    Modifica la dimensione del font. Minimo 1. Il cambio effettua un clear.
+  `,
+  esempi: [
+    { code: "DEV FONT 1", note: "Dimensione base." },
+    { code: "DEV FONT 2", note: "Font più grande." }
+  ],
+  note: "Il clear è automatico al cambio di font."
+},
+{
+  id: "dev-ili-set",
+  nome: "DEV ILI SET",
+  categoria: "Developer Console",
+  sintassi: "DEV ILI SET <CS> <DC> <RST> <LED> [SCK MOSI MISO] [ROT]",
+  sommario: "Configura pin e opzioni per un display ILI9341.",
+  descrizione: `
+    Imposta pin di controllo (CS, DC, RST, LED), opzionale bus SPI personalizzato (SCK/MOSI/MISO) e rotazione (ROT).
+  `,
+  esempi: [
+    {
+      code: "DEV ILI SET 17 16 5 32 18 23 19 3\nDEV DISPLAY ILI\nDEV ON",
+      note: "ILI9341 con retroilluminazione su GPIO32."
+    }
+  ],
+  note: "Richiede collegamenti corretti ai pin specificati."
+},
+{
+  id: "dev-lcd-i2c-set",
+  nome: "DEV LCD I2C SET",
+  categoria: "Developer Console",
+  sintassi: "DEV LCD I2C SET <addr> <cols> <rows> <sda> <scl>",
+  sommario: "Configura un display LCD via adattatore I²C.",
+  descrizione: `
+    Imposta indirizzo I²C, colonne/righe e pin SDA/SCL del display LCD.
+  `,
+  esempi: [
+    { code: "DEV LCD I2C SET 3C 16 2 21 22\nDEV DISPLAY LCD\nDEV ON", note: "LCD 16x2 a 0x3C su SDA=21, SCL=22." }
+  ],
+  note: "Indirizzo in hex senza 0x."
+},
+{
+  id: "dev-lcd-par-set",
+  nome: "DEV LCD PAR SET",
+  categoria: "Developer Console",
+  sintassi: "DEV LCD PAR SET <rs> <en> <d4> <d5> <d6> <d7> <cols> <rows>",
+  sommario: "Configura un LCD parallelo (4 bit).",
+  descrizione: `
+    Richiede pin RS/EN/D4..D7 e dimensioni (cols, rows).
+  `,
+  esempi: [
+    { code: "DEV LCD PAR SET 12 11 5 4 3 2 20 4\nDEV DISPLAY LCD\nDEV ON", note: "LCD 20x4 in parallelo." }
+  ],
+  note: "Verifica compatibilità pin con la board."
+},
+{
+  id: "dev-mapcols",
+  nome: "DEV MAPCOLS",
+  categoria: "Developer Console",
+  sintassi: "DEV MAPCOLS <n>",
+  sommario: "Imposta le colonne logiche della console DEV.",
+  descrizione: `
+    Mappa correttamente la stampa su display grafici definendo il numero di colonne virtuali.
+  `,
+  esempi: [
+    { code: "DEV MAPCOLS 40", note: "40 colonne virtuali." }
+  ],
+  note: "Usare insieme a risoluzione/display per layout coerente."
+},
+{
+  id: "dev-maprows",
+  nome: "DEV MAPROWS",
+  categoria: "Developer Console",
+  sintassi: "DEV MAPROWS <n>",
+  sommario: "Imposta le righe logiche della console DEV.",
+  descrizione: `
+    Definisce il numero di righe virtuali per la console.
+  `,
+  esempi: [
+    { code: "DEV MAPROWS 20", note: "20 righe virtuali." }
+  ],
+  note: "Si combina con MAPCOLS per l’impaginazione."
+},
+{
+  id: "dev-oled-set",
+  nome: "DEV OLED SET",
+  categoria: "Developer Console",
+  sintassi: "DEV OLED SET <width> <height> <addr> <sda> <scl> <rst>",
+  sommario: "Configura un OLED SSD1306 su I²C.",
+  descrizione: `
+    Richiede dimensioni, indirizzo I²C e pin SDA/SCL/RST.
+  `,
+  esempi: [
+    { code: "DEV OLED SET 128 64 3C 21 22 0\nDEV DISPLAY OLED\nDEV ON", note: "OLED 128x64 @0x3C." }
+  ],
+  note: "Indirizzo in hex senza 0x."
+},
+{
+  id: "dev-onoff",
+  nome: "DEV ON / OFF",
+  categoria: "Developer Console",
+  sintassi: `
+DEV ON
+DEV OFF
+  `,
+  sommario: "Abilita/disabilita la console developer sul display selezionato.",
+  descrizione: `
+    DEV ON: duplica le stampe Serial anche sul display. DEV OFF: disattiva la console su display.
+    L’attivazione può richiedere un riavvio per inizializzare.
+  `,
+  esempi: [
+    { code: "DEV DISPLAY OLED\nDEV ON", note: "Abilita console su OLED e mirror Serial→Display." },
+    { code: "DEV OFF", note: "Torna alla sola seriale." }
+  ],
+  note: "All’attivazione può riavviare l’ESP per applicare la config."
+},
+{
+  id: "dev-ps2-off",
+  nome: "DEV PS2 OFF",
+  categoria: "Developer Console",
+  sintassi: "DEV PS2 OFF",
+  sommario: "Disabilita la tastiera PS/2 in dev mode.",
+  descrizione: `
+    Interrompe la lettura della tastiera PS/2.
+  `,
+  esempi: [
+    { code: "DEV PS2 OFF", note: "PS/2 disabilitata." }
+  ],
+  note: "Nessuna configurazione eliminata."
+},
+{
+  id: "dev-ps2-on",
+  nome: "DEV PS2 ON",
+  categoria: "Developer Console",
+  sintassi: "DEV PS2 ON",
+  sommario: "Abilita la tastiera PS/2 per la console DEV.",
+  descrizione: `
+    Attiva l’input PS/2; richiede configurazione pin con <code>DEV PS2 SET</code>.
+  `,
+  esempi: [
+    { code: "DEV PS2 ON", note: "PS/2 attivata." }
+  ],
+  note: "Assicurarsi che i pin siano stati configurati."
+},
+{
+  id: "dev-ps2-set",
+  nome: "DEV PS2 SET",
+  categoria: "Developer Console",
+  sintassi: "DEV PS2 SET <clkPin> <dataPin>",
+  sommario: "Configura i pin per la tastiera PS/2.",
+  descrizione: `
+    Imposta i pin CLK/DATA per l’uso della tastiera in dev mode.
+  `,
+  esempi: [
+    { code: "DEV PS2 SET 33 32", note: "CLK=33, DATA=32." }
+  ],
+  note: "Dopo SET, usare DEV PS2 ON per abilitare l’input."
+},
+{
+  id: "dev-serial",
+  nome: "DEV SERIAL ON / OFF",
+  categoria: "Developer Console",
+  sintassi: `
+DEV SERIAL ON
+DEV SERIAL OFF
+  `,
+  sommario: "Abilita/disabilita il mirroring dell’output DEV su USB Serial.",
+  descrizione: `
+    ON: replica l’output della console DEV anche su Serial.
+    OFF: non replica su Serial (più veloce su ILI/OLED in stampe lunghe).
+    Non cambia il baud; controlla solo il mirroring. Non persistente al riavvio.
+  `,
+  esempi: [
+    { code: "10 DEV SERIAL ON\n20 PRINT \"Ciao su display e USB!\"\nRUN", note: "Log su display e su Serial." },
+    { code: "10 DEV SERIAL OFF\n20 LIST\nRUN", note: "LIST più reattivo senza eco USB." }
+  ],
+  note: "Se il Serial Monitor non è aperto, l’output può accodarsi nel buffer."
+},
+{
+  id: "dev-status",
+  nome: "DEV STATUS",
+  categoria: "Developer Console",
+  sintassi: "DEV STATUS",
+  sommario: "Mostra lo stato attuale della modalità developer.",
+  descrizione: `
+    Indica stato (ON/AUTO), display selezionato, font, mappatura, cursore, PS/2, e configurazioni salvate per OLED/ILI/LCD.
+  `,
+  esempi: [
+    { code: "DEV STATUS", note: "Dump configurazione correnti." }
+  ],
+  note: "Indirizzi I²C mostrati in hex senza 0x."
+},
+{
+  id: "dhtcalibreset",
+  nome: "DHTCALIBRESET",
+  categoria: "Sensori DHT",
+  sintassi: `
+DHTCALIBRESET pin
+DHTCALIBRESET ALL
+  `,
+  sommario: "Resetta le calibrazioni DHT/DHTT/DHTH (offset/slope) per un pin o per tutti.",
+  descrizione: `
+    Ripristina i parametri di calibrazione a offset=0 e slope=1 per il pin indicato o per tutti (ALL).
+    Utile per annullare correzioni impostate con <code>DHTCALIBSET</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 DHTCALIBSET DHT 2 0.5 -2
+20 DHTCALIBRESET 2
+30 SDHCALIBSHOW
+RUN
+      `,
+      note: "Reset solo per il pin 2."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHT 2 1.0
+20 DHTCALIBSET DHT 4 -0.5
+30 DHTCALIBRESET ALL
+40 SDHCALIBSHOW
+RUN
+      `,
+      note: "Reset globale."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHTT 2 1.0
+20 DHTREAD 2 T H
+30 PRINT T
+40 DHTCALIBRESET 2
+50 DHTREAD 2 T H
+60 PRINT T
+RUN
+      `,
+      note: "Confronto letture prima/dopo reset."
+    }
+  ],
+  note: "pin = quello usato in DHTINIT. Dopo reset, letture tornano ai valori grezzi del sensore."
 }
 ];
