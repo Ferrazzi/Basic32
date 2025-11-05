@@ -60,7 +60,7 @@ export default [
     </ol>
 
     <h3>Esempio: Display ILI9341 con SD e Touch integrati</h3>
-    <code>
+    <pre><code>
 10 PINMODE 17 OUTPUT NOPULL   ' TFT_CS come output
 20 DWRITE 17 1                ' tiene inattivo il display
 30 PINMODE 4 OUTPUT NOPULL    ' TOUCH_CS come output
@@ -71,7 +71,7 @@ export default [
 80 ILI INIT 17 16 5 3         ' inizializza TFT (CS=17, DC=16, RST=5, rotazione=3)
 90 ILI LED 32 1               ' accende retroilluminazione su GPIO32
 100 ILI TEXT 10 50 2 SDFREE 0 255 255  ' stampa spazio libero su SD in giallo
-    </code>
+    </code></pre>
 
     <p><strong>Nota:</strong> Se aggiungi altre periferiche SPI (es. RFID RC522), assegna loro un CS dedicato, imposta <code>PINMODE &lt;CS&gt; OUTPUT</code> e <code>DWRITE &lt;CS&gt; 1</code> prima di eseguire il rispettivo <code>INIT</code>. Con questa sequenza, ogni dispositivo è pronto a lavorare senza disturbare gli altri sul bus SPI.</p>
 
