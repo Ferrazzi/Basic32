@@ -310,15 +310,32 @@ body.c64 {
   color: var(--c64-text);
   font-size: clamp(18px, 3.2vw, 22px);
 }
-.manual-content code, .manual-content pre{
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+.manual-content pre {
   background: rgba(0,0,0,.18);
   border: 2px solid var(--c64-border);
   border-radius: 6px;
-  padding: 2px 6px;
+  padding: 0;                 /* padding sul code, non sul pre */
+  overflow: auto;
+}
+
+/* CODE DENTRO PRE: nessun bordo per riga, un solo box */
+.manual-content pre code {
+  display: block;             /* evita “cornici per riga” */
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  white-space: pre;           /* esplicito */
   color: var(--c64-text);
 }
-.manual-content pre{ padding: 8px 10px; overflow: auto; }
+
+/* INLINE CODE (nei paragrafi): mini-box */
+.manual-content code:not(pre code) {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0,0,0,.18);
+  border: 2px solid var(--c64-border);
+  border-radius: 6px;
+}
 
 /* Utility per accessibilità */
 .visually-hidden{
