@@ -1776,5 +1776,458 @@ RUN
     }
   ],
   note: "pin = quello usato in DHTINIT. Dopo reset, letture tornano ai valori grezzi del sensore."
+},
+{
+  id: "dhtcalibset",
+  nome: "DHTCALIBSET",
+  categoria: "Sensori DHT",
+  sintassi: `
+Forma semplice
+• DHTCALIBSET DHT pin offset [slope]
+• DHTCALIBSET DHTT pin offset [slope]
+• DHTCALIBSET DHTH pin offset [slope]
+Forma estesa
+• DHTCALIBSET DHT pin t_offset h_offset [t_slope] [h_slope]
+  `,
+  sommario: "Imposta offset/slope di calibrazione DHT per pin (T e/o H).",
+  descrizione: `
+    Applica correzioni secondo: <code>val_cal = val_raw * slope + offset</code>.
+    • <b>offset</b>: additivo (°C o %RH) • <b>slope</b>: moltiplicativo (>0).  
+    Priorità in lettura: calibrazioni specifiche <code>DHTT/DHTH</code> sovrascrivono la generale <code>DHT</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 DHTCALIBSET DHT 17 0.5 -2
+20 DHTINIT 17 11
+30 DHTREAD 17 T H
+40 PRINT T;"C  ";H;"%"
+RUN
+      `,
+      note: "Offset distinti (forma estesa compatta)."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHT 17 0.3
+20 DHTINIT 17 22
+30 DHTREAD 17 T H
+40 PRINT "T=";T;"  H=";H
+RUN
+      `,
+      note: "Stessa calibrazione su T e H (forma semplice)."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHTT 17 0.0 1.02
+20 DHTINIT 17 22
+30 DHTREAD 17 T H
+40 PRINT "T=";T
+RUN
+      `,
+      note: "Solo temperatura con slope."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHTH 17 -1.5
+20 DHTINIT 17 22
+30 DHTREAD 17 T H
+40 PRINT H
+RUN
+      `,
+      note: "Solo umidità (slope=1 implicito)."
+    },
+    {
+      code: `
+10 DHTCALIBSET DHT 17 0.5 -2
+RUN
+      `,
+      note: "Esempio di validazione: slope non valida → errore."
+    }
+  ],
+  note: "Slope opzionale (default 1.0, tipico 0.9…1.1). Le calibrazioni persistono finché non le cambi o fai DHTCALIBRESET."
+},
+{
+  id: "dhtcalibshow",
+  nome: "DHTCALIBSHOW",
+  categoria: "Sensori DHT",
+  sintassi: "DHTCALIBSHOW",
+  sommario: "Mostra le calibrazioni DHT correnti per tutti i pin.",
+  descrizione: `
+    Elenca chiavi e parametri (offset/slope) attivi per DHT, DHTT e DHTH.
+  `,
+  esempi: [
+    { code: "10 DHTCALIBSHOW\nRUN", note: "Elenco calibrazioni attive." },
+    { code: "10 DHTCALIBSET DHT 2 0 1\n20 DHTCALIBSHOW\nRUN", note: "Dopo reset/azzeramento valori." }
+  ],
+  note: "Sola lettura; utile per debug."
+},
+{
+  id: "dhtinit",
+  nome: "DHTINIT",
+  categoria: "Sensori DHT",
+  sintassi: "DHTINIT pin tipo",
+  sommario: "Inizializza un sensore DHT su un pin (11=DHT11, 22=DHT22).",
+  descrizione: `
+    Va eseguito almeno una volta per il pin prima di <code>DHTREAD</code>. Ripetilo se cambi pin o modello.
+  `,
+  esempi: [
+    { code: "10 DHTINIT 2 22\n20 PRINT \"OK\"\nRUN", note: "DHT22 sul pin 2." },
+    { code: "10 P=7: T=11\n20 DHTINIT P T\n30 PRINT \"DHT PRONTO\"\nRUN", note: "Parametri in variabile." }
+  ],
+  note: "Può restituire esito/OK secondo piattaforma, oppure nessun valore."
+},
+{
+  id: "dhtread",
+  nome: "DHTREAD",
+  categoria: "Sensori DHT",
+  sintassi: "DHTREAD pin varTemp varHum",
+  sommario: "Legge temperatura (°C) e umidità (%) dal DHT su pin.",
+  descrizione: `
+    Salva valori in numerico o stringa a seconda del suffisso della variabile. Applica automaticamente le calibrazioni DHTCALIBSET.
+  `,
+  esempi: [
+    { code: "10 DHTINIT 2 22\n20 DHTREAD 2 T H\n30 PRINT \"T=\";T;\"C  H=\";H;\"%\"\nRUN", note: "Lettura base." },
+    { code: "10 DHTINIT 2 22\n20 DHTREAD 2 T$ H$\n30 PRINT \"T=\";T$;\"  H=\";H$;\"%\"\nRUN", note: "Versione stringa." }
+  ],
+  note: "Gestire eventuali errori/NaN con IF."
+},
+{
+  id: "dim",
+  nome: "DIM",
+  categoria: "Array",
+  sintassi: `
+DIM nome_array(n)
+DIM nome_array$(n)
+  `,
+  sommario: "Dichiara array numerici o di stringhe indicizzati 0..n.",
+  descrizione: `
+    Elementi numerici inizializzati a 0, stringhe a "".
+    Assegnazione tramite <code>LET</code>. Indici fuori limite → errore.
+  `,
+  esempi: [
+    { code: "10 DIM A(3)\n20 LET A(0)=5: LET A(1)=10: LET A(2)=15\n30 FOR I=0 TO 2\n40 PRINT \"A(\";I;\")=\";A(I)\n50 NEXT I", note: "Array numerico." },
+    { code: "10 DIM NOME$(2)\n20 LET NOME$(0)=\"LUCA\": LET NOME$(1)=\"ANNA\"\n30 FOR I=0 TO 1\n40 PRINT NOME$(I)\n50 NEXT I", note: "Array di testo." }
+  ],
+  note: "Dimensione fissa; per ridimensionare usa CLEAR ARRAY e ridichiara."
+},
+{
+  id: "dlevel",
+  nome: "DLEVEL(pin)",
+  categoria: "GPIO",
+  sintassi: "DLEVEL(pin)",
+  sommario: "Legge il livello digitale raw del pin (ignora debounce).",
+  descrizione: `
+    Ritorna 1 (HIGH) o 0 (LOW). Configura prima il pin con <code>PINMODE</code>.
+  `,
+  esempi: [
+    { code: "10 PINMODE 12 INPUT PULLUP\n20 V=DLEVEL(12)\n30 PRINT \"PIN 12 = \";V", note: "Lettura diretta." },
+    { code: "10 PINMODE 12 INPUT PULLUP DEBOUNCE 60\n20 IF DLEVEL(12)=0 THEN PRINT \"HOLD\" ELSE PRINT \"UP\"\n30 DELAY 500\n40 GOTO 20", note: "Ignora il debounce." }
+  ],
+  note: "Per click singoli usa DREAD con DEBOUNCE."
+},
+{
+  id: "do",
+  nome: "DO",
+  categoria: "Task ciclici",
+  sintassi: "DO <numero_di_linea>",
+  sommario: "Esegue ripetutamente una singola riga ad ogni ciclo principale.",
+  descrizione: `
+    Utile per controlli semplici non bloccanti; non ferma altri servizi.
+  `,
+  esempi: [
+    { code: "50 DO 100\n100 PRINT \"CICLO ATTIVO\"\nRUN", note: "Messaggio ricorrente." },
+    { code: "10 PINMODE 12 INPUT PULLUP\n20 DO 100\n100 IF DREAD(12)=0 THEN PRINT \"PREMUTO\"\nRUN", note: "Controllo pulsante." }
+  ],
+  note: "Puoi usare più DO su righe diverse."
+},
+{
+  id: "do-block",
+  nome: "DO BLOCK",
+  categoria: "Task ciclici",
+  sintassi: "DO BLOCK <inizio> TO <fine>",
+  sommario: "Esegue in ciclo tutte le righe tra inizio e fine, in ordine.",
+  descrizione: `
+    Ogni ciclo esegue l’intero blocco; utile per automazioni multi-istruzione.
+  `,
+  esempi: [
+    { code: "5 PINMODE 2 OUTPUT NOPULL\n10 DO BLOCK 100 TO 140\n100 DWRITE 2 1\n110 WAIT 500\n120 DWRITE 2 0\n130 WAIT 500\n140 ' end", note: "Blink 500 ms." }
+  ],
+  note: "Non interferisce con servizi (es. MQTT). Più blocchi consentiti."
+},
+{
+  id: "dread",
+  nome: "DREAD(pin)",
+  categoria: "GPIO",
+  sintassi: "DREAD(pin)",
+  sommario: "Legge lo stato digitale; con DEBOUNCE diventa one-shot.",
+  descrizione: `
+    Senza DEBOUNCE: livello raw. Con DEBOUNCE [ms]: impulso singolo per pressione.  
+    1=HIGH, 0=LOW. Configura prima con <code>PINMODE</code>.
+  `,
+  esempi: [
+    { code: "10 PINMODE 12 INPUT PULLUP\n20 V=DREAD(12)\n30 PRINT \"STATO: \";V\nRUN", note: "Senza debounce." },
+    { code: "10 PINMODE 12 INPUT PULLUP DEBOUNCE 60\n20 IF DREAD(12)=0 THEN PRINT \"PULSANTE PREMUTO\"\n30 GOTO 20\nRUN", note: "One-shot con debounce." }
+  ],
+  note: "Per stato istantaneo (hold), usa DLEVEL."
+},
+{
+  id: "dwrite",
+  nome: "DWRITE(pin, valore)",
+  categoria: "GPIO",
+  sintassi: "DWRITE pin valore",
+  sommario: "Imposta un pin digitale a HIGH(1) o LOW(0).",
+  descrizione: `
+    Per LED, relè, segnali di controllo. Pin in OUTPUT via <code>PINMODE</code>.
+  `,
+  esempi: [
+    { code: "10 PINMODE 2 OUTPUT NOPULL\n20 DWRITE 2 1\n30 WAIT 1000\n40 DWRITE 2 0\nRUN", note: "LED on per 1 s." },
+    { code: "10 PINMODE 13 OUTPUT NOPULL\n20 INPUT A\n30 IF A>100 THEN DWRITE 13 1 ELSE DWRITE 13 0\nRUN", note: "Attiva su soglia." }
+  ],
+  note: "1≡HIGH, 0≡LOW."
+},
+{
+  id: "dir",
+  nome: "DIR",
+  categoria: "File system",
+  sintassi: "DIR",
+  sommario: "Elenca i file presenti sulla SD.",
+  descrizione: `
+    Mostra rapidamente i file disponibili su SD (se presente).
+  `,
+  esempi: [
+    { code: "DIR", note: "Elenco file." }
+  ],
+  note: "Per SPIFFS usa EDIR."
+},
+{
+  id: "ecopy",
+  nome: "ECOPY",
+  categoria: "File system",
+  sintassi: `
+ECOPY "file"
+ECOPY FILE$
+ECOPY "*"
+  `,
+  sommario: "Copia file da SD a SPIFFS (sovrascrive se esiste).",
+  descrizione: `
+    Accetta nome tra virgolette, variabile/espressione stringa, oppure "*" per copia massiva.
+  `,
+  esempi: [
+    { code: "10 FILE$=\"config.json\"\n20 ECOPY FILE$\n30 PRINT \"File copiato in SPIFFS\"", note: "Singolo file da variabile." },
+    { code: "10 ECOPY \"*\"\n20 PRINT \"Tutti i file copiati in SPIFFS\"", note: "Copia tutti i file." }
+  ],
+  note: "Richiede SD montata e SPIFFS abilitata."
+},
+{
+  id: "edel",
+  nome: "EDEL",
+  categoria: "File system (SPIFFS)",
+  sintassi: `
+EDEL "nomefile"
+EDEL variabile$
+  `,
+  sommario: "Elimina un file esclusivamente da SPIFFS.",
+  descrizione: `
+    Forza la cancellazione in memoria interna, ignorando la SD.
+  `,
+  esempi: [
+    { code: "EDEL \"prog1.bas\"", note: "Elimina file su SPIFFS." },
+    { code: "10 FN$=\"prog1.bas\"\n20 EDEL FN$\nRUN", note: "Uso con variabile." }
+  ],
+  note: "Silenzioso se il file non esiste."
+},
+{
+  id: "edelvar",
+  nome: "EDELVAR",
+  categoria: "KV/JSON su SPIFFS",
+  sintassi: `
+EDELVAR "file"
+EDELVAR "file" "chiave"
+  `,
+  sommario: "Elimina un file JSON o una chiave al suo interno (SPIFFS).",
+  descrizione: `
+    Equivalente a DELVAR ma opera su SPIFFS.
+  `,
+  esempi: [
+    { code: "10 EDELVAR \"prefs.json\" \"USER\"", note: "Elimina chiave." },
+    { code: "10 EDELVAR \"prefs.json\"", note: "Elimina l’intero file." }
+  ],
+  note: "Nessun effetto se file/chiave mancano."
+},
+{
+  id: "edir",
+  nome: "EDIR",
+  categoria: "File system (SPIFFS)",
+  sintassi: "EDIR",
+  sommario: "Elenca i file presenti solo su SPIFFS.",
+  descrizione: `
+    Forza la visualizzazione dei file della memoria interna.
+  `,
+  esempi: [
+    { code: "EDIR", note: "Elenco SPIFFS." }
+  ],
+  note: "Utile quando coesistono file omonimi su SD e SPIFFS."
+},
+{
+  id: "eformat",
+  nome: "EFORMAT",
+  categoria: "File system (SPIFFS)",
+  sintassi: "EFORMAT",
+  sommario: "Cancella tutti i file nella root della SPIFFS.",
+  descrizione: `
+    Svuota la memoria interna (attenzione: operazione distruttiva).
+  `,
+  esempi: [
+    { code: "10 EFORMAT\n20 PRINT \"SPIFFS pulita\"", note: "Pulizia completa." }
+  ],
+  note: "Non formattare se non necessario."
+},
+{
+  id: "elistvars",
+  nome: "ELISTVARS",
+  categoria: "KV/JSON su SD",
+  sintassi: "ELISTVARS(\"file\")",
+  sommario: "Elenca variabili salvate su SD (file JSON).",
+  descrizione: `
+    Equivalente a LISTVARS ma legge file su SD (creati con ESAVEVAR).
+  `,
+  esempi: [
+    {
+      code: "10 ESAVEVAR \"dati.json\" \"TEMP\" 22.5\n20 ESAVEVAR \"dati.json\" \"STATO\" \"OK\"\n30 ELISTVARS \"dati.json\"",
+      note: "Stampa contenuto chiave/valore."
+    }
+  ],
+  note: "Formato e stampa come LISTVARS."
+},
+{
+  id: "eload",
+  nome: "ELOAD",
+  categoria: "File system (SPIFFS)",
+  sintassi: `
+ELOAD "nomefile"
+ELOAD variabile$
+  `,
+  sommario: "Carica un .bas dalla SPIFFS nel listato in memoria.",
+  descrizione: `
+    Identico a LOAD ma forza la sorgente SPIFFS. Sostituisce il programma in RAM.
+  `,
+  esempi: [
+    { code: "ELOAD \"setup.bas\"", note: "Carica da SPIFFS." },
+    { code: "10 F$=\"gioco.bas\"\n20 ELOAD F$\nRUN", note: "Nome in variabile." }
+  ],
+  note: "Il listato in RAM viene sovrascritto."
+},
+{
+  id: "eloadvar",
+  nome: "ELOADVAR",
+  categoria: "KV/JSON su SPIFFS",
+  sintassi: "ELOADVAR(file chiave variabile)",
+  sommario: "Carica un valore dal JSON su SPIFFS in una variabile.",
+  descrizione: `
+    Equivalente a LOADVAR ma legge da SPIFFS (file creati con ESAVEVAR).
+  `,
+  esempi: [
+    { code: "10 ELOADVAR \"prefs.json\" \"SPEED\" S\n20 ELOADVAR \"prefs.json\" \"USER\" U$", note: "Carica configurazioni." }
+  ],
+  note: "Tipi coerenti con la variabile destinazione."
+},
+{
+  id: "else",
+  nome: "ELSE",
+  categoria: "Controllo di flusso",
+  sintassi: "IF cond THEN istruzione1 ELSE istruzione2",
+  sommario: "Ramo alternativo dell’IF su singola riga.",
+  descrizione: `
+    BASIC32 non ha blocchi IF…ENDIF: esprimi tutto su una riga. Consente PRINT, LET, GOTO, ecc.
+  `,
+  esempi: [
+    { code: "10 INPUT A\n20 IF A>0 THEN PRINT \"POSITIVO\" ELSE PRINT \"NEGATIVO O ZERO\"\nRUN", note: "Messaggio condizionale." },
+    { code: "10 PINMODE 2 OUTPUT NOPULL\n20 INPUT V\n30 IF V=1 THEN DWRITE 2 1 ELSE DWRITE 2 0\nRUN", note: "Controllo GPIO." }
+  ],
+  note: "Usa parentesi per chiarezza nelle espressioni complesse."
+},
+{
+  id: "erename",
+  nome: "ERENAME",
+  categoria: "File system (SPIFFS)",
+  sintassi: `
+ERENAME "vecchio" "nuovo"
+ERENAME variabile$ variabile$
+  `,
+  sommario: "Rinomina un file presente su SPIFFS.",
+  descrizione: `
+    Opera solo su memoria interna. Non altera i contenuti.
+  `,
+  esempi: [
+    { code: "ERENAME \"boot.bas\" \"boot_old.bas\"", note: "Versioning rapido." }
+  ],
+  note: "Ignora SD; operazione di metadati."
+},
+{
+  id: "esavevar",
+  nome: "ESAVEVAR",
+  categoria: "KV/JSON su SPIFFS",
+  sintassi: "ESAVEVAR(file chiave valore",
+  sommario: "Salva/aggiorna chiave-valore in JSON su SPIFFS.",
+  descrizione: `
+    Identico a SAVEVAR ma scrive su SPIFFS. Sovrascrive la chiave se esiste.
+  `,
+  esempi: [
+    {
+      code: "10 ESAVEVAR \"prefs.json\" \"SPEED\" 150\n20 ESAVEVAR \"prefs.json\" \"USER\" \"Anna\"",
+      note: "Salva configurazioni permanenti."
+    }
+  ],
+  note: "Utile su dispositivi senza SD."
+},
+{
+  id: "esave",
+  nome: "ESAVE",
+  categoria: "File system (SPIFFS)",
+  sintassi: `
+ESAVE "nomefile"
+ESAVE variabile$
+  `,
+  sommario: "Salva il programma corrente su SPIFFS.",
+  descrizione: `
+    Identico a SAVE ma forza la destinazione SPIFFS, anche con SD inserita.
+  `,
+  esempi: [
+    { code: "10 ESAVE \"config.bas\"\nRUN", note: "Salva su memoria interna." },
+    { code: "10 F$=\"menu.bas\"\n20 ESAVE F$\nRUN", note: "Nome in variabile." }
+  ],
+  note: "Sovrascrive file omonimo se presente."
+},
+{
+  id: "everify",
+  nome: "EVERIFY",
+  categoria: "File system (SPIFFS)",
+  sintassi: `
+EVERIFY "nomefile"
+EVERIFY variabile$
+  `,
+  sommario: "Confronta il listato in RAM con un file su SPIFFS.",
+  descrizione: `
+    Segnala se il programma in memoria è identico al file specificato.
+  `,
+  esempi: [
+    { code: "EVERIFY \"setup.bas\"", note: "File uguale/diverso dal listato." },
+    { code: "10 REM VERSIONE NUOVA\n20 EVERIFY \"setup.bas\"\nRUN", note: "Rileva differenza." }
+  ],
+  note: "Non modifica nulla (controllo non distruttivo)."
+},
+{
+  id: "examples",
+  nome: "EXAMPLES",
+  categoria: "Rete / Utility",
+  sintassi: "EXAMPLES",
+  sommario: "Recupera e mostra la lista degli esempi ufficiali da GitHub.",
+  descrizione: `
+    Richiede connessione Wi-Fi attiva tramite <code>WIFI</code>. Elenca gli esempi disponibili online.
+  `,
+  esempi: [
+    { code: "10 WIFI \"ssid\" \"password\"\n20 WAIT 2000\n30 EXAMPLES\nRUN", note: "Elenco esempi da GitHub." }
+  ],
+  note: "Nessun parametro; carica dinamicamente i nomi se la rete è attiva."
 }
 ];
