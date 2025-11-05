@@ -351,5 +351,391 @@ RUN
     }
   ],
   note: "Per 50 Hz, usare finestre di 200–500 ms. Finestra più lunga → misura più stabile. Calibrare lo zero senza carico prima dell’uso."
+},
+{
+  id: "acs-samples",
+  nome: "ACS SAMPLES",
+  categoria: "ACS712",
+  sintassi: "ACS SAMPLES n",
+  sommario: "Imposta il numero di campioni per le letture DC mediate (ACS READ).",
+  descrizione: `
+    Imposta il numero di campioni utilizzati per calcolare la media durante le letture di corrente DC con <code>ACS READ</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS SAMPLES 64
+30 ACS READ I
+40 PRINT I
+      `,
+      note: "Imposta 64 campioni per la media delle letture DC."
+    }
+  ],
+  note: "Non influisce su <code>ACS RMS</code>, che usa la propria finestra temporale."
+},
+
+{
+  id: "acs-sens",
+  nome: "ACS SENS",
+  categoria: "ACS712",
+  sintassi: "ACS SENS mv_per_A",
+  sommario: "Imposta manualmente la sensibilità (mV/A) del sensore ACS.",
+  descrizione: `
+    Imposta manualmente la sensibilità in mV/A del modulo ACS712.  
+    Utile se il modulo non corrisponde ai modelli standard o per tarature personalizzate.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS SENS 100
+30 ACS READ I
+40 PRINT I
+      `,
+      note: "Forza una sensibilità di 100 mV/A."
+    }
+  ],
+  note: "Valori tipici per ACS712: 185 (5 A), 100 (20 A), 66 (30 A)."
+},
+
+{
+  id: "acs-vref",
+  nome: "ACS VREF",
+  categoria: "ACS712",
+  sintassi: "ACS VREF mv",
+  sommario: "Imposta la tensione di riferimento ADC in millivolt.",
+  descrizione: `
+    Imposta manualmente la tensione di riferimento ADC in millivolt (<em>mV</em>), usata come fallback
+    se non è disponibile la funzione <code>analogReadMilliVolts</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 20 3300
+20 ACS VREF 3300
+      `,
+      note: "Imposta la tensione di riferimento ADC a 3.3 V (3300 mV)."
+    }
+  ],
+  note: "Su ESP32, se <code>analogReadMilliVolts</code> è disponibile, non serve impostare manualmente VREF."
+},
+
+{
+  id: "acs-watch",
+  nome: "ACS WATCH",
+  categoria: "ACS712",
+  sintassi: `
+ACS WATCH limit GOTO line
+ACS WATCH limit ABOVE GOTO line
+ACS WATCH limit BELOW GOTO line
+ACS WATCH limit GOTO line RMS window_ms
+ACS WATCH limit ABOVE|BELOW GOTO line RMS window_ms
+  `,
+  sommario: "Esegue una lettura di corrente e salta alla linea specificata se la condizione è vera.",
+  descrizione: `
+    Valuta la corrente letta dal sensore e, se supera (o scende sotto) la soglia indicata, esegue un salto alla riga specificata.  
+    - Default: <b>ABOVE</b> (salta se corrente ≥ limite)  
+    - Con <b>BELOW</b>: salta se corrente ≤ limite  
+    - Con <b>RMS</b>: misura la corrente AC RMS sulla finestra temporale specificata (<em>window_ms</em>)  
+    - Senza RMS: usa la media DC
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 20
+20 ACS CALIB ZERO 256
+30 PRINT "Loop motore..."
+40 ' ... comandi motore ...
+50 ACS WATCH 2.5 GOTO 200
+60 WAIT 50
+70 GOTO 40
+200 PRINT "ALLARME: sovracorrente!"
+210 ' Spegni carico
+      `,
+      note: "Protezione DC per sovracorrente."
+    },
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS CALIB ZERO 256
+30 PRINT "Monitor corrente minima"
+40 ACS WATCH 0.20 BELOW GOTO 100
+50 WAIT 200
+60 GOTO 40
+100 PRINT "Corrente bassa! Verifica carico."
+      `,
+      note: "Soglia minima per corrente DC."
+    },
+    {
+      code: `
+10 ACS INIT 34 30
+20 ACS CALIB ZERO 256
+30 PRINT "Controllo AC RMS"
+40 ACS WATCH 0.80 GOTO 100 RMS 400
+50 WAIT 100
+60 GOTO 40
+100 PRINT "Soglia Irms raggiunta!"
+      `,
+      note: "Controllo RMS su finestra di 400 ms (AC 50 Hz)."
+    },
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS CALIB ZERO 256
+30 PRINT "Servo in movimento"
+40 ' SERVOWRITE 1 90
+50 ACS WATCH 1.2 GOTO 300
+60 WAIT 50
+70 GOTO 40
+300 PRINT "STOP: corrente troppo alta"
+310 ' SERVOWRITE 1 0
+      `,
+      note: "Stop servo su sovracorrente."
+    }
+  ],
+  note: `
+    • Il comando non mantiene stato interno: valuta e, se la condizione è vera, salta.  
+    • Con <b>RMS</b> la chiamata è bloccante per circa <em>window_ms</em>.  
+    • Eseguire <code>ACS CALIB ZERO</code> senza carico per una calibrazione stabile.  
+    • È possibile usare più <code>ACS WATCH</code> con soglie diverse nello stesso loop (es. avviso e arresto).
+  `
+},
+
+{
+  id: "adc-cal-gain",
+  nome: "ADC CAL GAIN",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL GAIN <fattore>",
+  sommario: "Imposta il guadagno moltiplicativo del convertitore ADC.",
+  descrizione: `
+    Imposta il guadagno moltiplicativo del convertitore ADC per correggere differenze di scala
+    tra la tensione reale e quella misurata. Il valore predefinito è 1.0.
+  `,
+  esempi: [
+    { code: "ADC CAL GAIN 1.015", note: "Aumenta la scala dell’1.5%." },
+    { code: "ADC CAL GAIN 0.98", note: "Riduce la scala del 2%." }
+  ],
+  note: "GAIN deve essere > 0 (tipicamente tra 0.95 e 1.10). Si applica automaticamente a <code>VREAD</code> e <code>RREAD</code>."
+},
+
+{
+  id: "adc-cal-measure",
+  nome: "ADC CAL MEASURE",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL MEASURE <pin> <volt_noto> [campioni]",
+  sommario: "Esegue una calibrazione automatica del GAIN misurando una tensione nota.",
+  descrizione: `
+    Calibra automaticamente il GAIN leggendo una tensione nota sul pin ADC.  
+    Confronta la lettura reale con il valore noto e regola il guadagno in modo che coincidano.
+  `,
+  esempi: [
+    {
+      code: `
+ADC CAL RESET
+ADC CAL REF 3.30
+ADC CAL MEASURE 34 3.300 32
+      `,
+      note: "Calibrazione automatica a 3.300 V su GPIO34 (32 campioni)."
+    },
+    {
+      code: `
+ADC CAL MEASURE 34 2.500 16
+      `,
+      note: "Calibrazione a 2.500 V con 16 campioni."
+    }
+  ],
+  note: "Aggiorna solo il GAIN. [campioni] è opzionale (default 16). Usare tensioni tra 1.0 V e 3.0 V reali e stabili."
+},
+
+{
+  id: "adc-cal-offset",
+  nome: "ADC CAL OFFSET",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL OFFSET <volt>",
+  sommario: "Applica un offset additivo (in volt) alle letture ADC.",
+  descrizione: `
+    Applica un offset costante alle letture ADC per correggere differenze di zero o errori sistematici.
+    L’offset viene aggiunto dopo il calcolo del guadagno.
+  `,
+  esempi: [
+    { code: "ADC CAL OFFSET -0.010", note: "Sottrae 10 mV (corregge una sovrastima)." },
+    { code: "ADC CAL OFFSET 0.005", note: "Aggiunge 5 mV (compensa una sottostima)." }
+  ],
+  note: "Valori tipici da −0.020 V a +0.020 V. Utile per errori costanti a 0 V."
+},
+
+{
+  id: "adc-cal-ref",
+  nome: "ADC CAL REF",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL REF <volt>",
+  sommario: "Imposta la tensione di riferimento ADC.",
+  descrizione: `
+    Definisce la tensione massima corrispondente alla piena scala ADC.
+    Serve per adattare le letture alla tensione reale di alimentazione del microcontrollore.
+  `,
+  esempi: [
+    { code: "ADC CAL REF 3.30", note: "Usa 3.30 V come riferimento standard (ESP32)." },
+    { code: "ADC CAL REF 3.28", note: "Imposta riferimento reale misurato di 3.28 V." }
+  ],
+  note: "REF deve essere > 0. Impostalo sul valore reale della Vcc. Combinalo con GAIN e OFFSET."
+},
+
+{
+  id: "adc-cal-reset",
+  nome: "ADC CAL RESET",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL RESET",
+  sommario: "Ripristina i valori di calibrazione ADC ai default di fabbrica.",
+  descrizione: `
+    Reimposta i parametri di calibrazione ai valori iniziali: REF=3.30 V, GAIN=1.0, OFFSET=0.0.
+    Utile per annullare modifiche e ripartire da zero.
+  `,
+  esempi: [
+    {
+      code: `
+ADC CAL RESET
+ADC CAL STATUS
+      `,
+      note: "Reset completo dei parametri di calibrazione."
+    }
+  ],
+  note: "Può essere eseguito più volte senza effetti collaterali. Consigliato prima di una nuova calibrazione."
+},
+
+{
+  id: "adc-cal-status",
+  nome: "ADC CAL STATUS",
+  categoria: "ADC Calibrazione",
+  sintassi: "ADC CAL STATUS",
+  sommario: "Mostra i parametri di calibrazione attivi del sistema ADC.",
+  descrizione: `
+    Visualizza i valori correnti di riferimento (REF), guadagno (GAIN) e offset (OFFSET),
+    permettendo di verificare la calibrazione in uso.
+  `,
+  esempi: [
+    { code: "ADC CAL STATUS", note: "Mostra i parametri di calibrazione correnti via seriale." }
+  ],
+  note: "Non modifica alcun valore. Usalo dopo ogni calibrazione per confermare i parametri."
+},
+
+{
+  id: "aread",
+  nome: "AREAD(p)",
+  categoria: "Funzioni ADC",
+  sintassi: "AREAD(p)",
+  sommario: "Legge il valore analogico da un pin ADC dell’ESP32.",
+  descrizione: `
+    Legge il valore analogico dal pin specificato (p), restituendo un numero tra 0 e 4095:
+    <ul>
+      <li>0 = 0 V</li>
+      <li>4095 ≈ 3.3 V</li>
+    </ul>
+    Usato per sensori analogici (potenziometri, luce, temperatura, ecc.).  
+    Pin tipici: GPIO 36, 39, 34, 35, 32, 33.  
+    ⚠ Solo i pin ADC supportano lettura analogica.
+  `,
+  esempi: [
+    {
+      code: `
+10 PRINT "LETTURA ANALOGICA:"
+20 V = AREAD(36)
+30 PRINT "VALORE: "; V
+40 WAIT 1000
+50 GOTO 20
+RUN
+      `,
+      note: "Lettura continua dal pin GPIO36 (es. potenziometro)."
+    },
+    {
+      code: `
+10 LUX = AREAD(36)
+20 IF LUX < 1000 THEN PRINT "LUCE OK" ELSE PRINT "LUCE BASSA"
+30 WAIT 1000
+40 GOTO 10
+RUN
+      `,
+      note: "Verifica soglia di luminosità simulata."
+    }
+  ],
+  note: "Restituisce valori 0–4095 proporzionali alla tensione analogica. Usa pin ADC validi."
+},
+
+{
+  id: "and-or-not",
+  nome: "AND, OR, NOT",
+  categoria: "Operatori logici",
+  sintassi: "A AND B | A OR B | NOT A",
+  sommario: "Operatori logici per confronti e operazioni bit a bit.",
+  descrizione: `
+    Gli operatori logici <code>AND</code>, <code>OR</code> e <code>NOT</code> eseguono confronti logici o bitwise:
+    <ul>
+      <li><b>AND</b>: restituisce 1 se entrambi gli operandi ≠ 0</li>
+      <li><b>OR</b>: restituisce 1 se almeno uno ≠ 0</li>
+      <li><b>NOT</b>: inverte il valore logico (NOT 0 = -1, NOT 1 = 0)</li>
+    </ul>
+    Utilizzabili in <code>IF</code>, <code>LET</code> e operazioni binarie.
+  `,
+  esempi: [
+    { code: "10 A=1: B=2\n20 IF A=1 AND B=2 THEN PRINT \"ENTRAMBI VERI\"\nRUN", note: "Uso con IF e AND." },
+    { code: "10 A=0: B=5\n20 IF A<>0 OR B<>0 THEN PRINT \"ALMENO UNO È DIVERSO DA ZERO\"\nRUN", note: "Uso con OR." },
+    { code: "10 A=0\n20 IF NOT A THEN PRINT \"A È ZERO\"\nRUN", note: "Uso con NOT." },
+    { code: "10 X=7: MASK=4\n20 RESULT=X AND MASK\n30 PRINT \"RISULTATO:\"; RESULT\nRUN", note: "Maschera di bit con AND." },
+    { code: "10 A=5\n20 B=(A>0) AND (A<10)\n30 PRINT B\nRUN", note: "Uso logico in assegnazione." }
+  ],
+  note: "Restituiscono valori numerici (0 o 1/-1). 0=FALSO, ≠0=VERO."
+},
+
+{
+  id: "asc",
+  nome: "ASC(stringa$)",
+  categoria: "Stringhe",
+  sintassi: "ASC(stringa$)",
+  sommario: "Restituisce il codice ASCII del primo carattere della stringa.",
+  descrizione: `
+    La funzione <code>ASC</code> restituisce il codice ASCII del primo carattere della stringa.
+    Utile per analizzare input, confronti e conversioni tra caratteri e codici numerici.
+  `,
+  esempi: [
+    { code: "10 A$=\"A\"\n20 PRINT ASC(A$)\nRUN", note: "Restituisce 65." },
+    { code: "10 C$=\"Z\"\n20 IF ASC(C$)=90 THEN PRINT \"È Z\"\nRUN", note: "Confronto con lettera specifica." },
+    { code: "10 T$=\"C\"\n20 COD=ASC(T$)\n30 PRINT CHR$(COD)\nRUN", note: "Conversione da codice a carattere." },
+    { code: "10 PRINT \"PREMI UN TASTO:\"\n20 GET K$\n30 PRINT \"CODICE ASCII:\"; ASC(K$)\nRUN", note: "Mostra il codice del tasto premuto." },
+    { code: "10 S$=\"ABC\"\n20 FOR I=1 TO LEN(S$)\n30 PRINT MID$(S$,I,1);\"=\";ASC(MID$(S$,I,1))\n40 NEXT I\nRUN", note: "Itera e mostra i codici di ogni carattere." }
+  ],
+  note: "Solo il primo carattere viene considerato. Se la stringa è vuota, può restituire 0 o errore."
+},
+{
+  id: "autorun",
+  nome: "AUTORUN",
+  categoria: "Sistema",
+  sintassi: `
+AUTORUN "file.bas"
+AUTORUN "file.bas" PIN <numero>
+AUTORUN OFF
+  `,
+  sommario: "Imposta o disattiva l’esecuzione automatica di un programma all’avvio.",
+  descrizione: `
+    <code>AUTORUN</code> configura l’avvio automatico di un programma BASIC all’accensione.
+    Puoi specificare un file <code>.bas</code> e opzionalmente un pin di sicurezza (GPIO).
+    <ul>
+      <li><b>AUTORUN "file.bas"</b>: avvia il programma all’accensione (PIN 0 predefinito)</li>
+      <li><b>AUTORUN "file.bas" PIN n</b>: usa un GPIO per controllo sicurezza</li>
+      <li><b>AUTORUN OFF</b>: disattiva completamente l’autorun</li>
+    </ul>
+  `,
+  esempi: [
+    { code: "AUTORUN \"startup.bas\"", note: "Avvio automatico con PIN 0 predefinito." },
+    { code: "AUTORUN \"demo.bas\" PIN 5", note: "Autorun con controllo su GPIO5." },
+    { code: "AUTORUN OFF", note: "Disattiva l’autorun." }
+  ],
+  note: `
+    • Il file deve esistere su SPIFFS ed avere estensione .bas.
+    • Se il file non viene trovato, viene restituito un errore.
+    • Il GPIO di sicurezza è opzionale e può bloccare l’esecuzione automatica in base al suo stato.
+    • Il file di configurazione /autorun.cfg viene sovrascritto a ogni nuova impostazione.
+    • L'esecuzione del programma avviene subito dopo la configurazione.
+  `
 }
 ];
