@@ -201,5 +201,155 @@ RUN
     }
   ],
   note: "ABS è una funzione pura: non modifica variabili, restituisce solo un valore numerico positivo."
+},
+{
+  id: "acs-calib-setoffset",
+  nome: "ACS CALIB SETOFFSET",
+  categoria: "ACS712",
+  sintassi: "ACS CALIB SETOFFSET mv",
+  sommario: "Imposta manualmente l’offset di zero in millivolt.",
+  descrizione: `
+    Imposta manualmente l’offset di zero in mV (tipicamente attorno a <em>Vcc/2</em>).
+    Utile se conosci già l’offset misurato con un multimetro o desideri forzarlo manualmente.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 20
+20 ACS CALIB SETOFFSET 1650
+30 ACS READ I
+40 PRINT I
+      `,
+      note: "Imposta offset manuale a 1650 mV e legge la corrente."
+    }
+  ],
+  note: "Non sostituisce la calibrazione automatica. Puoi combinare <code>ZERO</code> e <code>SETOFFSET</code> (l’ultimo chiamato prevale)."
+},
+{
+  id: "acs-calib-show",
+  nome: "ACS CALIB SHOW",
+  categoria: "ACS712",
+  sintassi: "ACS CALIB SHOW",
+  sommario: "Mostra su seriale la configurazione corrente del sensore ACS.",
+  descrizione: `
+    Visualizza su seriale i parametri attuali del modulo ACS: pin, modello, sensibilità (mV/A),
+    tensione di riferimento (<em>vref</em>), offset di zero (mV) e numero di campioni mediati.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS CALIB SHOW
+      `,
+      note: "Mostra la configurazione attuale via seriale."
+    }
+  ],
+  note: "L’output viene inviato tramite <code>Serial.printf(...)</code>, come per gli altri comandi diagnostici."
+},
+{
+  id: "acs-calib-zero",
+  nome: "ACS CALIB ZERO",
+  categoria: "ACS712",
+  sintassi: "ACS CALIB ZERO [samples]",
+  sommario: "Esegue la calibrazione dello zero (nessuna corrente nel sensore).",
+  descrizione: `
+    Legge un certo numero di campioni (<em>samples</em>) e imposta l’offset di zero in mV.
+    Assicurati che non scorra corrente durante la calibrazione per ottenere una misura accurata.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 5
+20 PRINT "Togli corrente e premi INVIO"
+30 WAIT 3000
+40 ACS CALIB ZERO 256
+50 ACS CALIB SHOW
+      `,
+      note: "Calibrazione accurata con 256 campioni."
+    }
+  ],
+  note: "Più campioni → offset più stabile (consigliati 128–512)."
+},
+{
+  id: "acs-init",
+  nome: "ACS INIT (acs712)",
+  categoria: "ACS712",
+  sintassi: "ACS INIT pin model [vref_mv] [avgSamples]",
+  sommario: "Inizializza il sensore ACS712 e imposta i parametri di base.",
+  descrizione: `
+    Inizializza il sensore ACS712 specificando il pin ADC, il modello (5/20/30 A),
+    e opzionalmente la tensione di riferimento (<em>vref_mv</em>) e il numero di campioni mediati.
+    <ul>
+      <li><b>pin</b>: GPIO ADC1 consigliato (32–39)</li>
+      <li><b>model</b>: 5, 20 o 30 → imposta automaticamente mV/A (185 / 100 / 66)</li>
+      <li><b>vref_mv</b>: opzionale; usato come fallback se non disponibile <code>analogReadMilliVolts</code></li>
+      <li><b>avgSamples</b>: opzionale; predefinito 32</li>
+    </ul>
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 5
+20 ACS CALIB SHOW
+      `,
+      note: "Inizializza un modulo ACS712 5 A collegato al pin GPIO34."
+    }
+  ],
+  note: `
+    <b>Note hardware:</b><br>
+    Collega OUT del modulo ACS712 al pin ADC scelto (preferibilmente ADC1).<br>
+    Alimenta il modulo secondo specifiche (di solito 5 V). L’uscita è centrata su Vcc/2.<br>
+    Per ESP32, l’attenuazione 11 dB (~3.3 V full-scale) è già impostata nel codice.
+  `
+},
+{
+  id: "acs-read",
+  nome: "ACS READ",
+  categoria: "ACS712",
+  sintassi: "ACS READ var",
+  sommario: "Legge la corrente DC media (Ampere) e salva il valore in una variabile.",
+  descrizione: `
+    Esegue una lettura media della corrente DC (in Ampere) utilizzando il numero di campioni
+    definito in <code>avgSamples</code>. Il risultato viene assegnato alla variabile indicata.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 20
+20 ACS CALIB ZERO 256
+30 ACS READ I
+40 PRINT "I=";I;" A"
+50 WAIT 200
+60 GOTO 30
+      `,
+      note: "Lettura continua della corrente DC media."
+    }
+  ],
+  note: "Adatto per DC o AC rettificata/filtrata. Per AC pura, usa <code>ACS RMS</code>."
+},
+{
+  id: "acs-rms",
+  nome: "ACS RMS",
+  categoria: "ACS712",
+  sintassi: "ACS RMS window_ms var",
+  sommario: "Misura la corrente AC RMS (Ampere) su una finestra temporale specificata.",
+  descrizione: `
+    Calcola la corrente RMS (radice della media dei quadrati) su una finestra di durata <em>window_ms</em>.
+    Per ogni campione rimuove l’offset (zero) e calcola <code>sqrt(media(x^2))</code>.
+  `,
+  esempi: [
+    {
+      code: `
+10 ACS INIT 34 20
+20 ACS CALIB ZERO 256
+30 ACS RMS 500 IRMS
+40 PRINT "Irms=";IRMS;" A"
+50 WAIT 500
+60 GOTO 30
+      `,
+      note: "Misura corrente AC RMS su finestra di 500 ms (ideale per 50 Hz)."
+    }
+  ],
+  note: "Per 50 Hz, usare finestre di 200–500 ms. Finestra più lunga → misura più stabile. Calibrare lo zero senza carico prima dell’uso."
 }
 ];
