@@ -5,7 +5,6 @@ export default [
   "tipo": "introduzione",
   "titolo": "Introduzione a Basic32 – Interprete BASIC per ESP32",
   "contenuto": `
-    <h2>Introduzione a Basic32 – Interprete BASIC per ESP32</h2>
     <p><strong>Basic32</strong> è un potente ma leggero interprete BASIC sviluppato per la scheda ESP32, progettato per rendere la programmazione dell'ESP32 accessibile anche senza conoscenze di C/C++ o ambienti di sviluppo complessi.</p>
     <p>Con Basic32 puoi scrivere, salvare ed eseguire codice BASIC in tempo reale, utilizzando un qualsiasi terminale seriale. Questo approccio elimina completamente la necessità di ricompilare il firmware ad ogni modifica del programma.</p>
 
@@ -61,7 +60,7 @@ export default [
     </ol>
 
     <h3>Esempio: Display ILI9341 con SD e Touch integrati</h3>
-    <pre><code>
+    <code>
 10 PINMODE 17 OUTPUT NOPULL   ' TFT_CS come output
 20 DWRITE 17 1                ' tiene inattivo il display
 30 PINMODE 4 OUTPUT NOPULL    ' TOUCH_CS come output
@@ -72,7 +71,7 @@ export default [
 80 ILI INIT 17 16 5 3         ' inizializza TFT (CS=17, DC=16, RST=5, rotazione=3)
 90 ILI LED 32 1               ' accende retroilluminazione su GPIO32
 100 ILI TEXT 10 50 2 SDFREE 0 255 255  ' stampa spazio libero su SD in giallo
-    </code></pre>
+    </code>
 
     <p><strong>Nota:</strong> Se aggiungi altre periferiche SPI (es. RFID RC522), assegna loro un CS dedicato, imposta <code>PINMODE &lt;CS&gt; OUTPUT</code> e <code>DWRITE &lt;CS&gt; 1</code> prima di eseguire il rispettivo <code>INIT</code>. Con questa sequenza, ogni dispositivo è pronto a lavorare senza disturbare gli altri sul bus SPI.</p>
 
