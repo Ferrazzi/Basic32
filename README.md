@@ -110,19 +110,6 @@ It is the quickest way to add **custom icons, logos, or pixel art** to your Basi
 
 ---
 
-## Activate the firmware
-
-After flashing, when you open the serial monitor (or Basic32Terminal), the firmware will ask for **activation** and show a **fingerprint** unique to your device.
-
-To activate:
-1. Copy the fingerprint shown in the terminal  
-2. Send it to me via the [Telegram group](https://t.me/Basic32ESP)  
-3. You will receive your **activation code**  
-4. Enter the activation code when requested
-
-Activation is free.
-
----
 
 ## Examples
 
