@@ -1,7 +1,6 @@
 ![Basic32](https://github.com/Ferrazzi/Basic32/blob/main/Logo.png)
 <p align="center">
 FLASH FIRMWARE?
-
   <a href="https://ferrazzi.github.io/Basic32/index.html">
     <strong>OPEN BASIC32 WEBTOOL</strong>
   </a>
