@@ -1,6 +1,5 @@
 ![Basic32](https://github.com/Ferrazzi/Basic32/blob/main/Logo.png)
-<div align="center">
-[**Basic32 Web Tools**](https://ferrazzi.github.io/Basic32/index.html)</div>
+<div align="center">[**Basic32 Web Tools**](https://ferrazzi.github.io/Basic32/index.html)</div>
 Basic32 turns your ESP32 into a full BASIC interpreter. No compiler, no IDE, no complicated setup.  
 Just plug it in, open a terminal, and start coding like in the 80s — but with Wi-Fi, graphics, SD cards and all the modern toys.
 
