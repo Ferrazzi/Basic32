@@ -1,5 +1,4 @@
 ![Basic32](https://github.com/Ferrazzi/Basic32/blob/main/Logo.png)
-
 <p align="center">
   <a href="https://ferrazzi.github.io/Basic32/index.html">
     <strong>Basic32 Web Tools</strong>
