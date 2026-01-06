@@ -3,6 +3,7 @@
    - Carica lingua da diversi nomi file possibili
    - Supporta export default [], export const commands = [], export const DATA = { it:[] }
    - Ricerca + tendina Index
+   - SINGLE VIEW: mostra 1 comando/introduzione alla volta (no scroll su pagina lunga)
    ========================================================= */
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
@@ -23,6 +24,7 @@ function escapeHTML(str){
     .replaceAll(">","&gt;");
 }
 
+// per ricerca su comandi
 function matchesQuery(cmd, q) {
   if (!q) return true;
   const hay = [cmd.nome, cmd.sintassi, cmd.sommario, cmd.categoria]
@@ -32,67 +34,18 @@ function matchesQuery(cmd, q) {
   return hay.includes(q);
 }
 
-/* ---------- Build tendina Index ---------- */
-function buildIndexOptions() {
-  const q = (searchBox.value || "").trim().toLowerCase();
-
-  const items = currentData
-    .filter(cmd => cmd.tipo !== "introduzione" && matchesQuery(cmd, q))
-    .slice()
-    .sort((a, b) => a.nome.localeCompare(b.nome));
-
-  const prev = indexSel.value;
-  indexSel.innerHTML = `<option value="">— Select command —</option>` +
-    items.map(cmd => `<option value="${escapeHTML(cmd.id)}">${escapeHTML(cmd.nome)}</option>`).join("");
-
-  if ([...indexSel.options].some(o => o.value === prev)) indexSel.value = prev;
+// per ricerca su introduzioni (titolo + contenuto testuale base)
+function matchesIntroQuery(intro, q) {
+  if (!q) return true;
+  const hay = [intro.titolo, intro.nome, intro.contenuto]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return hay.includes(q);
 }
 
-/* ---------- Render contenuto (tutte le sezioni) ---------- */
-function renderContent() {
-  contentEl.innerHTML = "";
-
-  // Mostra l'introduzione, se presente
-  const intro = currentData.find(c => c.tipo === "introduzione");
-  if (intro) {
-    const sectionIntro = document.createElement("section");
-    sectionIntro.id = "manual-intro";
-    sectionIntro.innerHTML = `
-      <h2>${intro.titolo || "Introduzione"}</h2>
-      <div class="intro-text">${intro.contenuto}</div>
-      <hr style="border:0;border-top:2px dashed var(--c64-border);opacity:.6;margin:16px 0;">
-    `;
-    contentEl.appendChild(sectionIntro);
-  }
-
-  // Mostra SOLO i comandi normali (esclude tipo="introduzione")
-  const items = currentData
-    .filter(c => c.tipo !== "introduzione")
-    .slice()
-    .sort((a, b) => a.nome.localeCompare(b.nome));
-
-  for (const cmd of items) {
-    const section = document.createElement("section");
-    section.id = `cmd-${cmd.id}`;
-    section.innerHTML = `
-      <h2>${cmd.nome}</h2>
-      ${cmd.sintassi ? `<p><strong>${i18n('Syntax')}:</strong> <code>${cmd.sintassi}</code></p>` : ""}
-      ${cmd.sommario ? `<p><strong>${i18n('Summary')}:</strong> ${cmd.sommario}</p>` : ""}
-      ${cmd.descrizione ? `<h3>${i18n('Description')}</h3><p>${cmd.descrizione}</p>` : ""}
-      ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
-        <h3>${i18n('Examples')}</h3>
-        <div>
-          ${cmd.esempi.map(ex => `
-            <pre><code>${escapeHTML(ex.code)}</code></pre>
-            ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
-          `).join("")}
-        </div>
-      ` : ""}
-      ${cmd.note ? `<h3>${i18n('Notes')}</h3><p class="hint">${cmd.note}</p>` : ""}
-      <hr style="border:0;border-top:2px dashed var(--c64-border);opacity:.6;margin:14px 0;">
-    `;
-    contentEl.appendChild(section);
-  }
+function setHint(){
+  contentEl.innerHTML = `<p class="hint">Seleziona un comando o una sezione di introduzione dall’indice, oppure usa la ricerca.</p>`;
 }
 
 /* ---------- i18n etichette base ---------- */
@@ -102,39 +55,155 @@ function i18n(key){
     Summary:     { it: "Sommario",    en: "Summary" },
     Description: { it: "Descrizione", en: "Description" },
     Examples:    { it: "Esempi",      en: "Examples" },
-    Notes:       { it: "Note",        en: "Notes" }
+    Notes:       { it: "Note",        en: "Notes" },
+    Intro:       { it: "Introduzione", en: "Introduction" },
+    Commands:    { it: "Comandi",      en: "Commands" },
   };
   return (map[key] && map[key][currentLang]) || key;
 }
 
-/* ---------- Focus su sezione da hash ---------- */
-function focusHash(smooth = true){
+/* =========================================================
+   INDEX: ora include INTRO + COMANDI (con optgroup)
+   - value prefissati per evitare collisioni: "intro:<id>" e "cmd:<id>"
+   ========================================================= */
+function buildIndexOptions() {
+  const q = (searchBox.value || "").trim().toLowerCase();
+  const prev = indexSel.value;
+
+  const intros = currentData
+    .filter(x => x.tipo === "introduzione")
+    .filter(x => matchesIntroQuery(x, q))
+    .slice()
+    .sort((a, b) => String(a.titolo || a.nome || "").localeCompare(String(b.titolo || b.nome || "")));
+
+  const cmds = currentData
+    .filter(x => x.tipo !== "introduzione")
+    .filter(x => matchesQuery(x, q))
+    .slice()
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+  // build HTML con optgroup
+  let html = `<option value="">— Select item —</option>`;
+
+  if (intros.length) {
+    html += `<optgroup label="${escapeHTML(i18n("Intro"))}">` +
+      intros.map(intro => {
+        const id = intro.id ?? intro.nome ?? intro.titolo; // fallback robusto
+        const label = intro.titolo || intro.nome || "Introduzione";
+        return `<option value="intro:${escapeHTML(String(id))}">${escapeHTML(String(label))}</option>`;
+      }).join("") +
+    `</optgroup>`;
+  }
+
+  if (cmds.length) {
+    html += `<optgroup label="${escapeHTML(i18n("Commands"))}">` +
+      cmds.map(cmd =>
+        `<option value="cmd:${escapeHTML(cmd.id)}">${escapeHTML(cmd.nome)}</option>`
+      ).join("") +
+    `</optgroup>`;
+  }
+
+  indexSel.innerHTML = html;
+
+  // ripristina selezione se ancora presente
+  if ([...indexSel.options].some(o => o.value === prev)) indexSel.value = prev;
+}
+
+/* =========================================================
+   RENDER: SINGLE VIEW
+   - mostra SOLO l'item selezionato
+   ========================================================= */
+function renderIntro(intro){
+  const title = intro.titolo || intro.nome || i18n("Intro");
+  contentEl.innerHTML = `
+    <section class="manual-single" id="intro-view">
+      <h2>${escapeHTML(title)}</h2>
+      <div class="intro-text">${intro.contenuto || ""}</div>
+    </section>
+  `;
+  contentEl.focus();
+}
+
+function renderCommand(cmd){
+  contentEl.innerHTML = `
+    <section class="manual-single" id="cmd-view">
+      <h2>${escapeHTML(cmd.nome)}</h2>
+      ${cmd.sintassi ? `<p><strong>${escapeHTML(i18n('Syntax'))}:</strong> <code>${escapeHTML(cmd.sintassi)}</code></p>` : ""}
+      ${cmd.sommario ? `<p><strong>${escapeHTML(i18n('Summary'))}:</strong> ${escapeHTML(cmd.sommario)}</p>` : ""}
+      ${cmd.descrizione ? `<h3>${escapeHTML(i18n('Description'))}</h3><p>${escapeHTML(cmd.descrizione)}</p>` : ""}
+      ${Array.isArray(cmd.esempi) && cmd.esempi.length ? `
+        <h3>${escapeHTML(i18n('Examples'))}</h3>
+        <div>
+          ${cmd.esempi.map(ex => `
+            <pre><code>${escapeHTML(ex.code)}</code></pre>
+            ${ex.note ? `<p class="hint">${escapeHTML(ex.note)}</p>` : "" }
+          `).join("")}
+        </div>
+      ` : ""}
+      ${cmd.note ? `<h3>${escapeHTML(i18n('Notes'))}</h3><p class="hint">${escapeHTML(cmd.note)}</p>` : ""}
+    </section>
+  `;
+  contentEl.focus();
+}
+
+function renderSelection(value){
+  if (!value) { setHint(); return; }
+
+  const [kind, rawId] = String(value).split(":");
+  const id = rawId ?? "";
+
+  if (kind === "intro") {
+    // supporta intro con id o fallback su titolo/nome
+    const intro = currentData.find(x =>
+      x.tipo === "introduzione" &&
+      String(x.id ?? x.nome ?? x.titolo) === String(id)
+    );
+    if (intro) return renderIntro(intro);
+  }
+
+  if (kind === "cmd") {
+    const cmd = currentData.find(x => x.tipo !== "introduzione" && String(x.id) === String(id));
+    if (cmd) return renderCommand(cmd);
+  }
+
+  // se non trovato
+  setHint();
+}
+
+/* =========================================================
+   HASH: invece di scroll, apre la vista singola
+   - supporta #cmd-RUN e #intro-qualcosa
+   ========================================================= */
+function applyHashToView(){
   if (!location.hash) return;
-  const target = document.getElementById(location.hash.slice(1));
-  if (target){
-    target.setAttribute("tabindex","-1");
-    target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
-    target.focus({ preventScroll: true });
+
+  const h = location.hash.slice(1); // es: "cmd-RUN" o "intro-intro1"
+  if (h.startsWith("cmd-")) {
+    const id = h.slice(4);
+    const v = `cmd:${id}`;
+    indexSel.value = v;
+    renderSelection(v);
+    return;
+  }
+  if (h.startsWith("intro-")) {
+    const id = h.slice(6);
+    const v = `intro:${id}`;
+    indexSel.value = v;
+    renderSelection(v);
+    return;
   }
 }
 
 /* ---------- Estrarre dati dal modulo importato ---------- */
 function extractCommandsFromModule(mod, langCode){
-  // 1) export default [] (preferito)
   if (Array.isArray(mod.default)) return mod.default;
-
-  // 2) export const commands = []
   if (Array.isArray(mod.commands)) return mod.commands;
-
-  // 3) export const DATA = { it:[], en:[] }
   if (mod.DATA && Array.isArray(mod.DATA[langCode])) return mod.DATA[langCode];
-
   return null;
 }
 
 /* ---------- Prova più nomi file per la lingua ---------- */
 async function tryImportLanguage(code){
-  // Ordine: stessa cartella, poi cartella "manual/"
   const candidates = [
     `./manual.${code}.js`,
     `./manual-${code}.js`,
@@ -155,7 +224,6 @@ async function tryImportLanguage(code){
       return { data, url };
     } catch (e) {
       tried.push({ url, error: String(e.message || e) });
-      // continua con il prossimo
     }
   }
   throw { tried };
@@ -170,18 +238,19 @@ async function loadLanguage(code){
     currentData = data;
 
     langSel.value = code;
-    renderContent();
+
+    // SINGLE VIEW: non renderizzare tutto, solo hint (o hash)
+    setHint();
     buildIndexOptions();
 
     const params = new URLSearchParams(location.search);
     params.set("lang", code);
     history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 
-    if (location.hash) focusHash(false);
-    // Log utile in console per capire quale file è stato effettivamente caricato
+    if (location.hash) applyHashToView();
+
     console.info(`[manual-core] Loaded language "${code}" from: ${url}`);
   } catch (info) {
-    // Messaggio chiaro a schermo
     const list = (info?.tried || []).map(t => `• ${escapeHTML(t.url)}`).join("<br>");
     contentEl.innerHTML = `
       <p class="noscript">Unable to load language "<strong>${escapeHTML(code)}</strong>".</p>
@@ -201,24 +270,26 @@ function init(){
 
   loadLanguage(lang);
 
-  // Ricerca → filtra le opzioni dell'indice
   searchBox.addEventListener("input", () => buildIndexOptions());
 
-  // Cambio lingua
   langSel.addEventListener("change", () => loadLanguage(langSel.value));
 
-  // Selezione dall'indice → vai alla sezione
+  // Selezione dall'indice → SINGLE VIEW + hash
   indexSel.addEventListener("change", () => {
-    const id = indexSel.value;
-    if (!id) return;
+    const v = indexSel.value;
+    if (!v) { setHint(); return; }
+
     const qs = new URLSearchParams(location.search);
     qs.set("lang", currentLang);
-    const hash = `#cmd-${id}`;
+
+    const [kind, id] = v.split(":");
+    const hash = kind === "intro" ? `#intro-${id}` : `#cmd-${id}`;
+
     history.pushState(null, "", `${location.pathname}?${qs.toString()}${hash}`);
-    focusHash();
+    renderSelection(v);
   });
 
-  window.addEventListener("hashchange", () => focusHash());
+  window.addEventListener("hashchange", () => applyHashToView());
 }
 
 document.addEventListener("DOMContentLoaded", init);
