@@ -14,17 +14,17 @@
     {
       "chipFamily": "ESP32-C3",
       "parts": [
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32C3/Basic32.ino.bootloader.bin", "offset": "0x0" },
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32C3/Basic32.ino.partitions.bin", "offset": "0x8000" },
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32C3/Basic32.ino.bin", "offset": "0x10000" }
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-C3/Basic32.ino.bootloader.bin", "offset": "0x0" },
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-C3/Basic32.ino.partitions.bin", "offset": "0x8000" },
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-C3/Basic32.ino.bin", "offset": "0x10000" }
       ]
     },
     {
       "chipFamily": "ESP32-S3",
       "parts": [
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32S3/Basic32.ino.bootloader.bin", "offset": "0x0" },
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32S3/Basic32.ino.partitions.bin", "offset": "0x8000" },
-        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32S3/Basic32.ino.bin", "offset": "0x10000" }
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-S3/Basic32.ino.bootloader.bin", "offset": "0x0" },
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-S3/Basic32.ino.partitions.bin", "offset": "0x8000" },
+        { "path": "https://raw.githubusercontent.com/Ferrazzi/Basic32/main/firmware/ESP32-S3/Basic32.ino.bin", "offset": "0x10000" }
       ]
     }
   ]
