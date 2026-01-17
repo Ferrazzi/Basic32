@@ -165,7 +165,7 @@ export default [
     "sintassi": "ABS(x)",
     "sommario": "",
     "descrizione": `
-<p>The ABS(x) function returns the absolute value of x, that is, the number without its sign. It can be used in arithmetic expressions, assignments, and logical conditions. It accepts both integer and decimal numbers. If the number is already positive or zero, it is not modified.</p>
+The ABS(x) function returns the absolute value of x, that is, the number without its sign. It can be used in arithmetic expressions, assignments, and logical conditions. It accepts both integer and decimal numbers. If the number is already positive or zero, it is not modified.
     `,
     "esempi": [
       {
@@ -208,7 +208,7 @@ Output atteso:
     "sintassi": "ACS CALIB SETOFFSET mv",
     "sommario": "",
     "descrizione": `
-<p>Manually sets the zero offset in mV (typically ~Vcc/2). Useful if you know the offset measured with a multimeter or want to force it.</p>
+Manually sets the zero offset in mV (typically ~Vcc/2). Useful if you know the offset measured with a multimeter or want to force it.
     `,
     "esempi": [
       {
@@ -230,7 +230,7 @@ Output atteso:
     "sintassi": "ACS CALIB SHOW",
     "sommario": "",
     "descrizione": `
-<p>Displays the current configuration on the serial output: pin, model, sensitivity in mV/A, vref, zero in mV, averaged samples.</p>
+Displays the current configuration on the serial output: pin, model, sensitivity in mV/A, vref, zero in mV, averaged samples.
     `,
     "esempi": [
       {
