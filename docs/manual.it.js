@@ -3,7 +3,7 @@ export default [
   {
     "id": "introduzione-a-basic32-interprete-basic-per-esp32",
     "tipo": "introduzione",
-    "titolo": "Introduzione a Basic32 – Interprete BASIC per ESP32",
+    "titolo": "introduzione-a-basic32-interprete-basic-per-esp32",
     "contenuto": `
 <p>Basic32 è un potente ma leggero interprete BASIC sviluppato per la scheda ESP32, progettato per rendere la programmazione dell'ESP32 accessibile anche senza conoscenze di C/C++ o ambienti di sviluppo complessi. Con Basic32 puoi scrivere, salvare ed eseguire codice BASIC in tempo reale, utilizzando un qualsiasi terminale seriale. Questo approccio elimina completamente la necessità di ricompilare il firmware ad ogni modifica del programma. Caratteristiche principali</p>
 
@@ -157,7 +157,7 @@ export default [
     "nome": "ABS(x)",
     "categoria": "Funzioni matematiche",
     "sintassi": "ABS(x)",
-    "sommario": "Restituisce il valore assoluto di un numero",
+    "sommario": "",
     "descrizione": `
 <p>La funzione ABS(x) restituisce il valore assoluto di x, cioè il numero senza segno. È utilizzabile in espressioni aritmetiche, assegnazioni e condizioni logiche. Accetta sia numeri interi che decimali. Se il numero è già positivo o zero, non viene modificato.</p>
     `,
@@ -194,5 +194,47 @@ Output atteso:
       },
     ],
     "note": "ABS è una funzione pura: non modifica variabili, restituisce solo un valore numerico.",
+  },
+  {
+    "id": "acs-calib-setoffset",
+    "nome": "ACS CALIB SETOFFSET",
+    "categoria": "",
+    "sintassi": "ACS CALIB SETOFFSET mv",
+    "sommario": "",
+    "descrizione": `
+<p>Imposta manualmente l’offset di zero in mV (tipicamente ~Vcc/2). Utile se conosci l’offset misurato con multimetro o vuoi forzarlo.</p>
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 20
+20 ACS CALIB SETOFFSET 1650
+30 ACS READ I
+40 PRINT I
+        `,
+        "note": "",
+      },
+    ],
+    "note": "•\tNon sostituisce la calibrazione automatica; puoi combinare ZERO e SETOFFSET (l’ultimo chiamato vince).",
+  },
+  {
+    "id": "acs-calib-show",
+    "nome": "ACS CALIB SHOW",
+    "categoria": "",
+    "sintassi": "ACS CALIB SHOW",
+    "sommario": "",
+    "descrizione": `
+<p>Mostra su seriale la configurazione attuale: pin, modello, sensibilità mV/A, vref, zero in mV, campioni mediati.</p>
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 5
+20 ACS CALIB SHOW
+        `,
+        "note": "",
+      },
+    ],
+    "note": "•\tOutput via Serial.printf(...) (come gli altri comandi di diagnostica che stampano su seriale).",
   }
 ];
