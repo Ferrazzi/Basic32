@@ -172,10 +172,10 @@ The ABS(x) function returns the absolute value of x, that is, the number without
         "code": `
 10 A = -42
 20 B = ABS(A)
-30 PRINT "VALORE ASSOLUTO: "; B
+30 PRINT "ABSOLUTE VALUE: "; B
 
-Output atteso:
-VALORE ASSOLUTO: 42
+Expected output:
+ABSOLUTE VALUE: 42
         `,
         "note": "Shows the use of ABS with an integer:",
       },
@@ -183,7 +183,7 @@ VALORE ASSOLUTO: 42
         "code": `
 10 PRINT "ABS(-3.14) = "; ABS(-3.14)
 
-Output atteso:
+Expected output:
 ABS(-3.14) = 3.14
         `,
         "note": "It also works with floating-point numbers:",
@@ -191,10 +191,10 @@ ABS(-3.14) = 3.14
       {
         "code": `
 10 A = -7
-20 IF ABS(A) = 7 THEN PRINT "È UGUALE A 7"
+20 IF ABS(A) = 7 THEN PRINT "IT IS EQUAL TO 7"
 
-Output atteso: 
-È UGUALE A 7
+Expected output:
+IT IS EQUAL TO 7
         `,
         "note": "ABS can be used directly in an IF condition:",
       },

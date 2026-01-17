@@ -171,7 +171,7 @@ La funzione ABS(x) restituisce il valore assoluto di x, cioè il numero senza se
 Output atteso:
 VALORE ASSOLUTO: 42
         `,
-        "note": "Mostra l’uso di ABS con un numero intero:",
+        "note": "Show the use of ABS with an integer.",
       },
       {
         "code": `
