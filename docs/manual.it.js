@@ -3,7 +3,7 @@ export default [
   {
     "id": "introduzione-a-basic32-interprete-basic-per-esp32",
     "tipo": "introduzione",
-    "titolo": "introduzione-a-basic32-interprete-basic-per-esp32",
+    "titolo": "Introduzione a Basic32 interprete basic per esp32",
     "contenuto": `
 <p>Basic32 è un potente ma leggero interprete BASIC sviluppato per la scheda ESP32, progettato per rendere la programmazione dell'ESP32 accessibile anche senza conoscenze di C/C++ o ambienti di sviluppo complessi. Con Basic32 puoi scrivere, salvare ed eseguire codice BASIC in tempo reale, utilizzando un qualsiasi terminale seriale. Questo approccio elimina completamente la necessità di ricompilare il firmware ad ogni modifica del programma. Caratteristiche principali</p>
 
@@ -236,5 +236,105 @@ Mostra su seriale la configurazione attuale: pin, modello, sensibilità mV/A, vr
       },
     ],
     "note": "•\tOutput via Serial.printf(...) (come gli altri comandi di diagnostica che stampano su seriale).",
+  },
+  {
+    "id": "acs-calib-zero",
+    "nome": "ACS CALIB ZERO",
+    "categoria": "",
+    "sintassi": "ACS CALIB ZERO [samples]",
+    "sommario": "",
+    "descrizione": `
+Esegue la calibrazione dello zero (nessuna corrente nel sensore!). Legge samples campioni e fissa l’offset in mV.
+Mostra su seriale la configurazione attuale: pin, modello, sensibilità mV/A, vref, zero in mV, campioni mediati.
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 5
+20 PRINT "Togli corrente e premi INVIO"
+30 WAIT 3000
+40 ACS CALIB ZERO 256
+50 ACS CALIB SHOW
+        `,
+        "note": "Calibrazione accurata",
+      },
+    ],
+    "note": "•\tAssicurati che non scorra corrente nel cavo durante la calibrazione.\n•\tPiù campioni → offset più stabile (consiglio 128–512).",
+  },
+  {
+    "id": "acs-init-acs712",
+    "nome": "ACS INIT (acs712)",
+    "categoria": "",
+    "sintassi": "ACS INIT pin model [vref_mv] [avgSamples]",
+    "sommario": "",
+    "descrizione": `
+<p>Inizializza il sensore ACS712.</p>
+
+<ul>
+  <li>pin: GPIO ADC1 consigliato (32–39).</li>
+  <li>model: 5, 20 o 30 (Ampere) → imposta automaticamente mV/A (185 / 100 / 66).</li>
+  <li>vref_mv: opzionale (fallback se non si usa analogReadMilliVolts).</li>
+  <li>avgSamples: opzionale; default 32.</li>
+</ul>Esegue la calibrazione dello zero (nessuna corrente nel sensore!). Legge samples campioni e fissa l’offset in mV.
+Mostra su seriale la configurazione attuale: pin, modello, sensibilità mV/A, vref, zero in mV, campioni mediati.
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 5
+20 ACS CALIB SHOW
+        `,
+        "note": "Modulo 5 A su GPIO34",
+      },
+    ],
+    "note": "•\tCollega OUT del modulo ACS712 al pin ADC scelto (meglio ADC1).\n•\tAlimentazione del modulo secondo specifiche (spesso 5 V). L’uscita è centrata a Vcc/2.\n•\tPer ESP32: attenuazione 11 dB (~3.3 V full-scale) già impostata nel codice.",
+  },
+  {
+    "id": "acs-read",
+    "nome": "ACS READ",
+    "categoria": "",
+    "sintassi": "ACS READ var",
+    "sommario": "",
+    "descrizione": `
+<p>Legge la corrente DC media (in Ampere) usando avgSamples campioni. Salva il valore in var.</p>
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 20
+20 ACS CALIB ZERO 256
+30 ACS READ I
+40 PRINT "I=";I;" A"
+50 WAIT 200
+60 GOTO 30
+        `,
+        "note": "Lettura continua",
+      },
+    ],
+    "note": "•\tPer DC o AC rettificata/filtrata. Per AC pura, usa ACS RMS.",
+  },
+  {
+    "id": "acs-rms",
+    "nome": "ACS RMS",
+    "categoria": "",
+    "sintassi": "ACS RMS window_ms var",
+    "sommario": "",
+    "descrizione": `
+<p>Misura la corrente AC RMS (Ampere) su una finestra temporale di window_ms. Rimuove l’offset (zero) ad ogni campione e calcola sqrt(media(x^2)).</p>
+    `,
+    "esempi": [
+      {
+        "code": `
+10 ACS INIT 34 20
+20 ACS CALIB ZERO 256
+30 ACS RMS 500 IRMS
+40 PRINT "Irms=";IRMS;" A"
+50 WAIT 500
+60 GOTO 30
+        `,
+        "note": "50 Hz su 500 ms",
+      },
+    ],
+    "note": "•\tPer 50 Hz, finestre di 200–500 ms sono ok. Più lunga = più stabile.\n•\tAssicurati di aver calibrato lo zero senza carico.",
   }
 ];
