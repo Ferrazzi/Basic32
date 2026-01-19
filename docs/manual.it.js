@@ -1167,7 +1167,7 @@ export default [
         "note": "Conto alla rovescia"
       }
     ],
-    "note": "DELAY blocca totalmente l’esecuzione (incluso INPUT, GET, ecc.)\nL'unità di misura è il millisecondo (1000 = 1 secondo)"
+    "note": "• DELAY blocca totalmente l’esecuzione (incluso INPUT, GET, ecc.)\n• L'unità di misura è il millisecondo (1000 = 1 secondo)"
   },
   {
     "id": "dev-auto-on-off",
@@ -1737,6 +1737,270 @@ export default [
       {
         "code": "10 A = 5\n20 PRINT \"VALORE ORIGINALE: \"; A\n30 PRINT \"EXP(LOG(A)) = \"; EXP(LOG(A))\n\nOutput atteso:\nVALORE ORIGINALE: 5\nEXP(LOG(A)) = 5",
         "note": "Comparazione con potenze"
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "fclose",
+    "nome": "FCLOSE",
+    "categoria": "",
+    "sintassi": "FCLOSE",
+    "sommario": "",
+    "descrizione": "Chiude il file attualmente aperto, liberando le risorse.\nDevi chiudere SEMPRE un file dopo l’uso.\nSe nessun file è aperto, non produce errore (no-op).",
+    "esempi": [
+      {
+        "code": "10 OPEN \"test.txt\" W\n20 FPRINT \"CIAO\"\n30 FCLOSE",
+        "note": "Chiudere il file"
+      },
+      {
+        "code": "10 OPEN \"a.txt\" W\n20 FPRINT \"uno\"\n30 OPEN \"b.txt\" W    ' a.txt viene chiuso automaticamente\n40 FPRINT \"due\"\n50 FCLOSE",
+        "note": "Apertura multipla"
+      }
+    ],
+    "note": "• Viene automaticamente invocato da OPEN se già esiste un file aperto.\n• Sempre sicuro da chiamare."
+  },
+  {
+    "id": "fnname",
+    "nome": "FNname(...)",
+    "categoria": "",
+    "sintassi": "FNnome(arg1, arg2, ...)",
+    "sommario": "",
+    "descrizione": "FNname(...) viene usato per richiamare una funzione personalizzata precedentemente definita con DEF FN.\nIl nome della funzione deve iniziare con \"FN\" e gli argomenti devono corrispondere per numero e ordine a quelli usati nella definizione.\nLa funzione restituisce un valore calcolato in base all’espressione specificata.\nPuò essere usato:\nin una PRINT\nin un’assegnazione (LET)\nin condizioni logiche (IF)",
+    "esempi": [
+      {
+        "code": "10 DEF FNADD(X,Y) = X + Y\n20 PRINT \"SOMMA = \"; FNADD(5,3)\n\nOutput atteso:\nSOMMA = 8",
+        "note": "Funzione somma"
+      },
+      {
+        "code": "10 DEF FNDOPPIO(X) = X * 2\n20 A = FNDOPPIO(4) + 1\n30 PRINT \"RISULTATO: \"; A\n\nOutput atteso:\nRISULTATO: 9",
+        "note": "Uso in un’espressione più complessa"
+      },
+      {
+        "code": "10 DEF FNSQ(X) = X * X\n20 FOR I = 1 TO 5\n30 PRINT I; \"^2 = \"; FNSQ(I)\n40 NEXT I\n\nOutput atteso:\n1^2 = 1\n2^2 = 4\n3^2 = 9\n4^2 = 16\n5^2 = 25",
+        "note": "Richiamo in un ciclo"
+      },
+      {
+        "code": "10 DEF FNTRIPLO(X) = X * 3\n20 INPUT A\n30 IF FNTRIPLO(A) > 20 THEN PRINT \"GRANDE\" ELSE PRINT \"PICCOLO\"\n\nOutput atteso (con input 8):\nGRANDE",
+        "note": "Uso in condizione IF"
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "for-next",
+    "nome": "FOR/NEXT",
+    "categoria": "",
+    "sintassi": "FOR variabile = inizio TO fine [STEP incremento]",
+    "sommario": "",
+    "descrizione": "Il comando FOR crea un ciclo a contatore che esegue una o più istruzioni finché la variabile indicata non supera il valore finale (in positivo o negativo, a seconda del STEP).\nOgni FOR deve essere seguito da un NEXT, che incrementa (o decrementa) la variabile e decide se ripetere il ciclo o uscire.\nÈ utile per:\nRipetere blocchi di codice un numero definito di volte\nScorrere coordinate, contatori, indici o sequenze regolari\nCostruire animazioni o loop temporizzati",
+    "esempi": [
+      {
+        "code": "10 FOR I = 1 TO 5\n20 PRINT \"VALORE: \"; I\n30 NEXT I\n\nOutput atteso:\nVALORE: 1\nVALORE: 2\nVALORE: 3\nVALORE: 4\nVALORE: 5",
+        "note": "Ciclo base da 1 a 5"
+      },
+      {
+        "code": "10 FOR N = 10 TO 1 STEP -2\n20 PRINT \"N: \"; N\n30 NEXT N\n\nOutput atteso:\nN: 10\nN: 8\nN: 6\nN: 4\nN: 2",
+        "note": "Ciclo con STEP negativo (decrescente)"
+      },
+      {
+        "code": "10 FOR R = 1 TO 2\n20   FOR C = 1 TO 3\n30     PRINT \"RIGA: \"; R; \" COLONNA: \"; C\n40   NEXT C\n50 NEXT R\n\nOutput atteso:\nRIGA: 1 COLONNA: 1\nRIGA: 1 COLONNA: 2\nRIGA: 1 COLONNA: 3\nRIGA: 2 COLONNA: 1\nRIGA: 2 COLONNA: 2\nRIGA: 2 COLONNA: 3",
+        "note": "Cicli annidati (griglia 2x3)"
+      }
+    ],
+    "note": "• La variabile viene creata o aggiornata automaticamente all’interno del ciclo\n• Il valore di STEP può essere positivo o negativo (default: 1)\n• I cicli possono essere annidati se usano variabili diverse\n• I nomi delle variabili in NEXT devono corrispondere esattamente a quelli nel FOR\n• NEXT – chiude un ciclo FOR\n• RESETFOR – forza la pulizia del ciclo for e svuota tutti i cicli attivi in caso di GOTO o errori"
+  },
+  {
+    "id": "format",
+    "nome": "FORMAT",
+    "categoria": "",
+    "sintassi": "FORMAT SD\nFORMAT SPIFFS",
+    "sommario": "",
+    "descrizione": "FORMAT cancella tutti i file presenti nella directory radice del file system selezionato.\nPer sicurezza, se viene eseguito senza argomenti, non fa nulla e mostra un messaggio di conferma.\nFORMAT SD → cancella tutti i file sulla scheda SD\nFORMAT SPIFFS → cancella tutti i file nella memoria interna SPIFFS\nAttenzione: i file vengono eliminati definitivamente senza possibilità di recupero.",
+    "esempi": [
+      {
+        "code": "FORMAT\n\nOutput:\nSpecify FORMAT SD or FORMAT SPIFFS to confirm formatting.\nWarning: all files on the selected memory will be deleted!",
+        "note": "Protezione da errore"
+      },
+      {
+        "code": "FORMAT SD\n\nOutput:\nFORMAT SD: deleted 12 file(s)",
+        "note": "Formattare la scheda SD"
+      },
+      {
+        "code": "FORMAT SPIFFS\n\nOutput:\nFORMAT SPIFFS: deleted 5 file(s)",
+        "note": "Formattare la memoria interna SPIFFS"
+      }
+    ],
+    "note": "• Se la SD non è inserita o non accessibile, FORMAT SD mostrerà IO ERROR: SD root not accessible."
+  },
+  {
+    "id": "fprint",
+    "nome": "FPRINT",
+    "categoria": "",
+    "sintassi": "FPRINT <espressione_stringa>",
+    "sommario": "",
+    "descrizione": "Scrive una riga nel file aperto tramite OPEN.\nAggiunge automaticamente un carattere newline a fine riga.\nRiceve una qualunque espressione che restituisce una stringa:\n\"CIAO\"\nSTR$(A)\n\"TEMP=\" + STR$(T)\nPuò essere usato solo se il file è aperto in modalità W o A.",
+    "esempi": [
+      {
+        "code": "10 OPEN \"test.txt\" W\n20 FPRINT \"CIAO MONDO\"\n30 FCLOSE",
+        "note": "Riga semplice"
+      },
+      {
+        "code": "10 TEMP = 24.6\n20 OPEN \"sensore.txt\" A\n30 FPRINT \"TEMP=\" + STR$(TEMP)\n40 FCLOSE",
+        "note": "Riga con numeri"
+      }
+    ],
+    "note": "• In caso di file non aperto o in modalità non valida → errore.\n• FPRINT non stampa sul terminale → scrive SOLO nel file."
+  },
+  {
+    "id": "fread",
+    "nome": "FREAD$",
+    "categoria": "",
+    "sintassi": "FREAD$",
+    "sommario": "",
+    "descrizione": "Legge una riga dal file aperto con OPEN.\nRitorna una stringa (senza newline finale).\nRitorna \"\" se si raggiunge l’EOF (fine file).\nPuò essere usato:\nin un assegnamento\ndirettamente in PRINT\nin condizioni IF",
+    "esempi": [
+      {
+        "code": "10 OPEN \"log.txt\" R\n20 RIGA$ = FREAD$\n30 IF RIGA$ = \"\" THEN FCLOSE : END\n40 PRINT RIGA$\n50 GOTO 20",
+        "note": "Leggere tutte le righe"
+      },
+      {
+        "code": "10 OPEN SD \"config.txt\" R\n20 PRINT \"Prima riga=\", FREAD$\n30 FCLOSE",
+        "note": "Lettura singola"
+      }
+    ],
+    "note": "• Funziona solo in modalità R e A.\n• Ogni chiamata legge la riga successiva.\n• Non includere il newline (\\n), che viene automaticamente rimosso."
+  },
+  {
+    "id": "freemem",
+    "nome": "FREEMEM",
+    "categoria": "",
+    "sintassi": "PRINT FREEMEM",
+    "sommario": "",
+    "descrizione": "Il comando FREEMEM restituisce la quantità di memoria libera disponibile in byte per l’esecuzione del programma BASIC.\nÈ utile per monitorare l’utilizzo della RAM e prevenire problemi legati a esaurimento di memoria.",
+    "esempi": [
+      {
+        "code": "10 PRINT FREEMEM\n\nOutput atteso:\n22480",
+        "note": "Visualizzare la memoria libera"
+      },
+      {
+        "code": "10 A = FREEMEM\n20 PRINT A\n\nOutput atteso:\n22480",
+        "note": "Salvare la memoria libera in variabile"
+      }
+    ],
+    "note": "• Il valore restituito è in byte\n• Non richiede parametri\n• Utile per debugging e diagnostica\n• Valido solo come espressione in PRINT"
+  },
+  {
+    "id": "fsdefault",
+    "nome": "FSDEFAULT",
+    "categoria": "",
+    "sintassi": "FSDEFAULT SD\nFSDEFAULT SPIFFS",
+    "sommario": "",
+    "descrizione": "Imposta il filesystem predefinito utilizzato dai comandi che accedono ai file.\nDopo aver impostato il valore, tutti i comandi che non specificano esplicitamente SD o SPIFFS useranno automaticamente il filesystem scelto.\nIl valore viene memorizzato nelle preferenze (/prefs.cfg) ed è mantenuto anche dopo il riavvio dell’ESP32.\nEffetti del filesystem predefinito sui comandi BASIC:\nPuoi sempre forzare manualmente un filesystem scrivendo SD o SPIFFS dopo il comando (es: DIR SD, SAVE SPIFFS \"FILE\").",
+    "esempi": [
+      {
+        "code": "10 FSDEFAULT SD\n20 SAVE \"TEST\"\n\nEffetto:\nIl file TEST.BAS viene salvato su SD anche senza scrivere SAVE SD.",
+        "note": "Impostare SD come archivio predefinito"
+      },
+      {
+        "code": "10 FSDEFAULT SPIFFS\n20 DIR\n\nEffetto:\nDIR mostra il contenuto dello SPIFFS perché ora è il filesystem di default.",
+        "note": "Tornare a SPIFFS come archivio predefinito"
+      },
+      {
+        "code": "10 FSDEFAULT SD\n20 SAVE SPIFFS \"CONFIG\"\n\nEffetto:\nAnche se il default è SD, il file CONFIG.BAS viene salvato nello SPIFFS perché specificato esplicitamente.",
+        "note": "Default SD, ma un comando forzato su SPIFFS"
+      }
+    ],
+    "note": "• Il valore predefinito originale è SPIFFS.\n• Se il default è SD, ma la SD non è montata, il comando produce un messaggio di avviso.\n• Il comando FSDEFAULT non richiede parametri numerici: accetta solo SD o SPIFFS.\n• Le preferenze vengono salvate automaticamente dopo il comando."
+  },
+  {
+    "id": "func-endfunc",
+    "nome": "FUNC / ENDFUNC",
+    "categoria": "",
+    "sintassi": "FUNC <nome>\nFUNC <nome> LOOP\n...\nENDFUNC",
+    "sommario": "",
+    "descrizione": "Il comando FUNC definisce una funzione utente. Le funzioni permettono di creare blocchi riutilizzabili di codice.\nQuando è presente la parola chiave LOOP, la funzione viene eseguita ciclicamente in background (non bloccante) tramite STARTFUNC.\nTutte le funzioni devono essere chiuse da ENDFUNC.",
+    "esempi": [
+      {
+        "code": "5 FUNC SALUTO\n10 PRINT \"Ciao dal Basic!\"\n20 ENDFUNC\n30 CALLFUNC SALUTO\n\nOutput atteso:\nCiao dal Basic!",
+        "note": "Funzione semplice (non in loop)"
+      },
+      {
+        "code": "5 PINMODE 2 OUTPUT NOPULL\n10 FUNC BLINK LOOP\n20 DWRITE 2 1\n30 DELAY 300\n40 DWRITE 2 0\n50 DELAY 300\n60 ENDFUNC\n70 STARTFUNC BLINK\n\nOutput atteso:\nIl LED lampeggia ogni 300 ms in background.",
+        "note": "Funzione ciclica (loop) per lampeggio LED"
+      }
+    ],
+    "note": "• Ogni funzione deve iniziare con FUNC nome e finire con ENDFUNC\n• Il nome deve essere una parola unica (senza spazi o simboli)\n• Il codice all'interno non viene eseguito da solo: va richiamato con CALLFUNC o STARTFUNC\n• Se definita con LOOP, la funzione gira in modo continuo e parallelo\n• Le funzioni cicliche vanno interrotte con STOPFUNC\n• Può contenere qualsiasi comando BASIC (eccetto FUNC, ENDFUNC annidati)"
+  },
+  {
+    "id": "to-step-next",
+    "nome": "TO STEP NEXT",
+    "categoria": "",
+    "sintassi": "FOR variabile = inizio TO fine [STEP incremento]\n  ...\nNEXT [variabile]",
+    "sommario": "",
+    "descrizione": "La struttura FOR...NEXT viene utilizzata per creare cicli con contatore, in cui una variabile numerica viene incrementata o decrementata automaticamente fino a raggiungere un valore finale.\nvariabile: nome del contatore (es. I)\ninizio: valore iniziale\nfine: valore finale\nSTEP: incremento (positivo o negativo, opzionale — predefinito = 1)\nIl corpo del ciclo può contenere qualsiasi istruzione, inclusi IF, PRINT, LET, GOTO, ecc.",
+    "esempi": [
+      {
+        "code": "10 FOR N = 0 TO 10 STEP 2\n20 PRINT \"N = \"; N\n30 NEXT N\n\nOutput atteso:\nN = 0\nN = 2\nN = 4\nN = 6\nN = 8\nN = 10",
+        "note": "Ciclo con incremento personalizzato (STEP 2)"
+      },
+      {
+        "code": "10 FOR X = 10 TO 1 STEP -3\n20 PRINT X\n30 NEXT X\n\nOutput atteso:\n10\n7\n4\n1",
+        "note": "Ciclo decrescente (STEP negativo)"
+      },
+      {
+        "code": "10 SUM = 0\n20 FOR I = 1 TO 10\n30 SUM = SUM + I\n40 NEXT I\n50 PRINT \"SOMMA = \"; SUM\n\nOutput atteso:\nSOMMA = 55",
+        "note": "Calcolare la somma dei numeri da 1 a 10"
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "get",
+    "nome": "GET",
+    "categoria": "",
+    "sintassi": "GET",
+    "sommario": "",
+    "descrizione": "Il comando GET legge un singolo carattere dalla tastiera (terminale seriale) senza attendere il tasto INVIO.\nRestituisce il codice ASCII del carattere premuto. Se non viene premuto nulla, può restituire -1 o restare in attesa (a seconda del firmware).\nÈ utile per:\nleggere tasti in tempo reale\ncostruire interfacce interattive\nleggere sequenze di comandi o input manuali",
+    "esempi": [
+      {
+        "code": "10 PRINT \"PREMI UN TASTO:\"\n20 A = GET\n30 PRINT \"CODICE ASCII: \"; A\n\nOutput atteso (se premi ad esempio la lettera A):\nPREMI UN TASTO:\nCODICE ASCII: 65",
+        "note": "Premere un tasto e visualizzarne il codice ASCII"
+      },
+      {
+        "code": "10 C = GET\n20 IF C <> -1 THEN PRINT \"TASTO: \"; C\n30 IF C = 81 THEN PRINT \"fine\" : END\n40 GOTO 10\n\nOutput atteso:\nTASTO: 72\nTASTO: 69\nTASTO: 76\nTASTO: 76\nTASTO: 79\nTASTO: 81",
+        "note": "Leggere più tasti in un ciclo"
+      },
+      {
+        "code": "10 PINMODE 2 OUTPUT NOPULL\n20 PRINT \"PREMI 1 PER ON, 0 PER OFF\"\n30 DO BLOCK 40 TO 60\n40 C = GET\n50 IF C = 49 THEN DWRITE 2 1\n60 IF C = 48 THEN DWRITE 2 0\n\nOutput atteso:\nSe premi 1, il LED si accende\nSe premi 0, il LED si spegne",
+        "note": "Eseguire azioni in base al tasto premuto"
+      }
+    ],
+    "note": "• GET può restituire -1 se non ci sono caratteri in coda\n• I codici ASCII di tasti comuni:\n• 0 → 48, 1 → 49, A → 65, a → 97"
+  },
+  {
+    "id": "gosub-n",
+    "nome": "GOSUB n",
+    "categoria": "",
+    "sintassi": "GOSUB numero_riga",
+    "sommario": "",
+    "descrizione": "Il comando GOSUB consente di saltare a una subroutine (blocco di codice) definita a un'altra riga del programma, ed eseguirla.\nAl termine della subroutine, si usa RETURN per tornare alla riga successiva a quella da cui è stato chiamato GOSUB.\nÈ utile per:\nriutilizzare codice\nstrutturare il programma in blocchi logici\ncreare funzioni operative senza DEF FN\nPuoi usare più GOSUB e annidarli, ma ogni GOSUB deve avere un corrispondente RETURN.",
+    "esempi": [
+      {
+        "code": "10 GOSUB 100\n20 PRINT \"PROGRAMMA PRINCIPALE\"\n30 END\n100 PRINT \"SUBROUTINE ESEGUITA\"\n110 RETURN\n\nOutput atteso:\nSUBROUTINE ESEGUITA\nPROGRAMMA PRINCIPALE",
+        "note": "Subroutine che stampa una riga"
+      },
+      {
+        "code": "10 FOR I = 1 TO 3\n20 GOSUB 100\n30 NEXT I\n40 END\n100 PRINT \"ESECUZIONE NUMERO: \"; I\n110 RETURN\n\nOutput atteso:\nESECUZIONE NUMERO: 1\nESECUZIONE NUMERO: 2\nESECUZIONE NUMERO: 3",
+        "note": "Chiamare la stessa subroutine più volte"
+      },
+      {
+        "code": "10 INPUT A, B\n20 GOSUB 100\n30 PRINT \"RISULTATO: \"; R\n40 END\n100 R = A * B\n110 RETURN\n\nOutput atteso (es. input 3, 4):\nRISULTATO: 12",
+        "note": "Subroutine per calcolo riutilizzabile"
+      },
+      {
+        "code": "10 GOSUB 100\n20 PRINT \"QUESTA NON VERRÀ MAI ESEGUITA\"\n100 PRINT \"DIMENTICATO IL RETURN\"\nCorretto invece con:\n10 GOSUB 100\n20 PRINT \"QUESTA VERRÀ VISUALIZZATA\"\n30 END\n100 PRINT \"CON RETURN\"\n110 RETURN",
+        "note": "Errore comune da evitare:\nSe dimentichi RETURN, il programma non torna indietro correttamente."
       }
     ],
     "note": ""
