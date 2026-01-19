@@ -1168,5 +1168,577 @@ export default [
       }
     ],
     "note": "DELAY blocca totalmente l’esecuzione (incluso INPUT, GET, ecc.)\nL'unità di misura è il millisecondo (1000 = 1 secondo)"
+  },
+  {
+    "id": "dev-auto-on-off",
+    "nome": "DEV AUTO ON/OFF",
+    "categoria": "",
+    "sintassi": "DEV AUTO ON\nDEV AUTO OFF",
+    "sommario": "",
+    "descrizione": "Imposta se la modalità developer deve avviarsi automaticamente al boot dell’ESP32.\nQuando è attiva, al riavvio il display configurato e l’eventuale tastiera PS/2 vengono inizializzati senza dover reinserire i comandi manualmente.",
+    "esempi": [
+      {
+        "code": "10 DEV AUTO ON\n20 DEV ILI SET 17 16 5 32 18 23 19 3\n30 DEV DISPLAY ILI\n40 DEV ON",
+        "note": "Alla successiva accensione l’ESP32 partirà direttamente in modalità developer con display pronto."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-clear",
+    "nome": "DEV CLEAR",
+    "categoria": "",
+    "sintassi": "DEV CLEAR",
+    "sommario": "",
+    "descrizione": "Cancella lo schermo del display attualmente selezionato in modalità developer.\nNon disattiva il dev mode, ma pulisce solo il contenuto.",
+    "esempi": [
+      {
+        "code": "DEV CLEAR",
+        "note": "Cancella la console sul display (utile per avere una schermata pulita)."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-display",
+    "nome": "DEV DISPLAY",
+    "categoria": "",
+    "sintassi": "DEV DISPLAY ILI",
+    "sommario": "",
+    "descrizione": "Seleziona quale display usare come uscita della console DEV (per tutti i comandi di stampa: PRINT, LIST, EDIR, messaggi, ecc.).\nLa selezione viene salvata in configurazione e rimane attiva ai successivi avvii.\nNota: il display scelto deve essere già configurato (pin/indirizzi, modalità, ecc.). In caso contrario viene segnalato errore e la selezione non cambia.",
+    "esempi": [
+      {
+        "code": "10 DEV DISPLAY ILI\n20 DEV CLEAR\n30 PRINT \"Schermo ILI attivo\"",
+        "note": "Seleziona ILI9341"
+      }
+    ],
+    "note": "• Puoi passare da un display all’altro con lo stesso comando: DEV DISPLAY ILI.\n• Se il dispositivo non è configurato o non inizializza, il comando segnala errore e resta il display precedente.\n• Prestazioni: per stampe molto lunghe attiva DEV SERIAL OFF per massima reattività.\n• Colonne/Righe: possono variare a seconda del display e della sua risoluzione/impostazioni; usa i tuoi comandi dedicati (COLONNE/RIGHE, MAPCOLS/MAPROWS) se presenti per adattare il layout."
+  },
+  {
+    "id": "dev-font",
+    "nome": "DEV FONT",
+    "categoria": "",
+    "sintassi": "DEV FONT <size>",
+    "sommario": "",
+    "descrizione": "Imposta il fattore di scala del font nella console DEV.",
+    "esempi": [
+      {
+        "code": "DEV FONT 1\nDEV FONT 2",
+        "note": ""
+      }
+    ],
+    "note": "• Valore minimo 1.\n• Il cambio di font effettua un clear del display."
+  },
+  {
+    "id": "dev-ili-set",
+    "nome": "DEV ILI SET",
+    "categoria": "",
+    "sintassi": "DEV ILI SET <CS> <DC> <RST> <LED> [SCK MOSI MISO] [ROT]",
+    "sommario": "",
+    "descrizione": "Configura un display ILI9341 specificando i pin di collegamento.\nL’argomento LED indica il pin di controllo retroilluminazione.\nParametri opzionali: SCK MOSI MISO per bus SPI custom, ROT per rotazione.",
+    "esempi": [
+      {
+        "code": "DEV ILI SET 17 16 5 32 18 23 19 3\nDEV DISPLAY ILI\nDEV ON",
+        "note": "Inizializza un ILI9341 con CS=17, DC=16, RST=5, retroilluminazione sul GPIO32."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-mapcols",
+    "nome": "DEV MAPCOLS",
+    "categoria": "",
+    "sintassi": "DEV MAPCOLS <n>",
+    "sommario": "",
+    "descrizione": "Imposta il numero di colonne logiche della console developer.\nServe per mappare correttamente la stampa del testo su display grafici.",
+    "esempi": [
+      {
+        "code": "DEV MAPCOLS 40",
+        "note": "La console developer userà 40 colonne virtuali."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-maprows",
+    "nome": "DEV MAPROWS",
+    "categoria": "",
+    "sintassi": "DEV MAPROWS <n>",
+    "sommario": "",
+    "descrizione": "Imposta il numero di righe logiche della console developer.",
+    "esempi": [
+      {
+        "code": "DEV MAPROWS 20",
+        "note": "La console avrà 20 righe virtuali."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-on-off",
+    "nome": "DEV ON / OFF",
+    "categoria": "",
+    "sintassi": "DEV ON\nDEV OFF",
+    "sommario": "",
+    "descrizione": "Gestisce lo stato della modalità developer.\nDEV ON → attiva la console developer e duplica tutti i Serial.print anche sul display selezionato.\nDEV OFF → disattiva la console developer, lasciando attiva solo la seriale.",
+    "esempi": [
+      {
+        "code": "DEV DISPLAY ILI\nDEV ON",
+        "note": "Attiva la console su ILI e tutti i messaggi saranno visibili anche lì.\nRiavvia automaticamente ESP per inizializzare la configurazione."
+      },
+      {
+        "code": "DEV OFF",
+        "note": "Disattiva la console su display, continuando a lavorare solo da seriale."
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "dev-ps2-layout",
+    "nome": "DEV PS2 LAYOUT",
+    "categoria": "",
+    "sintassi": "DEV PS2 LAYOUT <US | IT | DE | FR | ES>",
+    "sommario": "",
+    "descrizione": "Imposta il layout della tastiera PS/2, permettendo la corretta mappatura dei tasti in base al paese.\nLayout supportati:\nUS → Americano (default)\nIT → Italiano\nDE → Tedesco\nFR → Francese\nES → Spagnolo",
+    "esempi": [
+      {
+        "code": "DEV PS2 LAYOUT IT\nOppure:\nDEV PS2 LAYOUT US",
+        "note": ""
+      }
+    ],
+    "note": "• Il layout viene salvato in prefs.cfg e ripristinato automaticamente al riavvio.\n• Può essere modificato anche con la tastiera PS/2 già in funzione.\n• È necessario aver configurato i pin (con DEV PS2 SET) per usare la tastiera."
+  },
+  {
+    "id": "dev-ps2-off",
+    "nome": "DEV PS2 OFF",
+    "categoria": "",
+    "sintassi": "DEV PS2 OFF",
+    "sommario": "",
+    "descrizione": "Disattiva la tastiera PS/2 in modalità developer.\nQuando è OFF, i tasti premuti non vengono letti né inviati alla console DEV.",
+    "esempi": [
+      {
+        "code": "DEV PS2 OFF",
+        "note": ""
+      }
+    ],
+    "note": "• Interrompe immediatamente la lettura della tastiera PS/2.\n• La configurazione dei pin rimane memorizzata, ma la tastiera resta inattiva finché non viene riabilitata con DEV PS2 ON."
+  },
+  {
+    "id": "dev-ps2-on",
+    "nome": "DEV PS2 ON",
+    "categoria": "",
+    "sintassi": "DEV PS2 ON",
+    "sommario": "",
+    "descrizione": "Attiva la tastiera PS/2 per l’uso nella console DEV.\nPermette di digitare comandi BASIC direttamente dal display ILI in tempo reale.",
+    "esempi": [
+      {
+        "code": "DEV PS2 ON",
+        "note": ""
+      }
+    ],
+    "note": "• Richiede una precedente configurazione dei pin tramite DEV PS2 SET.\n• Se i pin non sono stati configurati, il comando genera errore."
+  },
+  {
+    "id": "dev-ps2-set",
+    "nome": "DEV PS2 SET",
+    "categoria": "",
+    "sintassi": "DEV PS2 SET <dataPin> <clkPin>",
+    "sommario": "",
+    "descrizione": "Configura i pin utilizzati dalla tastiera PS/2.\nDopo aver impostato i pin, la tastiera può essere usata per digitare direttamente comandi BASIC sulla console DEV (display ILI).\nAttenzione:\nLa sintassi reale del firmware è DATA → CLK (in questo ordine).",
+    "esempi": [
+      {
+        "code": "DEV PS2 SET 26 27\nEffetto\nDATA = 26\nCLK  = 27",
+        "note": "La tastiera PS/2 viene collegata su DATA=26 e CLK=27 ed è pronta per essere abilitata con DEV PS2 ON."
+      }
+    ],
+    "note": "• La configurazione dei pin viene salvata in prefs.cfg e ricaricata automaticamente all'avvio.\n• Permette alla tastiera di funzionare in tempo reale sulla console DEV."
+  },
+  {
+    "id": "dev-serial-on-off",
+    "nome": "DEV SERIAL ON / OFF",
+    "categoria": "",
+    "sintassi": "DEV SERIAL ON\nDEV SERIAL OFF",
+    "sommario": "",
+    "descrizione": "Abilita o disabilita il mirroring dell’output della console DEV sulla porta Serial (USB).\nCon DEV SERIAL ON, tutto ciò che normalmente stampa sul display (es. PRINT, LIST, messaggi di stato) viene replicato anche sul Serial Monitor.\nCon DEV SERIAL OFF, l’output non viene replicato su Serial: utile per massima velocità su ILI/OLED durante stampe lunghe (es. LIST, directory).\nNon modifica il baud rate né le impostazioni della seriale; controlla solo se inviare o meno le stampe su Serial.\nL’impostazione non è persistente: dopo il riavvio torna al valore predefinito (di solito OFF). Se vuoi mantenerla, metti il comando nel tuo script di avvio.",
+    "esempi": [
+      {
+        "code": "10 DEV SERIAL ON\n20 PRINT \"Ciao sia su schermo che su USB!\"",
+        "note": "Attiva log USB"
+      },
+      {
+        "code": "10 DEV SERIAL OFF\n20 LIST",
+        "note": "LIST veloce (senza eco su USB)"
+      },
+      {
+        "code": "10 DEV SERIAL OFF\n20 PRINT \"Stampa veloce sul display\"\n30 DEV SERIAL ON\n40 PRINT \"Questa riga va anche su USB\"\n50 DEV SERIAL OFF\n60 PRINT \"Di nuovo solo display\"",
+        "note": "Log USB solo durante una sezione"
+      },
+      {
+        "code": "10 D=1\n20 IF D THEN DEV SERIAL ON\n30 PRINT \"Messaggi di debug\"\n40 IF D THEN DEV SERIAL OFF\n50 PRINT \"Uscita silenziosa su USB\"",
+        "note": "Debug condizionale"
+      }
+    ],
+    "note": "• Performance: DEV SERIAL OFF è consigliato durante stampe lunghe (es. LIST, elenco file) per evitare rallentamenti dovuti al buffer USB/Serial.\n• Ambito: vale per tutti i display supportati e non influisce sull’input da tastiera/PS2 o su altre periferiche.\n• Persistenza: l’impostazione non viene salvata in config.\n• Compatibilità: non cambia Serial.begin(...); usa il baud già impostato nel firmware. Se il Serial Monitor non è aperto, DEV SERIAL ON non causa errori, ma l’output può comunque accumularsi nel buffer USB."
+  },
+  {
+    "id": "dev-status",
+    "nome": "DEV STATUS",
+    "categoria": "",
+    "sintassi": "DEV STATUS",
+    "sommario": "",
+    "descrizione": "Mostra lo stato corrente della modalità developer (attivo/auto, display selezionato, font, mappa, cursore, PS/2).",
+    "esempi": [
+      {
+        "code": "DEV STATUS",
+        "note": ""
+      }
+    ],
+    "note": "• Mostra anche le configurazioni salvate per ILI."
+  },
+  {
+    "id": "dhtcalibreset",
+    "nome": "DHTCALIBRESET",
+    "categoria": "",
+    "sintassi": "DHTCALIBRESET pin → resetta tutte le calibrazioni associate a quel pin (DHT, DHTT, DHTH).\nDHTCALIBRESET ALL → resetta tutte le calibrazioni di tutti i pin.",
+    "sommario": "",
+    "descrizione": "Cancella le impostazioni di calibrazione e ripristina i valori di default:\noffset = 0\nslope = 1\nPuò essere usato quando vuoi azzerare correzioni precedentemente impostate con DHTCALIBSET.",
+    "esempi": [
+      {
+        "code": "10 DHTCALIBSET DHT 2 0.5 -2\n20 DHTCALIBRESET 2\n30 SDHCALIBSHOW\n\nOutput atteso:\n(nessuna calibrazione attiva per pin 2)",
+        "note": "Reset calibrazione su pin 2"
+      },
+      {
+        "code": "10 DHTCALIBSET DHT 2 1.0\n20 DHTCALIBSET DHT 4 -0.5\n30 DHTCALIBRESET ALL\n40 SDHCALIBSHOW\n\nOutput atteso:\n(nessuna calibrazione attiva)",
+        "note": "Reset totale di tutte le calibrazioni"
+      },
+      {
+        "code": "10 DHTCALIBSET DHTT 2 1.0\n20 DHTREAD 2 T H\n30 PRINT T\n40 DHTCALIBRESET 2\n50 DHTREAD 2 T H\n60 PRINT T\n\nOutput atteso (esempio):\nT=(temperatura+1.0)    // prima della reset\nT=(temperatura_grezza) // dopo reset",
+        "note": "Dopo reset lettura senza correzione"
+      }
+    ],
+    "note": "• pin = numero del pin usato nel DHTINIT.\n• Con ALL elimina tutte le calibrazioni registrate.\n• Dopo reset, le letture ritornano ai valori “grezzi” del sensore."
+  },
+  {
+    "id": "dhtcalibset",
+    "nome": "DHTCALIBSET",
+    "categoria": "",
+    "sintassi": "Forma semplice\nDHTCALIBSET DHT pin offset [slope] → applica a Temperatura e Umidità\nDHTCALIBSET DHTT pin offset [slope] → applica solo alla Temperatura\nDHTCALIBSET DHTH pin offset [slope] → applica solo all’Umidità\nForma estesa\nDHTCALIBSET DHT pin t_offset h_offset [t_slope] [h_slope]",
+    "sommario": "",
+    "descrizione": "Imposta la calibrazione delle letture DHT sul pin.\nLe correzioni seguono la formula:\nvalore_calibrato = valore_grezzo * slope + offset\noffset: correzione additiva (°C per T, %RH per H)\nslope: fattore moltiplicativo (predefinito 1.0, deve essere > 0 e ragionevole)\nPriorità in lettura (DHTREAD): DHTT/DHTH (specifiche) sovrascrivono DHT (generale).",
+    "esempi": [
+      {
+        "code": "10 DHTCALIBSET DHT 17 0.5 -2\n20 DHTINIT 17 11\n30 DHTREAD 17 T H\n40 PRINT T; \"C  \"; H; \"%\"\n\nOutput atteso (esempio):\n(Temperatura_grezza + 0.5)   (Umidità_grezza - 2)",
+        "note": "Offset distinti per T e H (forma estesa, 1 riga)"
+      },
+      {
+        "code": "10 DHTCALIBSET DHT 17 0.3\n20 DHTINIT 17 22\n30 DHTREAD 17 T H\n40 PRINT \"T=\";T;\"  H=\";H\n\nOutput atteso:\nT=(T_grezza + 0.3)  H=(H_grezza + 0.3)",
+        "note": "Stessa calibrazione su T e H (forma semplice)"
+      },
+      {
+        "code": "10 DHTCALIBSET DHTT 17 0.0 1.02\n20 DHTINIT 17 22\n30 DHTREAD 17 T H\n40 PRINT \"T=\";T\n\nOutput atteso:\nT=(T_grezza * 1.02)",
+        "note": "Solo Temperatura con slope"
+      },
+      {
+        "code": "10 DHTCALIBSET DHTH 17 -1.5\n20 DHTINIT 17 22\n30 DHTREAD 17 T H\n40 PRINT H\n\nOutput atteso:\nH=(H_grezza - 1.5)",
+        "note": "Solo Umidità, offset -1.5 (slope implicito = 1)"
+      },
+      {
+        "code": "10 DHTCALIBSET DHT 17 0.5 -2\n\nOutput atteso:\nDHTCALIBSET: Invalid slope (must be > 0 and reasonable)",
+        "note": "Validazione slope (errore se negativo o non ragionevole)"
+      }
+    ],
+    "note": "• Slope è opzionale; default 1.0. Deve essere > 0 (es. valori tipici 0.9…1.1).\n• La forma estesa (DHT pin t_off h_off [t_slope] [h_slope]) è la più chiara quando vuoi correzioni diverse su T e H in un’unica riga.\n• Le calibrazioni restano attive finché non le cambi o esegui un reset (es. DHTCALIBRESET pin o DHTCALIBRESET ALL).\n• Compatibile con PRINT, LET, IF perché agisce “a monte” delle variabili lette con DHTREAD.\n• In DHTREAD le calibrazioni specifiche (DHTT:pin, DHTH:pin) hanno priorità sulla calibrazione generale (DHT:pin)."
+  },
+  {
+    "id": "dhtcalibshow",
+    "nome": "DHTCALIBSHOW",
+    "categoria": "",
+    "sintassi": "DHTCALIBSHOW",
+    "sommario": "",
+    "descrizione": "Mostra a schermo le calibrazioni DHT correnti (chiavi e parametri offset/slope) per tutti i pin configurati.",
+    "esempi": [
+      {
+        "code": "10 DHTCALIBSHOW\n\nDHT:2  => offset=0.500 slope=1.000\nDHTT:2 => offset=0.000 slope=1.020\nDHTH:2 => offset=-1.500 slope=1.000",
+        "note": "Elenco calibrazioni attive"
+      },
+      {
+        "code": "10 DHTCALIBSET DHT 2 0 1\n20 DHTCALIBSHOW\n\nOutput atteso:\nDHT:2 => offset=0.000 slope=1.000",
+        "note": "Dopo reset calibrazione"
+      },
+      {
+        "code": "10 DHTCALIBSHOW\n20 PRINT \"FINE\"\n\nOutput atteso:\nDHT:... => offset=... slope=...",
+        "note": "Stampa condizionale (se serve)"
+      }
+    ],
+    "note": "• È di sola lettura: non modifica le impostazioni.\n• Utile per debug prima di acquisire misure."
+  },
+  {
+    "id": "dhtinit-dht11-dht22",
+    "nome": "DHTINIT (DHT11-DHT22)",
+    "categoria": "",
+    "sintassi": "DHTINIT pin tipo",
+    "sommario": "",
+    "descrizione": "Inizializza un sensore DHT collegato al pin indicato.\ntipo = 11 (DHT11) oppure 22 (DHT22/AM2302).\nDeve essere eseguito prima di DHTREAD.",
+    "esempi": [
+      {
+        "code": "10 DHTINIT 2 22\n20 PRINT \"OK\"\n\nOutput atteso:\nOK",
+        "note": "Inizializzare un DHT22 su pin 2"
+      },
+      {
+        "code": "10 LET P = 7\n20 LET T = 11\n30 DHTINIT P T\n40 PRINT \"DHT PRONTO\"\n\nOutput atteso:\nDHT PRONTO",
+        "note": "Variabili per pin e tipo"
+      },
+      {
+        "code": "10 DHTINIT 2 22\n20 DHTINIT 4 22\n30 PRINT \"SPOSTATO SU PIN 4\"\n\nOutput atteso:\nSPOSTATO SU PIN 4",
+        "note": "Re-inizializzazione su altro pin"
+      }
+    ],
+    "note": "• Va chiamato almeno una volta prima di leggere.\n• Se cambi pin o modello, ripeti DHTINIT.\n• Restituisce 1/OK (se la tua piattaforma lo prevede) oppure nessun valore."
+  },
+  {
+    "id": "dhtread",
+    "nome": "DHTREAD",
+    "categoria": "",
+    "sintassi": "DHTREAD pin varTemp varHum",
+    "sommario": "",
+    "descrizione": "Legge temperatura (°C) e umidità (%) dal DHT inizializzato su pin e salva i valori in varTemp e varHum.\nSe una variabile termina con $, il valore viene salvato come stringa; altrimenti come numero.\nApplica automaticamente eventuali calibrazioni impostate con DHTCALIBSET.",
+    "esempi": [
+      {
+        "code": "10 DHTINIT 2 22\n20 DHTREAD 2 T H\n30 PRINT \"T=\";T;\"C  H=\";H;\"%\"\n\nOutput atteso (esempio):\nT=24.0C  H=48.0%",
+        "note": "Lettura base"
+      },
+      {
+        "code": "10 DHTINIT 2 22\n20 DHTREAD 2 T$ H$\n30 PRINT \"T=\";T$;\"  H=\";H$;\"%\"\n\nOutput atteso (esempio):\nT=24.0  H=48.0%",
+        "note": "Uso con stringhe"
+      },
+      {
+        "code": "10 DHTINIT 2 22\n20 DHTREAD 2 T H\n30 IF H > 70 THEN PRINT \"UMIDITA' ALTA\"\n\nOutput atteso:\nUMIDITA' ALTA",
+        "note": "Condizione su umidità"
+      }
+    ],
+    "note": "• Richiede DHTINIT eseguito per quel pin.\n• In caso di errore lettura alcune implementazioni producono NaN/valore sentinella: gestiscilo con IF."
+  },
+  {
+    "id": "dim",
+    "nome": "DIM",
+    "categoria": "",
+    "sintassi": "DIM nome_array(n)\nDIM nome_array$(n)\nDIM FILE   buf$ pos() len() size() contatore\nDIM FILESD buf$ pos() len() size() contatore",
+    "sommario": "",
+    "descrizione": "DIM dichiara un array monodimensionale (vettore), indicizzato da 0 a n (incluso).\nArray numerici: senza $\nEsempio: DIM A(5) → crea A(0)…A(5) (6 elementi), inizializzati a 0.\nArray di testo: con $\nEsempio: DIM NOME$(5) → crea NOME$(0)…NOME$(5) (6 elementi), inizializzati a \"\".\nL’assegnazione dei valori deve essere effettuata con LET:\nLET A(0) = 10\nLET NOME$(1) = \"LUCA\"\nRegole generali\nIndici validi: 0..n (incluso).\nGli indici possono essere costanti o variabili numeriche.\nAccesso fuori limite → errore: INDEX OUT OF RANGE.\nNon puoi cambiare la dimensione di un array già dichiarato: usa prima CLEAR ARRAY.\nGli array numerici e di testo sono indipendenti: puoi avere A() e A$() contemporaneamente.\n\nEstensioni di DIM — Elenco file\nFILE → carica l’elenco dei file dalla memoria SPIFFS.\nFILESD → carica l’elenco dei file dalla scheda SD (errore se SD non inizializzata).\nbuf$ : variabile stringa che conterrà tutti i nomi concatenati (senza separatori).\npos() : array numerico con la posizione 1-based di inizio di ciascun nome dentro buf$.\nlen() : array numerico con la lunghezza di ciascun nome.\nsize() : array numerico con la dimensione in byte di ciascun file.\ncontatore : nome variabile numerica a tua scelta (es. NF, NFILES, TOT) in cui viene scritto il numero di file caricati.\nImportante: pos(), len(), size() devono essere già dichiarati con DIM prima di usare DIM FILE….\nSe le loro capienze differiscono, viene usata la capacità minima tra i tre.\nGli elementi riempiti sono agli indici 1..contatore (1-based per comodità d’uso), mentre i tuoi array restano comunque allocati 0..n.\nErrori possibili\nUNDEFINED ARRAY → pos(), len() o size() non sono stati dichiarati.\nSD NOT INITIALIZED → DIM FILESD … usato ma la SD non è montata/pronta.\nINDEX OUT OF RANGE → regola generale sugli accessi agli array.",
+    "esempi": [
+      {
+        "code": "10 DIM A(3)\n20 LET A(0) = 5\n30 LET A(1) = 10\n40 LET A(2) = 15\n50 FOR I = 0 TO 2\n60 PRINT \"A(\"; I; \") = \"; A(I)\n70 NEXT I\n\nOutput atteso:\nA(0) = 5\nA(1) = 10\nA(2) = 15",
+        "note": "Array numerico"
+      },
+      {
+        "code": "10 DIM NOME$(2)\n20 LET NOME$(0) = \"LUCA\"\n30 LET NOME$(1) = \"ANNA\"\n40 FOR I = 0 TO 1\n50 PRINT \"NOME(\"; I; \") = \"; NOME$(I)\n60 NEXT I\n\nOutput atteso:\nNOME(0) = LUCA\nNOME(1) = ANNA",
+        "note": "Array di testo"
+      },
+      {
+        "code": "10 DIM N(5)\n20 FOR I = 0 TO 5\n30   LET N(I) = I * I\n40 NEXT I\n50 PRINT \"N(3) = \"; N(3)\n\nOutput atteso:\nN(3) = 9",
+        "note": "Calcolo in ciclo"
+      },
+      {
+        "code": "10 DIM MSG$(2)\n20 LET MSG$(0) = \"CIAO\"\n30 LET MSG$(1) = MSG$(0) + \" MONDO\"\n40 PRINT MSG$(1)\n\nOutput atteso:\nCIAO MONDO",
+        "note": "Concatenazione stringhe"
+      },
+      {
+        "code": "10 DIM POS(512)\n20 DIM LENN(512)\n30 DIM SIZE(512)\n40 BUF$=\"\"\n50 DIM FILE BUF$ POS() LENN() SIZE() NF\n60 IF NF=0 THEN PRINT \"Nessun file in SPIFFS\"\n70 FOR I=1 TO NF\n80   N$ = MID$(BUF$, POS(I), LENN(I))\n90   PRINT N$; \"  \"; SIZE(I); \" B\"\n100 NEXT I",
+        "note": "Elenco completo da SPIFFS"
+      },
+      {
+        "code": "10 DIM POS(512)\n20 DIM LEN(512)\n30 DIM SIZE(512)\n40 BUF$=\"\"\n50 DIM FILESD BUF$ POS() LEN() SIZE() NFILES\n60 IF NFILES=0 THEN PRINT \"Nessun file su SD\"\n70 K = 2\n80 N$ = MID$(BUF$, POS(K), LEN(K))\n90 PRINT \"File #\"; K; \": \"; N$; \"  \"; SIZE(K); \" B\"",
+        "note": "SD (già montata) e stampa di un solo file"
+      },
+      {
+        "code": "10 DIM POS(512): DIM LEN(512): DIM SIZE(512)\n20 BUF$=\"\"\n30 DIM FILE BUF$ POS() LEN() SIZE() NF\n40 IF NF=0 THEN PRINT \"SPIFFS vuoto\"\n50 INPUT \"Nome da cercare\"; T$\n60 FOUND = 0\n70 FOR I=1 TO NF\n80   N$ = MID$(BUF$, POS(I), LEN(I))\n90   IF N$ = T$ THEN FOUND = I : GOTO 120\n100 NEXT I\n110 PRINT \"File non trovato\": END\n120 PRINT \"Trovato: \"; N$; \"  \"; SIZE(FOUND); \" B\"",
+        "note": "Ricerca di un nome file"
+      }
+    ],
+    "note": "• Il contatore (ultimo parametro in DIM FILE…) è una variabile numerica arbitraria: la decidi tu (es. NF, NFILES, TOT). Non è riservata.\n• Il DIM classico non crea/aggiorna contatori: se vuoi usarne uno, lo gestisci tu (LET K=…) oppure usi quello passato a DIM FILE….\n• Le posizioni in pos() sono 1-based per semplificare l’uso con MID$.\n• I nomi file in buf$ sono concatenati senza separatori: per leggerli usa sempre MID$(buf$, pos(i), len(i))."
+  },
+  {
+    "id": "dlevel-p",
+    "nome": "DLEVEL(p)",
+    "categoria": "",
+    "sintassi": "DLEVEL(p)",
+    "sommario": "",
+    "descrizione": "Restituisce sempre il livello digitale “raw” del pin, ignorando qualsiasi debounce software.\nUsala quando vuoi conoscere lo stato istantaneo del GPIO (utile per rilevare “tenuto premuto”, durata della pressione, ecc.).\nRestituisce:\n1 se il pin è ALTO (HIGH, ~3.3V)\n0 se il pin è BASSO (LOW, ~0V)\nConfigura prima il pin con PINMODE (INPUT + eventuale PULLUP/PULLDOWN/NOPULL).",
+    "esempi": [
+      {
+        "code": "10 PINMODE 12 INPUT NOPULL\n20 V = DLEVEL(12)\n30 PRINT \"PIN 12 = \"; V\n\nOutput atteso: \n0 oppure 1 in base al segnale.",
+        "note": "Lettura diretta"
+      },
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP\n20 IF DLEVEL(12) = 0 THEN PRINT \"PREMUTO\" ELSE PRINT \"RILASCIATO\"\n30 DELAY 500\n40 GOTO 20\n\nOutput atteso:\nstampa continuamente lo stato reale (0=premuto, 1=rilasciato).",
+        "note": "Pulsante con PULLUP (stato tenuto)"
+      },
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP DEBOUNCE 60\n20 IF DLEVEL(12) = 0 THEN PRINT \"HOLD\" ELSE PRINT \"UP\"\n30 DELAY 500\n40 GOTO 20\n\nOutput atteso: \nDLEVEL mostra lo stato in tempo reale; il debounce non ha effetto su DLEVEL.",
+        "note": "Con DEBOUNCE attivo (dimostrazione che lo ignora)"
+      }
+    ],
+    "note": "• Con PULLUP: premuto = 0, rilasciato = 1. Con PULLDOWN è l’inverso.\n• Differenza da DREAD:\n• DREAD(pin) può diventare one-shot se abiliti DEBOUNCE in PINMODE.\n• DLEVEL(pin) è sempre raw, indipendente da DEBOUNCE.\n• Per contare click singoli usa DREAD con DEBOUNCE; per rilevare “hold” o tempi di pressione usa DLEVEL."
+  },
+  {
+    "id": "do",
+    "nome": "DO",
+    "categoria": "",
+    "sintassi": "DO <numero_di_linea>",
+    "sommario": "",
+    "descrizione": "Il comando DO permette di eseguire ripetutamente una singola riga di programma ad ogni ciclo principale, senza bloccare l’esecuzione generale del sistema.\nÈ utile per controlli ciclici su variabili, ingressi digitali, o per ripetere semplici azioni.",
+    "esempi": [
+      {
+        "code": "50 DO 100\n100 PRINT \"CICLO ATTIVO\"\n\nOutput atteso:\nCICLO ATTIVO\nCICLO ATTIVO\nCICLO ATTIVO\n...(continuamente)",
+        "note": "Stampare un messaggio ciclicamente"
+      },
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP\n20 DO 100\n100 IF DREAD(12) = 0 THEN PRINT \"PREMUTO\"\n\nOutput atteso:\nStampa “PREMUTO” ogni volta che il pulsante sul pin 5 viene premuto.",
+        "note": "Leggere lo stato di un pulsante"
+      }
+    ],
+    "note": "• È possibile utilizzare più comandi DO per righe differenti\n• Non blocca l’esecuzione di altri comandi o servizi come MQTT\n• Utile per controlli semplici e ripetitivi\n• Valido solo su una singola riga per ogni comando DO"
+  },
+  {
+    "id": "do-block",
+    "nome": "DO BLOCK",
+    "categoria": "",
+    "sintassi": "DO BLOCK <inizio> TO <fine>",
+    "sommario": "",
+    "descrizione": "Il comando DO BLOCK esegue ciclicamente un blocco di righe del programma, dalla riga iniziale alla riga finale inclusa.\nTutte le righe comprese nel blocco vengono eseguite una volta per ciclo, in ordine.\nÈ utile per raggruppare più istruzioni da eseguire ciclicamente, come controlli, automazioni, reazioni a variabili o messaggi.",
+    "esempi": [
+      {
+        "code": "5 PINMODE 2 OUTPUT NOPULL\n10 DO BLOCK 100 TO 110\n100 IF TIMEH > 20 THEN DWRITE 2 1\n110 IF TIMEH < 21 THEN DWRITE 2 0\n\nOutput atteso:\nIl LED si accende dopo le 20:00 e si spegne prima delle 21:00, in modo automatico.",
+        "note": "Controllare l’accensione di un LED"
+      },
+      {
+        "code": "10 DO BLOCK 100 TO 120\n100 IF MSG$ = \"ACCENDI\" THEN PRINT \"LUCE ON\"\n110 IF MSG$ = \"SPEGNI\" THEN PRINT \"LUCE OFF\"\n120 LET MSG$ = \"\"\n\nOutput atteso:\nStampa “LUCE ON” o “LUCE OFF” in base al valore della variabile MSG$.",
+        "note": "Reazione a una variabile testuale"
+      },
+      {
+        "code": "5  PINMODE 2 OUTPUT NOPULL\n10 LET S = 0\n20 DO BLOCK 100 TO 140\n100 IF S = 0 THEN DWRITE 2 1\n110 IF S = 1 THEN DWRITE 2 0\n120 LET S = S + 1\n130 IF S > 1 THEN LET S = 0\n140 DELAY 500\n\nOutput atteso:\nil Led sul pin 2 si accende/spegne ogni mezzo secondo.",
+        "note": "Blink LED ogni 500 ms"
+      }
+    ],
+    "note": "• Le righe vengono eseguite tutte ad ogni ciclo\n• Può contenere IF, LET, DWRITE, WAIT, ecc.\n• Non interferisce con MQTT o altre operazioni del sistema\n• Si possono usare più blocchi DO BLOCK nel programma"
+  },
+  {
+    "id": "dread-p",
+    "nome": "DREAD(p)",
+    "categoria": "",
+    "sintassi": "DREAD(pin)",
+    "sommario": "",
+    "descrizione": "Legge lo stato digitale del pin.\nSenza DEBOUNCE (PINMODE senza la parola DEBOUNCE): ritorna il livello raw del pin (lettura immediata, può ripetere finché tieni premuto).\nCon DEBOUNCE (PINMODE con DEBOUNCE [ms]): ritorna un impulso one-shot alla pressione:\nemette 0 (con PULLUP) una sola volta quando premi, poi torna a 1 finché non rilasci e ripremi.\ncon PULLDOWN è l’inverso (premuto=1).\nRestituisce:\n1 se il pin è ALTO (HIGH, ~3.3V)\n0 se il pin è BASSO (LOW, ~0V)\nUsa prima PINMODE per configurare il pin in INPUT (con PULLUP, PULLDOWN o NOPULL).\nSe vuoi sempre il livello raw (ignorando il debounce), usa DLEVEL(pin).",
+    "esempi": [
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP\n20 V = DREAD(12)\n30 PRINT \"STATO DEL PIN 12: \"; V\n\nOutput atteso: \n0 oppure 1 in base al segnale presente sul pin.",
+        "note": "Lettura diretta (senza debounce)"
+      },
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP DEBOUNCE 60\n20 IF DREAD(12) = 0 THEN PRINT \"PULSANTE PREMUTO\"\n30 GOTO 20\n\nComportamento: stampa una sola volta per ogni pressione completa (press→release), evitando ripetizioni mentre tieni premuto.",
+        "note": "Pulsante con PULLUP e DEBOUNCE (one-shot)"
+      },
+      {
+        "code": "10 PINMODE 12 INPUT PULLUP DEBOUNCE 60\n20 IF DLEVEL(12) = 0 THEN PRINT \"PULSANTE PREMUTO\" ELSE PRINT \"RILASCIATO\"\n30 DELAY 500\n40 GOTO 20\n\nOutput atteso: \nmostra lo stato istantaneo del pin (0=premuto, 1=rilasciato con PULLUP), a prescindere dal debounce.",
+        "note": "Lettura continua “raw” con DLEVEL (ignora debounce)"
+      }
+    ],
+    "note": "• Con PULLUP: circuito “attivo-basso” → premuto=0, rilasciato=1.\n• Con PULLDOWN è l’inverso (premuto=1).\n• DEBOUNCE [ms] nel PINMODE filtra i rimbalzi e trasforma DREAD(pin) in un rilevatore di pressione singola.\n• Per contatori/menu: usa DREAD(pin) con DEBOUNCE; per “hold” o durate di pressione, usa DLEVEL(pin)."
+  },
+  {
+    "id": "dwrite-p-v",
+    "nome": "DWRITE(p v)",
+    "categoria": "",
+    "sintassi": "DWRITE(pin valore)",
+    "sommario": "",
+    "descrizione": "Il comando DWRITE imposta un pin digitale dell’ESP32 allo stato:\nHIGH (1) → tensione 3.3V\nLOW (0) → tensione 0V\nÈ usato per accendere o spegnere LED, attivare relé, segnali di controllo, ecc.\nIl pin deve essere configurato prima come OUTPUT usando PINMODE.",
+    "esempi": [
+      {
+        "code": "10 PINMODE 2 OUTPUT NOPULL\n20 DWRITE 2 1\n30 WAIT 1000\n40 DWRITE 2 0\n\nOutput atteso:\nIl LED si accende per 1 secondo, poi si spegne.",
+        "note": "Accendere e spegnere un LED collegato al pin 2"
+      },
+      {
+        "code": "10 PINMODE 2 OUTPUT NOPULL\n20 DO BLOCK 20 TO 60\n30 DWRITE 2 1\n40 WAIT 500\n50 DWRITE 2 0\n60 WAIT 500\n\nOutput atteso:\nLED collegato al GPIO2 lampeggia a intervalli regolari.",
+        "note": "Lampeggio continuo"
+      },
+      {
+        "code": "10 PINMODE 13 OUTPUT NOPULL\n20 INPUT A\n30 IF A > 100 THEN DWRITE 13 1 ELSE DWRITE 13 0\n\nOutput atteso:\nIl pin 13 sarà attivo (HIGH) se A è maggiore di 100.",
+        "note": "Controllo condizionale"
+      }
+    ],
+    "note": "• I valori 1 e HIGH sono equivalenti (idem per 0 e LOW)\n• È possibile controllare anche pin di output virtuali o logici in alcuni casi."
+  },
+  {
+    "id": "dir",
+    "nome": "DIR",
+    "categoria": "",
+    "sintassi": "DIR\nDIR SD\nDIR SPIFFS",
+    "sommario": "",
+    "descrizione": "Il comando DIR mostra l’elenco dei file presenti nella memoria del sistema.\nSe eseguito senza parametri, visualizza il contenuto della memoria interna SPIFFS.\nSe viene specificato l’argomento SD, mostra invece i file presenti sulla scheda SD.\nIn alternativa, è possibile indicare esplicitamente SPIFFS per elencare la memoria interna (equivalente a DIR senza argomenti).\nQuesto comando è utile per visualizzare rapidamente i file disponibili, sia su SPIFFS che su SD, da caricare, cancellare o rinominare.",
+    "esempi": [
+      {
+        "code": "DIR\n\nOutput atteso:\nDirectory of SPIFFS:\nmain.bas\nprog1.bas",
+        "note": "Elencare file nella memoria interna SPIFFS"
+      },
+      {
+        "code": "DIR SD\n\nOutput atteso:\nDirectory of SD:\nprogram1.bas\ndemo.bas",
+        "note": "Elencare file sulla scheda SD"
+      }
+    ],
+    "note": "• DIR accetta un solo argomento opzionale: SD o SPIFFS.\n• Se nessuna scheda SD è collegata o montata, il comando DIR SD mostrerà un messaggio di errore (“Unable to open SD root.”)."
+  },
+  {
+    "id": "else",
+    "nome": "ELSE",
+    "categoria": "",
+    "sintassi": "IF condizione THEN istruzione1 ELSE istruzione2",
+    "sommario": "",
+    "descrizione": "Il costrutto ELSE è parte della struttura condizionale IF...THEN...ELSE.\nPermette di eseguire un'istruzione alternativa se la condizione non è vera.\nPuò essere usato con singole istruzioni sulla stessa riga oppure con GOTO, PRINT, LET, INPUT, ecc.\nBASIC32 non supporta blocchi multi-linea (IF...ENDIF), quindi l'intera logica va espressa su una singola riga.",
+    "esempi": [
+      {
+        "code": "10 INPUT A\n20 IF A > 0 THEN PRINT \"POSITIVO\" ELSE PRINT \"NEGATIVO O ZERO\"\n\nOutput atteso (se inserisci 5):\nPOSITIVO",
+        "note": "Verifica di un numero"
+      },
+      {
+        "code": "10 PINMODE 2 OUTPUT NOPULL\n20 INPUT V\n30 IF V = 1 THEN DWRITE 2 1 ELSE DWRITE 2 0\n\nOutput atteso:\nIl pin GPIO2 sarà acceso se V = 1, altrimenti spento.",
+        "note": "Scelta tra due azioni"
+      },
+      {
+        "code": "10 INPUT T\n20 IF T < 20 THEN LET STATO$ = \"FREDDO\" ELSE LET STATO$ = \"CALDO\"\n30 PRINT \"STATO: \"; STATO$\n\nOutput atteso (es. input 15):\nSTATO: FREDDO",
+        "note": "Uso con LET per assegnazioni diverse"
+      },
+      {
+        "code": "10 INPUT A\n20 IF A < 100 THEN GOTO 100 ELSE GOTO 200\n100 PRINT \"NUMERO PICCOLO\": END\n200 PRINT \"NUMERO GRANDE\"\n\nOutput atteso (es. input 50):\nNUMERO PICCOLO",
+        "note": "Con GOTO per saltare a righe diverse"
+      }
+    ],
+    "note": ""
+  },
+  {
+    "id": "exp-x",
+    "nome": "EXP(x)",
+    "categoria": "",
+    "sintassi": "EXP(x)",
+    "sommario": "",
+    "descrizione": "La funzione EXP(x) restituisce il valore di e elevato alla x, dove e ≈ 2.71828 è la base dei logaritmi naturali.\nÈ utile per calcoli matematici avanzati, esponenziali, crescita logistica, e operazioni scientifiche.\nIl parametro x può essere positivo, negativo o zero.",
+    "esempi": [
+      {
+        "code": "10 PRINT \"EXP(1) = \"; EXP(1)\n\nOutput atteso:\nEXP(1) = 2.71828",
+        "note": "Calcolare e^1"
+      },
+      {
+        "code": "10 X = EXP(2)\n20 PRINT \"EXP(2) = \"; X\n\nOutput atteso:\nEXP(2) = 7.389",
+        "note": "e elevato alla seconda"
+      },
+      {
+        "code": "10 PRINT \"EXP(-1) = \"; EXP(-1)\n\nOutput atteso:\nEXP(-1) = 0.3679",
+        "note": "Usare EXP con numeri negativi"
+      },
+      {
+        "code": "10 A = 5\n20 PRINT \"VALORE ORIGINALE: \"; A\n30 PRINT \"EXP(LOG(A)) = \"; EXP(LOG(A))\n\nOutput atteso:\nVALORE ORIGINALE: 5\nEXP(LOG(A)) = 5",
+        "note": "Comparazione con potenze"
+      }
+    ],
+    "note": ""
   }
 ];
