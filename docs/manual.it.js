@@ -2004,5 +2004,200 @@ export default [
       }
     ],
     "note": ""
+  },
+  {
+    "id": "goto-n",
+    "nome": "GOTO n",
+    "categoria": "",
+    "sintassi": "GOTO numero_riga",
+    "sommario": "",
+    "descrizione": "Il comando GOTO trasferisce l'esecuzione del programma alla riga con numero n.\nÈ uno strumento basilare ma potente per saltare blocchi di codice, creare loop manuali, o diramare il flusso del programma in base a condizioni.\nTuttavia, è consigliabile usarlo con criterio per mantenere il codice leggibile (evita il cosiddetto “spaghetti code”).",
+    "esempi": [
+      {
+        "code": "10 PRINT \"INIZIO\"\n20 GOTO 40\n30 PRINT \"QUESTA NON SI VEDE\"\n40 PRINT \"DOPO IL SALTO\"\n\nOutput atteso:\nINIZIO\nDOPO IL SALTO",
+        "note": "Salto semplice"
+      },
+      {
+        "code": "10 A = 1\n20 PRINT A\n30 A = A + 1\n40 IF A <= 5 THEN GOTO 20\n\nOutput atteso:\n1\n2\n3\n4\n5",
+        "note": "Creazione di un ciclo manuale"
+      },
+      {
+        "code": "10 PRINT \"1. START\"\n20 PRINT \"2. ESCI\"\n30 INPUT C\n40 IF C = 1 THEN GOTO 100\n50 IF C = 2 THEN GOTO 200\n100 PRINT \"INIZIO GIOCO\": END\n200 PRINT \"USCITA DAL PROGRAMMA\"\n\nOutput atteso (se premi 1):\nINIZIO GIOCO",
+        "note": "Gestione di menù testuale"
+      },
+      {
+        "code": "10 PRINT \"CICLO CONTINUO\"\n20 GOTO 10\n\nQuesto ciclo è infinito e va interrotto manualmente.",
+        "note": "Evitare loop infiniti involontari"
+      }
+    ],
+    "note": "• Le righe di destinazione devono esistere, altrimenti il programma può bloccarsi.\n• GOTO può essere usato dentro IF, ELSE, cicli o subroutine."
+  },
+  {
+    "id": "htmlobj",
+    "nome": "HTMLOBJ",
+    "categoria": "",
+    "sintassi": "HTMLOBJ \"<riga_html>\"\nHTMLOBJ espressione_stringa$",
+    "sommario": "",
+    "descrizione": "Il comando HTMLOBJ memorizza una riga di codice HTML da includere nella pagina web generata dal dispositivo.\nOgni chiamata a HTMLOBJ accoda la stringa alla pagina HTML interna.\nLe righe accumulate vengono inviate al browser quando viene eseguito HTMLSTART.\nL’argomento può essere:\nuna stringa costante racchiusa tra virgolette\nuna variabile stringa (es. A$)\nuna espressione stringa (es. \"Valore: \" + STR$(T))\nLe righe HTML restano memorizzate finché non viene eseguito MEMCLEAN(HTML) o si riavvia la scheda.",
+    "esempi": [
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 HTMLOBJ \"<h1>Benvenuto su Basic32</h1>\"\n30 HTMLSTART\n\noutput atteso:\nMostra un titolo grande nella pagina web.",
+        "note": "Intestazione HTML semplice"
+      },
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET T = 23.7\n30 LET R$ = \"<p>Temperatura attuale: \" + STR$(T) + \" &deg;C</p>\"\n40 HTMLOBJ \"<h2>Sensore</h2>\"\n50 HTMLOBJ R$\n60 HTMLSTART\n\noutput atteso:\nInserisce nella pagina il valore di una variabile BASIC formattata come HTML.",
+        "note": "Mostrare una variabile BASIC"
+      },
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET T = 22.5\n30 LET H = 55.0\n40 HTMLOBJ \"<h2>Lettura sensori</h2>\"\n50 HTMLOBJ \"<table border='1' style='margin:auto;border-collapse:collapse;'>\"\n60 HTMLOBJ \"<tr><th style='padding:6px;'>Grandezza</th><th style='padding:6px;'>Valore</th></tr>\"\n70 LET RIGA$ = \"<tr><td style='padding:6px;'>Temperatura</td><td style='padding:6px;'>\" + STR$(T) + \" &deg;C</td></tr>\"\n80 HTMLOBJ RIGA$\n90 LET RIGA$ = \"<tr><td style='padding:6px;'>Umidit&agrave;</td><td style='padding:6px;'>\" + STR$(H) + \" %</td></tr>\"\n100 HTMLOBJ RIGA$\n110 HTMLOBJ \"</table>\"\n120 HTMLSTART\n\noutput atteso:\nCostruisce una tabella HTML usando stringhe generate dal BASIC.",
+        "note": "Tabella HTML con valori"
+      },
+      {
+        "code": "10 PINMODE 32 OUTPUT NOPULL\n20 WIFI \"ssid\" \"password\"\n30 HTMLOBJ \"<div style='font-family:Arial,sans-serif;background:#202124;color:#fff;text-align:center;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;'>\"\n40 HTMLOBJ \"<h2 style='font-size:32px;margin-bottom:40px;'>Controllo LED on board</h2>\"\n50 HTMLOBJ \"<iframe name='exec_hidden' style='display:none;width:0;height:0;border:0;'></iframe>\"\n60 HTMLOBJ \"<a href='/exec?cmd=DWRITE%2032%201' target='exec_hidden'>\"\n70 HTMLOBJ \"<button style='font-size:24px;padding:12px 24px;margin:10px;border-radius:10px;border:none;cursor:pointer;background:#4caf50;color:#fff;'>Accendi LED</button>\"\n80 HTMLOBJ \"</a>\"\n90 HTMLOBJ \"<a href='/exec?cmd=DWRITE%2032%200' target='exec_hidden'>\"\n100 HTMLOBJ \"<button style='font-size:24px;padding:12px 24px;margin:10px;border-radius:10px;border:none;cursor:pointer;background:#f44336;color:#fff;'>Spegni LED</button>\"\n110 HTMLOBJ \"</a>\"\n120 HTMLOBJ \"</div>\"\n130 HTMLSTART\n\noutput atteso:\nI pulsanti inviano comandi a /exec ma la pagina rimane sempre la stessa (la risposta “OK” viene caricata nell’iframe nascosto).",
+        "note": "Pulsanti per controllare un LED senza cambiare pagina"
+      }
+    ],
+    "note": "• Le stringhe costanti devono essere racchiuse tra virgolette doppie.\n• Per inserire doppi apici nell’HTML è consigliato usare apici singoli ' oppure raddoppiare i doppi apici:\n• class=\"\"bottone\"\"\n• HTMLOBJ non valida l’HTML: eventuali errori di markup si rifletteranno nella pagina.\n• Le righe HTML vengono accumulate tra diverse esecuzioni: per ripartire da zero usare:\n• MEMCLEAN(HTML)\n• HTMLOBJ non avvia nessun server web: per rendere visibile la pagina è necessario chiamare HTMLSTART."
+  },
+  {
+    "id": "htmlstart",
+    "nome": "HTMLSTART",
+    "categoria": "",
+    "sintassi": "HTMLSTART",
+    "sommario": "",
+    "descrizione": "Il comando HTMLSTART avvia il server web integrato e rende accessibile via browser la pagina HTML costruita in precedenza tramite HTMLOBJ.\nIl dispositivo deve essere già connesso in Wi-Fi, tramite:\nWIFI \"ssid\" \"password\" (modalità stazione)\nWIFIAP \"ssid\" \"password\" (modalità Access Point, se supportato)\nLa pagina generata è raggiungibile all’indirizzo IP riportato dai comandi:\nIP → indirizzo in modalità Wi-Fi client\nIPAP → indirizzo in modalità Access Point",
+    "esempi": [
+      {
+        "code": "10 WIFI \"ssid\" \"password\"\n20 HTMLOBJ \"<h2>Pagina di test Basic32</h2>\"\n30 HTMLOBJ \"<p>Se vedi questo messaggio, HTMLSTART funziona!</p>\"\n40 HTMLSTART\n\noutput atteso:\nAvvia una pagina molto semplice per verificare il funzionamento del web server.",
+        "note": "Pagina di test"
+      },
+      {
+        "code": "10 PINMODE 32 OUTPUT NOPULL\n20 WIFI \"ssid\" \"password\"\n30 HTMLOBJ \"<div style='font-family:Arial,sans-serif;background:#202124;color:#fff;text-align:center;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;'>\"\n40 HTMLOBJ \"<h2 style='font-size:32px;margin-bottom:40px;'>Controllo LED on board</h2>\"\n50 HTMLOBJ \"<iframe name='exec_hidden' style='display:none;width:0;height:0;border:0;'></iframe>\"\n60 HTMLOBJ \"<a href='/exec?cmd=DWRITE%2032%201' target='exec_hidden'>\"\n70 HTMLOBJ \"<button style='font-size:24px;padding:12px 24px;margin:10px;border-radius:10px;border:none;cursor:pointer;background:#4caf50;color:#fff;'>Accendi LED</button>\"\n80 HTMLOBJ \"</a>\"\n90 HTMLOBJ \"<a href='/exec?cmd=DWRITE%2032%200' target='exec_hidden'>\"\n100 HTMLOBJ \"<button style='font-size:24px;padding:12px 24px;margin:10px;border-radius:10px;border:none;cursor:pointer;background:#f44336;color:#fff;'>Spegni LED</button>\"\n110 HTMLOBJ \"</a>\"\n120 HTMLOBJ \"</div>\"\n130 HTMLSTART\n\noutput atteso:\nPermette di controllare il LED dal browser. I comandi vengono eseguiti su /exec e la pagina dei pulsanti non viene sostituita dalla scritta “OK”.",
+        "note": "Controllo LED via Web (senza cambiare pagina)"
+      }
+    ],
+    "note": "• Deve essere chiamato dopo la configurazione Wi-Fi (WIFI / WIFIAP).\n• Richiede che siano state definite una o più righe HTMLOBJ, altrimenti la pagina risulterà vuota o minimale.\n• Per evitare che vecchie pagine si mescolino alle nuove è consigliato usare MEMCLEAN(HTML) all’inizio dei programmi che definiscono contenuti HTML.\n• Le azioni lato BASIC invocate via web passano dall’endpoint:\n• /exec?cmd=<comando BASIC>\n• È possibile usare <iframe> (come negli esempi) o JavaScript per eseguire comandi senza cambiare pagina principale."
+  },
+  {
+    "id": "http-get",
+    "nome": "HTTP GET",
+    "categoria": "",
+    "sintassi": "HTTP GET \"url\" TO var$",
+    "sommario": "",
+    "descrizione": "Esegue una richiesta HTTP GET (solo http://) e salva il corpo della risposta nella variabile indicata.\nSe l’URL inizia con https:// → errore: “HTTPS NON COMPATIBILE”.\nLa variabile speciale HTTPSTATUS contiene il codice HTTP (200=OK).\nGli header completi possono essere letti con:\nHTTP HEADERS TO var$.",
+    "esempi": [
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 HTTP GET \"http://ip-apicom/json\" TO R$\n30 IF HTTPSTATUS<>200 THEN PRINT \"Errore HTTP \";HTTPSTATUS : GOTO 90\n40 HTTP JSON GET \"query\" FROM R$ TO I$\n50 PRINT \"IP pubblico=\";I$\n90 END",
+        "note": "IP pubblico"
+      },
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET URL$=\"http://api.openweathermap.org/data/2.5/weather?q=Milano,it&units=metric&appid=LA_TUA_API_KEY\"\n30 HTTP GET URL$ TO R$\n40 IF HTTPSTATUS<>200 THEN PRINT \"Errore HTTP \";HTTPSTATUS : GOTO 100\n50 HTTP JSON GET \"main.temp\" FROM R$ TO T$\n60 HTTP JSON GET \"weather[0].description\" FROM R$ TO D$\n70 PRINT \"Meteo:\";T$;\"°C \";D$\n100 END",
+        "note": "Meteo OpenWeatherMap"
+      }
+    ],
+    "note": "• Richiede Wi-Fi attivo (WIFI \"ssid\" \"pwd\").\n• L’header Accept-Encoding: identity è forzato → risposta sempre in testo non compresso.\n• Se la risposta non è JSON, puoi stamparla direttamente."
+  },
+  {
+    "id": "http-headers",
+    "nome": "HTTP HEADERS",
+    "categoria": "",
+    "sintassi": "HTTP HEADERS TO var$",
+    "sommario": "",
+    "descrizione": "Salva gli header HTTP completi dell’ultima risposta GET/POST nella variabile indicata.",
+    "esempi": [
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 HTTP GET \"http://ip-api.com/json\" TO R$\n30 HTTP HEADERS TO H$\n40 PRINT \"Status=\";HTTPSTATUS\n50 PRINT LEFT$(H$,200)\n60 PRINT LEFT$(R$,200)\n90 END",
+        "note": ""
+      }
+    ],
+    "note": "• Restituisce gli header grezzi in un’unica stringa.\n• Utile per diagnosticare redirect, Content-Type, Content-Length."
+  },
+  {
+    "id": "http-json-get",
+    "nome": "HTTP JSON GET",
+    "categoria": "",
+    "sintassi": "HTTP JSON GET path$ FROM src$ TO var$",
+    "sommario": "",
+    "descrizione": "Estrae un valore da una stringa contenente una risposta JSON.\npath$ può includere:\ncampi annidati → main.temp\nindici array → weather[0].description\nSe il percorso non esiste → errore: JSON Path not found.\nLa funzione è robusta:\nignora tutto ciò che precede il primo { o [\n(quindi funziona anche se nel buffer ci sono header)",
+    "esempi": [
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET URL$=\"http://api.openweathermap.org/data/2.5/weather?q=Milano,it&units=metric&appid=LA_TUA_API_KEY\"\n30 HTTP GET URL$ TO R$\n40 HTTP JSON GET \"main.temp\" FROM R$ TO T$\n50 HTTP JSON GET \"weather[0].description\" FROM R$ TO D$\n60 PRINT \"Temp=\";T$;\"°C \";D$\n70 END",
+        "note": "Meteo OpenWeatherMap"
+      },
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 HTTP GET \"http://httpbin.org/get\" TO R$\n30 HTTP JSON GET \"headers.Host\" FROM R$ TO H$\n40 PRINT \"Server visto come host:\";H$\n50 END",
+        "note": "Host da httpbin"
+      }
+    ],
+    "note": "• La funzione cerca automaticamente il primo { o [ per identificare l’inizio del JSON.\n• Gli indici array partono da 0.\n• Controllare sempre HTTPSTATUS=200 prima di estrarre."
+  },
+  {
+    "id": "http-post",
+    "nome": "HTTP POST",
+    "categoria": "",
+    "sintassi": "HTTP POST \"url\" \"contentType\" \"body\" TO var$",
+    "sommario": "",
+    "descrizione": "Invia una richiesta HTTP POST (solo http://) con corpo e Content-Type specificati.\nHTTPS → non supportato.\nLa risposta viene salvata in var$.\nStato HTTP disponibile in HTTPSTATUS.\nIMPORTANTE\nSe il corpo contiene virgolette \", va costruito con CHR$(34)\noppure verrà troncato.",
+    "esempi": [
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET URL$=\"http://httpbin.org/post\"\n30 LET CT$=\"application/json\"\n40 LET Q$ = CHR$(34)\n50 LET B$ = \"{\" + Q$ + \"hello\" + Q$ + \":\" + Q$ + \"world\" + Q$ + \"}\"\n60 HTTP POST URL$ CT$ B$ TO R$\n70 HTTP JSON GET \"json.hello\" FROM R$ TO V$\n80 PRINT \"Server ha ricevuto:\";V$\n90 END\n\nOutput:\nServer ha ricevuto:world",
+        "note": "Echo JSON"
+      },
+      {
+        "code": "10 WIFI \"SSID\" \"PASSWORD\"\n20 LET URL$=\"http://mioserver.local/api/save\"\n30 LET CT$=\"application/x-www-form-urlencoded\"\n40 LET B$=\"name=temp&value=23.7\"\n50 HTTP POST URL$ CT$ B$ TO R$\n60 PRINT \"Status=\";HTTPSTATUS\n70 PRINT LEFT$(R$,120)\n90 END",
+        "note": "Invia un sensore"
+      }
+    ],
+    "note": "• Se il server restituisce JSON → puoi usare HTTP JSON GET.\n• Evitare body troppo grandi (limiti di memoria dell’ESP32).\n• Funziona solo con server HTTP (porta 80, testo non compresso)."
+  },
+  {
+    "id": "if-then-else",
+    "nome": "IF ... THEN [ELSE]",
+    "categoria": "",
+    "sintassi": "IF condizione THEN istruzione [ELSE istruzione]",
+    "sommario": "",
+    "descrizione": "IF condizione THEN istruzione [ELSE istruzione]\nDescrizione:\nIF ... THEN è il costrutto condizionale principale di BASIC32.\nValuta una condizione logica e, se vera, esegue l'istruzione indicata dopo THEN.\nSe la condizione è falsa e viene specificato ELSE, esegue l’istruzione alternativa.\nSupporta operatori: =, <>, <, <=, >, >=\nÈ compatibile con numeri, stringhe e funzioni\nLe istruzioni devono stare sulla stessa riga",
+    "esempi": [
+      {
+        "code": "10 INPUT A\n20 IF A > 10 THEN PRINT \"MAGGIORE DI 10\"\n\nOutput atteso (se inserisci 15):\nMAGGIORE DI 10",
+        "note": "Condizione semplice"
+      },
+      {
+        "code": "10 INPUT A\n20 IF A = 0 THEN PRINT \"ZERO\" ELSE PRINT \"NON ZERO\"\n\nOutput atteso (se inserisci 0):\nZERO",
+        "note": "Condizione con ELSE"
+      },
+      {
+        "code": "10 INPUT S\n20 IF S = 1 THEN GOTO 100 ELSE GOTO 200\n100 PRINT \"SCELTA 1\": END\n200 PRINT \"ALTRA SCELTA\"\n\nOutput atteso (con input 2):\nALTRA SCELTA",
+        "note": "Uso con GOTO"
+      },
+      {
+        "code": "10 INPUT A$\n20 IF A$ = \"CIAO\" THEN PRINT \"SALUTO RICONOSCIUTO\" ELSE PRINT \"STRINGA DIVERSA\"\n\nOutput atteso (con input CIAO):\nSALUTO RICONOSCIUTO",
+        "note": "Condizione su stringhe"
+      },
+      {
+        "code": "10 INPUT X\n20 IF X <> 0 THEN PRINT \"DIVERSO DA ZERO\"",
+        "note": "Condizione negativa"
+      }
+    ],
+    "note": "• Le condizioni devono restituire vero/falso (valori numerici logici)\n• Solo una singola istruzione può seguire THEN e ELSE sulla riga"
+  },
+  {
+    "id": "ili-circle",
+    "nome": "ILI CIRCLE",
+    "categoria": "",
+    "sintassi": "ILI CIRCLE <x> <y> <r> [r g b] [drawnow]",
+    "sommario": "",
+    "descrizione": "Disegna un cerchio vuoto (solo il contorno).\n<x> <y>: centro del cerchio.\n<r>: raggio in pixel.\n[r g b]: colore opzionale (default bianco).\n[drawnow]: opzionale (1 = disegna subito, 0 = accoda).",
+    "esempi": [
+      {
+        "code": "10 ILI CIRCLE 60 120 30 255 0 0\n\nDisegna subito un cerchio vuoto rosso di raggio 30 centrato in (60,120).",
+        "note": "Cerchio rosso immediato"
+      },
+      {
+        "code": "10 ILI CIRCLE 80 140 20 255 0 255 0\n20 ILI DRAW\n\nIl cerchio appare solo dopo ILI DRAW.",
+        "note": "Cerchio magenta differito"
+      }
+    ],
+    "note": "• Per un cerchio pieno, usa ILI FILLCIRCLE.\n• Utile per pulsanti, contorni o indicatori."
   }
 ];
