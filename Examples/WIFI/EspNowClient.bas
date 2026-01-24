@@ -1,0 +1,25 @@
+10 REM ==========================================
+20 REM ESP-NOW CLIENT (TX + RX ACK)
+30 REM Uses: NOWINIT, NOWSEND, NOWPOLL, NOWCLR
+40 REM ==========================================
+50 NOWINIT RX$
+60 PRINT "ESP-NOW CLIENT"
+70 PRINT "CLIENT MAC: "; MAC$
+80 PRINT
+90 SERVERMAC$ = "00:00:00:00:00:00"    : REM <-- PUT SERVER MAC HERE
+100 COUNT = 0
+110 TX$ = ""
+120 MSG$ = ""
+130 LEFTINQ = 0
+140 REM --- main loop
+150 COUNT = COUNT + 1
+160 TX$ = "HELLO " + STR$(COUNT)
+170 NOWSEND SERVERMAC$ TX$
+180 PRINT "TX: "; TX$
+190 WAIT 200
+200 NOWPOLL MSG$ LEFTINQ
+210 IF MSG$ <> "" THEN PRINT "RX: "; MSG$; "  (queue left: "; LEFTINQ; ")"
+220 REM --- clear historical RX variable (demo of NOWCLR)
+230 IF RX$ <> "" THEN NOWCLR
+240 WAIT 300
+250 GOTO 150
