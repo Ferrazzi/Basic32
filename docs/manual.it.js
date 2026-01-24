@@ -2199,5 +2199,81 @@ export default [
       }
     ],
     "note": "• Per un cerchio pieno, usa ILI FILLCIRCLE.\n• Utile per pulsanti, contorni o indicatori."
+  },
+  {
+    "id": "ili-clear",
+    "nome": "ILI CLEAR",
+    "categoria": "",
+    "sintassi": "ILI CLEAR",
+    "sommario": "",
+    "descrizione": "Cancella lo schermo riempiendolo con il colore di sfondo corrente. Il colore di sfondo può essere impostato con ILI SETBGCOLOR.\nNon rimuove sprite o dati memorizzati, ma solo ciò che è graficamente visibile.",
+    "esempi": [
+      {
+        "code": "10 ILI SETBGCOLOR 0 0 255\n20 ILI CLEAR\n\nOutput:\nlo schermo viene completamente riempito di blu.",
+        "note": "Pulizia dello schermo in blu"
+      },
+      {
+        "code": "10 ILI RECT 10 10 100 50 255 0 0\n20 ILI CLEAR\n\nOutput:\nil rettangolo rosso viene cancellato e lo schermo torna al colore di sfondo.",
+        "note": "Dopo il disegno"
+      }
+    ],
+    "note": "• Non rimuove sprite memorizzati.\n• Per rimuovere completamente sprite dallo schermo, usare ILI SPRITE CLEAR"
+  },
+  {
+    "id": "ili-draw",
+    "nome": "ILI DRAW",
+    "categoria": "",
+    "sintassi": "ILI DRAW",
+    "sommario": "",
+    "descrizione": "Esegue tutti i comandi grafici che sono stati chiamati con [drawnow] = 0.\nVengono disegnati nell’ordine di inserimento:\nPIXEL, LINE, RECT, FILLRECT, CIRCLE, FILLCIRCLE, TEXT.\nDopo il disegno, la coda viene svuotata.",
+    "esempi": [
+      {
+        "code": "10 ILI LINE 10 10 100 50 255 0 0",
+        "note": "Disegno immediato"
+      },
+      {
+        "code": "10 ILI RECT 20 20 100 50 255 0 0 0\n20 ILI FILLRECT 130 50 60 40 255 255 0 0\n30 ILI TEXT 10 200 2 \"CIAO BUFFER\" 255 255 255 0\n40 ILI DRAW",
+        "note": "Disegno bufferizzato"
+      }
+    ],
+    "note": "• ILI DRAW mostra contemporaneamente tutto ciò che è stato accodato con drawnow=0.\n• Utile per evitare sfarfallii o per aggiornamenti di schermata completi (frame buffer simulato)."
+  },
+  {
+    "id": "ili-fillcircle",
+    "nome": "ILI FILLCIRCLE",
+    "categoria": "",
+    "sintassi": "ILI FILLCIRCLE <x> <y> <r> [r g b] [drawnow]",
+    "sommario": "",
+    "descrizione": "Disegna un cerchio pieno di raggio <r> centrato in (x, y).\n[r g b]: colore del riempimento (default bianco).\n[drawnow]: opzionale (1 = disegna subito, 0 = accoda).",
+    "esempi": [
+      {
+        "code": "10 ILI FILLCIRCLE 100 100 30 255 0 0\n\nOutput:\nDisegna subito un cerchio pieno rosso di raggio 30 centrato in (100,100).",
+        "note": "Cerchio pieno rosso immediato"
+      },
+      {
+        "code": "10 ILI FILLCIRCLE 140 140 20 0 255 255 0\n20 ILI DRAW\n\nOutput:\nIl cerchio viene disegnato solo alla riga 20.",
+        "note": "Cerchio pieno ciano differito"
+      }
+    ],
+    "note": "• Se [r g b] non è specificato, il colore è bianco.\n• Il parametro [drawnow] permette di accodare il cerchio per disegnarlo insieme ad altri elementi."
+  },
+  {
+    "id": "ili-fillrect",
+    "nome": "ILI FILLRECT",
+    "categoria": "",
+    "sintassi": "ILI FILLRECT <x> <y> <w> <h> [r g b] [drawnow]",
+    "sommario": "",
+    "descrizione": "Disegna un rettangolo pieno alle coordinate specificate.\n<x> <y>: coordinate dell’angolo superiore sinistro.\n<w> <h>: larghezza e altezza del rettangolo.\n[r g b]: colore del riempimento (default bianco).\n[drawnow]: opzionale (1 = disegna subito, 0 = accoda).",
+    "esempi": [
+      {
+        "code": "10 ILI FILLRECT 10 10 50 20\n\nOutput:\nDisegna subito un rettangolo pieno bianco di 50x20 pixel a (10,10).",
+        "note": "Rettangolo pieno bianco immediato"
+      },
+      {
+        "code": "10 ILI FILLRECT 40 80 60 30 0 255 0 0\n20 ILI DRAW\n\nOutput:\nIl rettangolo verde viene disegnato solo alla riga 20.",
+        "note": "Rettangolo verde differito"
+      }
+    ],
+    "note": "• Usa ILI FILLRECT per sfondi, pulsanti o aree colorate.\n• Combinato con [drawnow]=0 puoi comporre intere schermate e visualizzarle in un solo frame."
   }
 ];
