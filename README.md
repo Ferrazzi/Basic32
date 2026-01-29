@@ -6,6 +6,7 @@ FLASH BASIC32?
   </a>
 </p>
 
+<p align="center">
 href="http://www.basic32.com">
     <strong>NEW BASIC32 SITE ONLINE!!!!!</strong>
   </a>
