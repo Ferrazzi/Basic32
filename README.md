@@ -6,6 +6,11 @@ FLASH BASIC32?
   </a>
 </p>
 
+href="http://www.basic32.com">
+    <strong>NEW BASIC32 SITE ONLINE!!!!!</strong>
+  </a>
+</p>
+
 Basic32 turns your ESP32 into a full BASIC interpreter. No compiler, no IDE, no complicated setup.  
 Just plug it in, open a terminal, and start coding like in the 80s — but with Wi-Fi, graphics, SD cards and all the modern toys.
 
