@@ -14,9 +14,4 @@
   </a>
 </p>
 
-<div align="center">
-  <p align="center">
-    <img src="https://visitor-badge.laobi.icu/badge?page_id=Ferrazzi.Basic32" />
-  </p>
-  <br>
-</div>
+<div align="center"> <p align="center"><img src="https://visitor-badge.laobi.icu/badge?page_id=<Ferrazzi>.<Basic32>" /></p> <br></div>
